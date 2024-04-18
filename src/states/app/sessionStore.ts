@@ -6,6 +6,7 @@ import { create } from 'zustand'
 interface SessionProps {
     session: SessionData
     getAuthSession: () => Promise<void>
+    setSession: (data: SessionData) => void
 }
 
 const useSessionStore = create<SessionProps>((set, get) => ({
@@ -13,10 +14,12 @@ const useSessionStore = create<SessionProps>((set, get) => ({
         address: '',
         loggedin: false
     },
+    setSession: (data: SessionData) => {
+        set({ session: data })
+    },
     getAuthSession: async () => {
         try {
             const { data } = await axios.get('/api/auth/session')
-
             if (data.ok) set({ session: data.data })
 
         } catch (error) {

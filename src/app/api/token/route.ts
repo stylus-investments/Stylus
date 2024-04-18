@@ -1,7 +1,8 @@
 import { okayRes, serverErrorRes, unauthorizedRes } from "@/lib/apiResponse";
-import { getMoralis, getSession } from "@/lib/lib";
+import { getSession, getMoralis } from "@/lib/lib";
 import Moralis from "moralis";
-export const GET = async (req: Request) => {
+
+export const GET = async () => {
     try {
 
         const session = await getSession()
@@ -16,6 +17,16 @@ export const GET = async (req: Request) => {
 
         return okayRes(response.result)
 
+    } catch (error) {
+        console.log(error);
+        return serverErrorRes(error)
+    }
+}
+
+export const POST = async () => {
+    try {
+
+        return okayRes()
     } catch (error) {
         console.log(error);
         return serverErrorRes(error)

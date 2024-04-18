@@ -1,3 +1,4 @@
+'use client'
 import { availableTokenToDisplay } from '@/app/constant/availableToken'
 import useSessionStore from '@/states/app/sessionStore'
 import useTokenStore from '@/states/app/tokenStore'

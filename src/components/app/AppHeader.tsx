@@ -4,24 +4,21 @@ import React, { useEffect } from 'react'
 import { Button } from '../ui/button'
 import { ToggleTheme } from '../ui/toggle-theme'
 import useWalletStore from '@/states/app/walletStore'
-import { SessionData } from '@/lib/lib'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuShortcut } from '../ui/dropdown-menu'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowRightToBracket, faCaretDown, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRightToBracket, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import useSessionStore from '@/states/app/sessionStore'
 
-interface Props {
-    session: SessionData
-}
-
-const AppHeader = ({ session }: Props) => {
+const AppHeader = () => {
 
     const { connectWallet, walletListener, disconnectWallet } = useWalletStore()
+    const { session, getAuthSession } = useSessionStore()
 
     useEffect(() => {
-
-        if (session.loggedin) walletListener()
+        getAuthSession()
+        walletListener()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [session.loggedin])
+    }, [])
 
     return (
         <header className='flex fixed top-0 left-0 w-screen h-20 padding items-center justify-between border-b'>

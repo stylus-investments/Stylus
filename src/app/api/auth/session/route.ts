@@ -1,12 +1,13 @@
 import { NextRequest } from "next/server";
 import { getSession } from "@/lib/lib";
-import { notFoundRes, okayRes, serverErrorRes, unauthorizedRes } from "@/lib/apiResponse";
+import { notFoundRes, okayRes, serverErrorRes } from "@/lib/apiResponse";
 
 export const GET = async (req: NextRequest) => {
     try {
 
         //get the session
         const session = await getSession()
+
         //if session does not found return 401
         if (!session.loggedin) return okayRes({ address: '', loggedin: false })
 
@@ -39,7 +40,7 @@ export const POST = async (req: NextRequest) => {
         await session.save()
 
         //return 200 response
-        return okayRes()
+        return okayRes(session)
 
     } catch (error) {
         console.log(error);
@@ -58,7 +59,7 @@ export const PATCH = async (req: NextRequest) => {
         //update the session and save
         session.address = wallet_address
         await session.save()
-        return okayRes()
+        return okayRes(session)
 
     } catch (error) {
         console.log(error);
@@ -73,9 +74,9 @@ export const DELETE = async (req: NextRequest) => {
         const session = await getSession()
         //destroy the session
         session.destroy()
-
+        await session.save()
         //return 200 response
-        return okayRes()
+        return okayRes({ address: '', loggedin: false })
 
     } catch (error) {
         console.log(error);
