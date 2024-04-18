@@ -3,7 +3,6 @@ import AppHeader from '@/components/app/AppHeader'
 import DisplayTokens from '@/components/app/DisplayTokens'
 import useSessionStore from '@/states/app/sessionStore'
 import React, { useEffect } from 'react'
-
 const AppPage = () => {
 
     const { session, getAuthSession } = useSessionStore()

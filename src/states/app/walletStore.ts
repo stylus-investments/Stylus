@@ -13,6 +13,7 @@ declare global {
 interface WalletProps {
     connectWallet: () => Promise<any>
     walletListener: () => Promise<void>
+    disconnectWallet: () => Promise<void>
 }
 
 const useWalletStore = create<WalletProps>((set, get) => ({
@@ -49,6 +50,7 @@ const useWalletStore = create<WalletProps>((set, get) => ({
     walletListener: async () => {
 
         const { getAuthSession, session } = useSessionStore.getState()
+        const { clearToken } = useTokenStore.getState()
 
         if (session.loggedin) {
 
@@ -75,14 +77,11 @@ const useWalletStore = create<WalletProps>((set, get) => ({
                         } else {
                             try {
                                 const { data } = await axios.delete('/api/auth/session')
-
                                 if (data.ok) {
-                                    const { clearToken } = useTokenStore.getState()
                                     await getAuthSession()
                                     clearToken()
                                     return toast.success("Wallet Disconnected!")
                                 }
-
                                 return alert("Something went wrong")
                             } catch (error) {
                                 console.log(error);
@@ -90,11 +89,33 @@ const useWalletStore = create<WalletProps>((set, get) => ({
                             }
                         }
                     }
-
                 })
 
             } else {
                 alert("Please Install Metamask")
+            }
+        }
+    },
+    disconnectWallet: async () => {
+
+        const { session } = useSessionStore.getState()
+
+        if (typeof window !== "undefined" && typeof window.ethereum !== "undefined" && session.loggedin) {
+
+            try {
+
+                await window.ethereum.request({
+                    method: "wallet_revokePermissions",
+                    params: [
+                        {
+                            "eth_accounts": {}
+                        }
+                    ]
+                });
+
+            } catch (error) {
+                console.log(error);
+                alert("Something went wrong")
             }
         }
     }
