@@ -6,7 +6,7 @@ export const GET = async () => {
     try {
 
         const session = await getSession()
-        if (!session.loggedin) return unauthorizedRes()
+        if (!session.address) return unauthorizedRes()
 
         await getMoralis()
 
@@ -14,7 +14,7 @@ export const GET = async () => {
             chain: "0x2105",
             address: session.address
         })
-
+        
         return okayRes(response.result)
 
     } catch (error) {

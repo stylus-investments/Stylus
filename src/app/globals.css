@@ -23,7 +23,7 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
-    --radius: 0.3rem;
+    --radius: 0rem;
   }
 
   .dark {
@@ -48,6 +48,7 @@
     --ring: 240 4.9% 83.9%;
   }
 }
+
 
 
 @layer base {

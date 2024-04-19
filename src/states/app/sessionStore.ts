@@ -12,7 +12,6 @@ interface SessionProps {
 const useSessionStore = create<SessionProps>((set, get) => ({
     session: {
         address: '',
-        loggedin: false
     },
     setSession: (data: SessionData) => {
         set({ session: data })

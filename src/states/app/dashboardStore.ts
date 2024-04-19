@@ -24,17 +24,22 @@ interface TokenInfo {
     portfolio_percentage: number;
 };
 
+interface DashboardData {
+
+}
+
 interface TokenProps {
-    getTokens: () => Promise<void>
+    getDashboardData: () => Promise<void>
     tokens: TokenInfo[] | null
     clearToken: () => void
 }
 
-const useTokenStore = create<TokenProps>((set, get) => ({
+const useDashboardStore = create<TokenProps>((set, get) => ({
     tokens: null,
-    getTokens: async () => {
+    dashboardData: null,
+    getDashboardData: async () => {
         try {
-            const { data } = await axios.get('/api/token')
+            const { data } = await axios.get('/api/dashboard')
 
             if (data.ok) set({ tokens: data.data })
 
@@ -46,4 +51,4 @@ const useTokenStore = create<TokenProps>((set, get) => ({
     clearToken: () => set({ tokens: null })
 }))
 
-export default useTokenStore
+export default useDashboardStore

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { create } from 'zustand'
 import useSessionStore from './sessionStore';
-import useTokenStore from './tokenStore';
+import useTokenStore from './dashboardStore';
 
 declare global {
     interface Window {
@@ -12,15 +12,15 @@ declare global {
 
 interface WalletProps {
     connectWallet: () => Promise<any>
-    walletListener: () => Promise<void>
-    disconnectWallet: () => Promise<void>
+    walletListener: (address: string) => Promise<void>
+    disconnectWallet: () => Promise<string | number | void>
 }
 
 const useWalletStore = create<WalletProps>((set, get) => ({
     connectWallet: async () => {
         const { session, setSession } = useSessionStore.getState()
 
-        if (!session.loggedin) {
+        if (!session.address) {
             if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
                 try {
                     /* Metamask is installed*/
@@ -47,17 +47,17 @@ const useWalletStore = create<WalletProps>((set, get) => ({
             }
         }
     },
-    walletListener: async () => {
+    walletListener: async (address: string) => {
 
         const { setSession } = useSessionStore.getState()
         const { clearToken } = useTokenStore.getState()
 
         if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
 
-            window.ethereum.on("accountsChanged", async (accounts: string[]) => {
+            if (address) {
 
-                const { data } = await axios.get('/api/auth/session')
-                if (data.data.loggedin) {
+                window.ethereum.on("accountsChanged", async (accounts: string[]) => {
+
                     if (accounts.length > 0) {
                         try {
 
@@ -73,21 +73,15 @@ const useWalletStore = create<WalletProps>((set, get) => ({
                             alert("Something went wrong")
                         }
                     } else {
-                        try {
-                            const { data } = await axios.delete('/api/auth/session')
-                            if (data.ok) {
-                                setSession(data.data)
-                                clearToken()
-                                return toast.success("Wallet Disconnected!")
-                            }
-                            return alert("Something went wrong")
-                        } catch (error) {
-                            console.log(error);
-                            alert("Something went wrong")
+                        const { data } = await axios.delete('/api/auth/session')
+                        if (data.ok) {
+                            setSession(data.data)
+                            clearToken()
+                            return toast.success("Wallet Disconnected!")
                         }
                     }
-                }
-            })
+                })
+            }
 
         } else {
             alert("Please Install Metamask")
@@ -97,8 +91,9 @@ const useWalletStore = create<WalletProps>((set, get) => ({
 
         const { session } = useSessionStore.getState()
 
-        if (typeof window !== "undefined" && typeof window.ethereum !== "undefined" && session.loggedin) {
+        if (typeof window !== "undefined" && typeof window.ethereum !== "undefined" && session.address) {
             try {
+                //disconnect metamask
                 await window.ethereum.request({
                     method: "wallet_revokePermissions",
                     params: [
@@ -107,6 +102,7 @@ const useWalletStore = create<WalletProps>((set, get) => ({
                         }
                     ]
                 })
+
             } catch (error) {
                 console.log(error);
                 alert("Something went wrong")

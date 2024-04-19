@@ -1,15 +1,12 @@
 import { NextRequest } from "next/server";
 import { getSession } from "@/lib/lib";
-import { notFoundRes, okayRes, serverErrorRes } from "@/lib/apiResponse";
+import { badRequestRes, notFoundRes, okayRes, serverErrorRes, unauthorizedRes } from "@/lib/apiResponse";
 
 export const GET = async (req: NextRequest) => {
     try {
 
         //get the session
         const session = await getSession()
-
-        //if session does not found return 401
-        if (!session.loggedin) return okayRes({ address: '', loggedin: false })
 
         //retrurn the session
         return okayRes(session)
@@ -24,23 +21,27 @@ export const POST = async (req: NextRequest) => {
     try {
 
         const session = await getSession()
-        if (session.loggedin) return okayRes()
 
-        //get the session in request body
-        const { wallet_address } = await req.json()
+        if (!session.address) {
 
-        //return 404 if wallet address not found
-        if (!wallet_address) return notFoundRes("Wallet Address")
+            //get the session in request body
+            const { wallet_address } = await req.json()
 
-        //modify the session
-        session.address = wallet_address
-        session.loggedin = true
+            //return 404 if wallet address not found
+            if (!wallet_address) return notFoundRes("Wallet Address")
 
-        //save the session
-        await session.save()
+            //modify the session
+            session.address = wallet_address
 
-        //return 200 response
-        return okayRes(session)
+            //save the session
+            await session.save()
+
+            //return 200 response
+            return okayRes(session)
+
+        }
+
+        return badRequestRes()
 
     } catch (error) {
         console.log(error);
@@ -50,8 +51,9 @@ export const POST = async (req: NextRequest) => {
 
 export const PATCH = async (req: NextRequest) => {
     try {
+
         const session = await getSession()
-        if (!session.loggedin) return okayRes({ address: '', loggedin: false })
+
         const { wallet_address } = await req.json()
         //return 404 if wallet address not found
         if (!wallet_address) return notFoundRes("Wallet Address")
@@ -59,6 +61,8 @@ export const PATCH = async (req: NextRequest) => {
         //update the session and save
         session.address = wallet_address
         await session.save()
+
+        //return the session
         return okayRes(session)
 
     } catch (error) {
@@ -72,11 +76,17 @@ export const DELETE = async (req: NextRequest) => {
 
         //retrieve the session
         const session = await getSession()
-        //destroy the session
-        session.destroy()
-        await session.save()
-        //return 200 response
-        return okayRes({ address: '', loggedin: false })
+
+        if (session.address) {
+
+            //destroy the session
+            session.destroy()
+            await session.save()
+            //return 200 response
+            return okayRes({ address: '' })
+        }
+
+        return unauthorizedRes()
 
     } catch (error) {
         console.log(error);

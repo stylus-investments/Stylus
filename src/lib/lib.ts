@@ -4,7 +4,6 @@ import Moralis from 'moralis';
 
 export interface SessionData {
     address: string
-    loggedin: boolean
 }
 
 const sessionOptions: SessionOptions = {
@@ -18,9 +17,8 @@ const sessionOptions: SessionOptions = {
 
 const getSession = async () => {
     const session = await getIronSession<SessionData>(cookies(), sessionOptions)
-    if (!session.loggedin) {
+    if (!session.address) {
         session.address = ''
-        session.loggedin = false
     }
     return session
 }
