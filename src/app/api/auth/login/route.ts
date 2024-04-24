@@ -10,7 +10,7 @@ export const POST = async (req: NextRequest) => {
             where: { username, password }
         })
 
-        if (!admin) return null
+        if (!admin) return NextResponse.json(null, { status: 404 })
 
         return NextResponse.json(admin, { status: 200 })
 
