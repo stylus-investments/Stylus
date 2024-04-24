@@ -16,7 +16,7 @@ export const dashboardRoute = {
                 code: 'UNAUTHORIZED',
                 message: "Unauthorized"
             })
-
+//
             await getMoralis()
 
             const [userToken, goTokenData, currentSnapshot] = await Promise.all([
