@@ -1,13 +1,14 @@
 import { SessionOptions, getIronSession } from "iron-session"
 import { cookies } from "next/headers"
 import Moralis from 'moralis';
+import 'dotenv/config'
 
 export interface SessionData {
     address: string
 }
 
 const sessionOptions: SessionOptions = {
-    password: process.env.SECRET_KEY!,
+    password: process.env.NEXTAUTH_SECRET as string,
     cookieName: 'wallet-session',
     cookieOptions: {
         httpOnly: true,

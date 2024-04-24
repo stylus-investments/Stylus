@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Toaster } from "@/components/ui/sonner"
+import TrpcProvider from "./_trpc/TrpcProvider";
+import NextAuthSessionProvider from "@/components/auth/NextAuthSessionProvider";
 
 export const metadata: Metadata = {
   title: "GrowPoint",
@@ -15,17 +17,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <body>
-          {children}
-          <Toaster />
-        </body>
-      </ThemeProvider>
+      <TrpcProvider>
+        <NextAuthSessionProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <body>
+              {children}
+              <Toaster />
+            </body>
+          </ThemeProvider>
+        </NextAuthSessionProvider>
+      </TrpcProvider>
     </html>
   );
 }

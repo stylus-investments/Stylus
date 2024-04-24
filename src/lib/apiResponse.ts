@@ -1,59 +1,42 @@
-import { NextRequest, NextResponse } from "next/server"
+import axios from "axios"
 
-//404 response
-const notFoundRes = (name: string) => {
-    return NextResponse.json({ msg: `${name} not found` }, { status: 404 })
-}
-
-//500 response
-const serverErrorRes = (data: any) => {
-    return NextResponse.json({ msg: 'Server error', error: data }, { status: 500 })
-}
-
-//400 response
-const badRequestRes = (data?: any) => {
-    if (data) return NextResponse.json({ msg: data, error: "Something went wrong" }, { status: 400 })
-
-    return NextResponse.json({ msg: 'Something went wrong' }, { status: 400 })
+interface TokenHolders {
+    balance: string
+    balance_formatted: string
+    is_contract: boolean
+    owner_address: string
+    owner_address_label: string | null
+    usd_value: string | null
+    percentage_relative_to_total_supply: number
 }
 
 //200 response
 const okayRes = (data?: any) => {
-    if (data) return NextResponse.json({ ok: true, data: data }, { status: 200 })
+    if (data) return { ok: true, data: data }
 
-    return NextResponse.json({ ok: true }, { status: 200 })
+    return { ok: true }
 }
 
-//201 response
-const createdRes = (data?: any) => {
-    if (data) return NextResponse.json({ ok: true, data: data }, { status: 201 })
+const getTokenHolders = async () => {
+    try {
 
-    return NextResponse.json({ ok: true }, { status: 201 })
-}
+        const { data } = await axios.get('https://deep-index.moralis.io/api/v2.2/erc20/0xb70F970876638a33859600B9E64BEAd0fD22b065/owners?&order=DESC', {
+            params: {
+                chain: process.env.CHAIN
+            },
+            headers: {
+                'x-api-key': process.env.MORALIS_API_KEY
+            }
+        })
 
-//409 response
-const existRes = (name: string) => {
-    return NextResponse.json({ msg: `${name} already exist` }, { status: 409 })
-}
+        return data.result as TokenHolders[]
 
-//401 response
-const unauthorizedRes = () => {
-    return NextResponse.json({ msg: 'Unauthorized try re-login' }, { status: 401 })
-}
-
-//get searchParameters
-const getSearchParams = ({ url }: NextRequest, key: string) => {
-    const { searchParams } = new URL(url)
-    return searchParams.get(key)
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 export {
-    notFoundRes,
-    serverErrorRes,
-    badRequestRes,
     okayRes,
-    existRes,
-    createdRes,
-    unauthorizedRes,
-    getSearchParams,
+    getTokenHolders
 }

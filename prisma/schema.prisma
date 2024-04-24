@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model snapshot {
+  id         Int                @id @default(autoincrement())
+  start_date DateTime
+  end_date   DateTime
+  completed  Boolean            @default(false)
+  session    snapshot_session[]
+  created_at DateTime           @default(now())
+  updated_at DateTime           @updatedAt
+}
+
+model user {
+  id         Int                @id @default(autoincrement())
+  wallet     String             @unique
+  snapshots  snapshot_session[]
+  created_at DateTime           @default(now())
+  updated_at DateTime           @updatedAt
+}
+
+model admin {
+  id         Int      @id @default(autoincrement())
+  username   String
+  password   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model snapshot_session {
+  id          Int      @id @default(autoincrement())
+  stake       String
+  reward      String
+  status      Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  user        user     @relation(fields: [user_id], references: [id])
+  snapshot    snapshot @relation(fields: [snapshot_id], references: [id])
+  user_id     Int
+  snapshot_id Int
+}
