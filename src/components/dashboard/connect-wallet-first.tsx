@@ -1,5 +1,5 @@
 import React from 'react'
-import ConnectWalletButton from './ConnectWalletButton'
+import ConnectWalletButton from './connect-wallet-button'
 
 const ConnectWalletFirst = () => {
     return (

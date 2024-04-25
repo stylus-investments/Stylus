@@ -2,7 +2,7 @@ import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 
-const Timer = ({ nextSnapshot }: { nextSnapshot: string }) => {
+const SnapshotTimer = ({ nextSnapshot }: { nextSnapshot: string }) => {
     const calculateTimeLeft = () => {
         const difference = new Date(nextSnapshot).getTime() - new Date().getTime();
         let timeLeft: { days: number; hours: number; minutes: number; seconds: number } = {
@@ -52,4 +52,4 @@ const Timer = ({ nextSnapshot }: { nextSnapshot: string }) => {
     );
 };
 
-export default Timer
+export default SnapshotTimer

@@ -1,10 +1,8 @@
 import React from 'react'
-import { Card, CardContent } from '../ui/card'
 import { faLock, faFlag, faSackDollar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Button } from '../ui/button'
-import { Separator } from '../ui/separator'
-import Timer from './SnapshotTimer'
+import { Button } from '../../ui/button'
+import SnapshotTimer from './SnapshotTimer'
 
 interface Props {
     dashboardData: {
@@ -29,7 +27,7 @@ interface Props {
 const LiquidStaking = ({ dashboardData }: Props) => {
 
     return (
-        <>
+        <div className='flex flex-col gap-10'>
             <div className='border flex flex-col'>
                 <div className='flex flex-col lg:flex-row w-full'>
                     <div className='flex flex-col gap-3 p-5 border w-full'>
@@ -58,7 +56,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             }  UTC
                         </h1>
                     </div>
-                    <Timer nextSnapshot={dashboardData.snapshot_date.next} />
+                    <SnapshotTimer nextSnapshot={dashboardData.snapshot_date.next} />
                 </div>
                 <div className='flex w-full flex-col lg:flex-row'>
                     <div className='flex flex-col gap-3 p-5 border w-full'>
@@ -76,17 +74,20 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             </Button>}
                         </div>
                         <h1 className='font-black sm:text-lg md:text-xl'>{(Number(dashboardData.user.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $GO</h1>
-                        <small className='text-muted-foreground'>Snapshot balance</small>
+                        <small className='text-muted-foreground'>Last snapshot balance</small>
                     </div>
                     <div className='flex flex-col gap-3 p-5 border w-full'>
                         <div className='text-muted-foreground flex items-center gap-3'>
                             <FontAwesomeIcon icon={faSackDollar} width={18} height={18} />
-                            Current Balance
+                            <div>
+                                Current Balance
+                            </div>
+                            {Number(dashboardData.user.current_go_balance) > 0 && <Button className=' h-8 bg-orange-400 hover:bg-orange-400 text-white'>Holding</Button>}
                         </div>
                         <h1 className='font-black sm:text-lg md:text-xl'>
                             <h1 className='font-black sm:text-lg md:text-xl'>{(Number(dashboardData.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $GO</h1>
                         </h1>
-                        <small className='text-muted-foreground'>Claimed and unclaimed</small>
+                        <small className='text-muted-foreground'>Crypto wallet holdings</small>
                     </div>
                     <div className='flex flex-col gap-3 w-full p-5 border bg-muted'>
                         <div className='text-muted-foreground flex items-center gap-3'>
@@ -96,11 +97,14 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                         <div className='w-full flex items-center justify-between'>
                             <h1 className='font-black sm:text-lg md:text-xl'>{(Number(dashboardData.user.snapshot.reward)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $GROW</h1>
                         </div>
-                        <small className='text-muted-foreground'>Compounding in your stake</small>
+                        <small className='text-muted-foreground'>Epoch rewards expected</small>
                     </div>
                 </div>
             </div>
-        </>
+            <div className='w-full py-20 border'>
+
+            </div>
+        </div>
     )
 }
 

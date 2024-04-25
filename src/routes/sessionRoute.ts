@@ -66,6 +66,7 @@ export const sessionRoute = {
     delete: publicProcedure.mutation(async () => {
         try {
 
+            //delete the session
             const session = await getSession()
 
             session.destroy()

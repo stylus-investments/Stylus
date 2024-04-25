@@ -118,7 +118,8 @@ export const dashboardRoute = {
             }
 
             const data = {
-                user, snapshot_date,
+                user,
+                snapshot_date,
                 global_stake: goTokenTotalSupply,
             }
 

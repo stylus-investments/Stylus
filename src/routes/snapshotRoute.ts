@@ -1,36 +1,109 @@
 import { publicProcedure } from "@/app/server/trpc";
 import db from "@/db/db";
 import { getTokenHolders, okayRes } from "@/lib/apiResponse";
-import { getSession } from "@/lib/lib";
 import { TRPCError } from "@trpc/server";
 export const snapshotRoute = {
     get: publicProcedure.query(async () => {
 
-        const session = await getSession()
+        try {
 
-        if (!session) throw new TRPCError({
-            code: 'UNAUTHORIZED',
-            message: "Unauthorized"
-        })
+            const snapshots = await db.snapshot.findMany({
+                select: {
+                    start_date: true,
+                    id: true,
+                    end_date: true,
+                    completed: true,
+                    session: {
+                        select: {
+                            id: true,
+                            status: true
+                        }
+                    }
+                },
+                orderBy: {
+                    created_at: 'desc'
+                }
+            },)
+            if (!snapshots) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "Failed to get all snapshots"
+            })
 
-        const snapshots = await db.snapshot.findMany({
-            include: {
-                session: {
-                    include: {
-                        user: true
+            const modifySnapshotData = snapshots.map(snap => {
+
+                const unpaidRemaining = snap.session.reduce((total, snap) => {
+                    return snap.status === 2 ? total + 1 : total
+                }, 0)
+
+                return {
+                    ...snap,
+                    session: undefined,
+                    total_holders: snap.session.length || 0,
+                    total_unpaid_holders: unpaidRemaining
+                }
+            })
+
+            return modifySnapshotData
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
+        }
+    }),
+    getData: publicProcedure.input(Number).query(async (opts) => {
+
+        try {
+
+
+            const snapshotID = opts.input
+            if (!snapshotID) throw new TRPCError({
+                code: 'NOT_FOUND',
+                message: "Snapshot ID not found"
+            })
+
+            const snapshot = await db.snapshot.findUnique({
+                where: { id: snapshotID }, select: {
+                    session: {
+                        select: {
+                            id: true,
+                            reward: true,
+                            stake: true,
+                            status: true,
+                            user: {
+                                select: {
+                                    wallet: true
+                                }
+                            }
+                        }
                     }
                 }
-            },
-            orderBy: {
-                created_at: 'desc'
-            }
-        },)
-        if (!snapshots) throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "Failed to get all snapshots"
-        })
+            })
+            if (!snapshot) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Snapshot not found"
+            })
+            const modifySnapshotData = snapshot.session.map(session => ({
+                ...session,
+                user: undefined,
+                wallet: session.user.wallet
+            }))
 
-        return okayRes(snapshots)
+            return modifySnapshotData
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
+        }
     }),
     reset: publicProcedure.query(async () => {
 

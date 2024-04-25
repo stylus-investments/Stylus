@@ -8,7 +8,7 @@ import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { trpc } from '@/app/_trpc/client'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import ConnectWalletButton from './ConnectWalletButton'
+import ConnectWalletButton from './connect-wallet-button'
 
 declare global {
     interface Window {
@@ -17,7 +17,7 @@ declare global {
 }
 
 
-const AppHeader = ({ walletAddress }: { walletAddress: string }) => {
+const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
 
     const router = useRouter()
 
@@ -92,7 +92,7 @@ const AppHeader = ({ walletAddress }: { walletAddress: string }) => {
 
     return (
         <header className='flex fixed top-0 left-0 w-screen h-16 padding items-center backdrop-blur justify-between border-b'>
-            <div className='flex items-center gap-4'>
+            <div className='flex items-center'>
                 <Image src={'/logo.png'} alt='logo' width={50} height={20} className='w-auto h-auto' />
                 <h1 className='text-3xl font-black text-primary'>GrowPoint</h1>
             </div>
@@ -112,4 +112,4 @@ const AppHeader = ({ walletAddress }: { walletAddress: string }) => {
     )
 }
 
-export default AppHeader
+export default DashboardHeader

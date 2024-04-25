@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, CardHeader } from '../ui/card'
+import { Card, CardHeader } from '../../ui/card'
 
 const GrowRewards = () => {
     return (
