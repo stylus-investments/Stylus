@@ -16,7 +16,7 @@ export const dashboardRoute = {
                 code: 'UNAUTHORIZED',
                 message: "Unauthorized"
             })
-//
+
             await getMoralis()
 
             const [userToken, goTokenData, currentSnapshot] = await Promise.all([
@@ -85,14 +85,14 @@ export const dashboardRoute = {
             }
 
             if (currentSnapshot.length > 0) {
-                snapshot_date.start = currentSnapshot[0].start_date.toLocaleString()
-                snapshot_date.next = currentSnapshot[0].end_date.toLocaleString()
+                snapshot_date.start = currentSnapshot[0].start_date.toString()
+                snapshot_date.next = currentSnapshot[0].end_date.toString()
             } else {
                 const tomorrow = new Date();
                 tomorrow.setDate(tomorrow.getDate() + 1);
                 tomorrow.setHours(0, 0, 0, 0);
-                snapshot_date.next = tomorrow.toLocaleString();
-                snapshot_date.start = tomorrow.toLocaleString();
+                snapshot_date.next = tomorrow.toString();
+                snapshot_date.start = tomorrow.toString();
             }
 
             if (userWallet.snapshots.length > 0) {

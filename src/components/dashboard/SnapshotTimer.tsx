@@ -40,7 +40,7 @@ const Timer = ({ nextSnapshot }: { nextSnapshot: string }) => {
     });
 
     return (
-        <div className='flex flex-col gap-3 w-1/2'>
+        <div className='flex flex-col gap-3 p-5 bg-muted border w-full'>
             <div className='text-muted-foreground flex items-center gap-3'>
                 <FontAwesomeIcon icon={faClock} width={18} height={18} />
                 Timer

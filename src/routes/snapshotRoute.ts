@@ -63,7 +63,7 @@ export const snapshotRoute = {
             if (previousSnapshot.length > 0) {
 
                 const end_date = new Date(previousSnapshot[0].end_date)
-                end_date.setDate(end_date.getDate() + 1)
+                end_date.setDate(end_date.getUTCDate() + 1)
 
                 const snapshotEndDate = new Date(previousSnapshot[0].end_date);
 
@@ -126,30 +126,13 @@ export const snapshotRoute = {
 
                         if (user) {
 
-                            let reward
-                            let stakeAmount
-
-                            const previousSnapshot = await db.snapshot_session.findFirst({
-                                where: {
-                                    user: { id: user.id },
-                                    snapshot: { end_date: { lt: now } }, // Filter previous snapshots
-                                },
-                                orderBy: { snapshot: { created_at: 'desc' } } // Order by end_date in descending order to get the most recent previous snapshot
-                            });
-                            if (previousSnapshot && previousSnapshot.status) {
-                                reward = (Number(holder.balance_formatted) + Number(previousSnapshot.reward)) * (1.66 / 100)
-                                stakeAmount = Number(holder.balance_formatted) + Number(previousSnapshot.reward)
-                            } else {
-                                reward = Number(holder.balance_formatted) * (1.66 / 100)
-                                stakeAmount = Number(holder.balance_formatted)
-                                //the reward will be 1.66% each snapshot
-                            }
+                            const reward = Number(holder.balance_formatted) * (1.66 / 100)
 
                             //create the session and connect it to snapshots
                             await db.snapshot_session.create({
                                 data: {
-                                    stake: stakeAmount.toFixed(2),
-                                    reward: reward.toFixed(8),
+                                    stake: Number(holder.balance_formatted).toFixed(2),
+                                    reward: reward.toFixed(2),
                                     status: 1,
                                     user: {
                                         connect: {
@@ -177,10 +160,10 @@ export const snapshotRoute = {
 
             } else {
 
-                const end_date = new Date()
-                end_date.setDate(now.getDate() + 1);
-                end_date.setHours(0, 0, 0, 0);
-                now.setHours(0, 0, 0, 0)
+                now.setUTCHours(16, 0, 0, 0); // Set now to 4:00 PM UTC
+                const end_date = new Date(now)
+                end_date.setUTCDate(now.getUTCDate() + 1); // Add a day to now
+                end_date.setUTCHours(16, 0, 0, 0);
 
                 const newSnapshot = await db.snapshot.create({
                     data: { start_date: now, end_date }
@@ -204,7 +187,7 @@ export const snapshotRoute = {
                         await db.snapshot_session.create({
                             data: {
                                 stake: Number(holder.balance_formatted).toFixed(2),
-                                reward: reward.toFixed(8),
+                                reward: reward.toFixed(2),
                                 status: 1,
                                 user: {
                                     connect: {

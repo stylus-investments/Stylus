@@ -9,6 +9,8 @@ import GlowStaking from './GlowStaking'
 import LiquidStaking from './LiquidStaking'
 import { trpc } from '@/app/_trpc/client'
 import ConnectWalletFirst from './ConnectWalletFirst'
+import { Button } from '../ui/button'
+import Link from 'next/link'
 
 interface Props {
     walletAddress: string
@@ -29,6 +31,7 @@ const Dashboard = ({ walletAddress }: Props) => {
     })
 
     if (!session.data) return <ConnectWalletFirst />
+    
     if (!data) return (
         <div className='grid place-content-center h-screen'>
             <FontAwesomeIcon icon={faSpinner} width={50} height={50} className='animate-spin w-[50px] h-[50px]' />
@@ -41,27 +44,40 @@ const Dashboard = ({ walletAddress }: Props) => {
             <div className='flex flex-col gap-3 items-center text-center'>
                 <Image width={100} height={50} className='h-auto' alt='Coin' src={'/logo.png'} />
                 <h1 className='font-black text-xl'>{(Number(data.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $GO</h1>
-                <h1 className='text-muted-foreground'>Total balance in your wallets</h1>
+                <h1 className='text-muted-foreground'>Total balance in your wallet</h1>
+                <div className='flex items-center gap-5'>
+                    {Number(data.user.current_go_balance) > 0 && <Button className=' h-8 bg-orange-400 hover:bg-orange-400 text-white'>Holding</Button>}
+                    <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank'>
+                        <Button className='h-8'>
+                            Add More $GO
+                        </Button>
+                    </Link>
+                </div>
             </div>
-
             <Tabs defaultValue="go" className="w-full">
                 <TabsList className="grid w-full grid-cols-3 mb-20">
                     <TabsTrigger value="go">
                         <div className='flex items-center gap-2'>
                             <FontAwesomeIcon icon={faDatabase} width={18} height={18} className='text-primary' />
-                            LIQUID STAKING
+                            <div className='hidden md:flex'>
+                                LIQUID STAKING
+                            </div>
                         </div>
                     </TabsTrigger>
                     <TabsTrigger value="grow">
                         <div className='flex items-center gap-2'>
                             <FontAwesomeIcon icon={faSeedling} width={18} height={18} className='text-primary' />
-                            GROW REWARDS
+                            <div className='hidden md:flex'>
+                                GROW REWARDS
+                            </div>
                         </div>
                     </TabsTrigger>
                     <TabsTrigger value="glow">
                         <div className='flex items-center gap-2'>
                             <FontAwesomeIcon icon={faGavel} width={18} height={18} className='text-primary' />
-                            GLOW STAKING
+                            <div className='hidden md:flex'>
+                                GLOW STAKING
+                            </div>
                         </div>
                     </TabsTrigger>
                 </TabsList>
