@@ -9,12 +9,14 @@ generator client {
 }
 
 // development
+
 // datasource db {
 // provider = "mysql"
 // url = env("DATABASE_URL")
 // }
 
 // production
+
 datasource db {
   provider  = "postgresql"
   url       = env("POSTGRES_PRISMA_URL")

@@ -38,7 +38,7 @@ const nextAuthOptions = {
     },
     pages: {
         signIn: '/admin/auth',
-        error: '/error'
+        error: '/admin/error'
     },
 } satisfies NextAuthOptions
 
