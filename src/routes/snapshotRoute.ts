@@ -152,16 +152,7 @@ export const snapshotRoute = {
             //retrieve token holders and users
             const [tokenHolders, users] = await Promise.all([
                 getTokenHolders(),
-                db.user.findMany({
-                    include: {
-                        snapshots: {
-                            orderBy: {
-                                created_at: 'desc'
-                            },
-                            take: 1
-                        }
-                    }
-                })
+                db.user.findMany()
             ])
 
             if (!tokenHolders) throw new TRPCError({
@@ -182,7 +173,7 @@ export const snapshotRoute = {
 
                 const snapshotEndDate = new Date(previousSnapshots[0].end_date);
 
-                if (now) {
+                if (snapshotEndDate <= now) {
 
                     //if this is truenv meaning the snapshot is completed
                     const updateSnapshot = await db.snapshot.update({
@@ -255,7 +246,6 @@ export const snapshotRoute = {
                             //create the session and connect it to snapshots
                             const createUserSnapshot = await db.snapshot_session.create({
                                 data: {
-                                    month: user.snapshots[0].month + 1,
                                     stake: Number(holder.balance_formatted).toFixed(2),
                                     reward: reward.toFixed(2),
                                     status: 1,
@@ -315,7 +305,6 @@ export const snapshotRoute = {
                         //create the session and connect it to snapshots
                         const createUserSnapshot = await db.snapshot_session.create({
                             data: {
-                                month: user.snapshots[0].month + 1,
                                 stake: Number(holder.balance_formatted).toFixed(2),
                                 reward: reward.toFixed(2),
                                 status: 1,
