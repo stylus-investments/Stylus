@@ -62,7 +62,7 @@ const SnapshotsTable: React.FC<SnapshotTableProps> = (props) => {
                                     })
                                 }  UTC
                             </TableCell>
-                            <TableCell>{data.completed ? 'true' : 'false'}</TableCell>
+                            <TableCell>{data.completed ? 'YES' : 'NO'}</TableCell>
                             < TableCell > {data.total_holders}</TableCell>
                             <TableCell>{data.total_unpaid_holders}</TableCell>
                             <TableCell></TableCell>
