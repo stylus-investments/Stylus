@@ -3,9 +3,11 @@ import DashboardHeader from '@/components/dashboard/dashboard-header'
 import React from 'react'
 import { caller } from '../_trpc/server'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 
 const ConnectPage = async () => {
 
+    cookies()
     const sessionData = await caller.session.get()
     if(sessionData) redirect('/dashboard')
 
