@@ -8,6 +8,7 @@ const BalanceHistory = ({ history }: {
     history: {
         id: string;
         type: string;
+        month: number
         date: string;
         amount: string;
     }[]
@@ -39,9 +40,9 @@ const BalanceHistory = ({ history }: {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {currentTable && currentTable.length > 0 ? currentTable.map((transac, index) => (
+                        {currentTable && currentTable.length > 0 ? currentTable.map((transac) => (
                             <TableRow key={transac.id} className='text-muted-foreground hover:text-foreground'>
-                                <TableCell>{index + 1}</TableCell>
+                                <TableCell>{transac.month}</TableCell>
                                 <TableCell>{transac.id.substring(0, 10)}....</TableCell>
                                 <TableCell>
                                     {

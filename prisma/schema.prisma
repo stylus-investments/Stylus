@@ -50,7 +50,6 @@ model snapshot {
 
 model snapshot_session {
   id          Int      @id @default(autoincrement())
-  month       Int
   stake       String
   reward      String
   status      Int

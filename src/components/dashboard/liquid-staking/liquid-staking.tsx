@@ -23,6 +23,7 @@ interface Props {
         balance_history: {
             id: string;
             type: string;
+            month: number
             date: string;
             amount: string;
         }[];

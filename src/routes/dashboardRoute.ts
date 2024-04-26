@@ -35,7 +35,7 @@ export const dashboardRoute = {
                 }),
                 Moralis.EvmApi.token.getWalletTokenTransfers({
                     "chain": process.env.CHAIN,
-                    order: "DESC",
+                    order: "ASC",
                     address: session.address
                 }),
                 db.user.findUnique({
@@ -46,7 +46,6 @@ export const dashboardRoute = {
                                 id: true,
                                 stake: true,
                                 status: true,
-                                month: true,
                                 reward: true,
                                 snapshot: {
                                     select: {
@@ -56,7 +55,7 @@ export const dashboardRoute = {
                                 }
                             },
                             orderBy: {
-                                created_at: 'desc'
+                                created_at: 'asc'
                             }
                         }
                     }
@@ -67,22 +66,27 @@ export const dashboardRoute = {
                 message: "User not found"
             })
 
-            const snapshotHistory = userSnapshotsSession.snapshots.map(snapshotData => ({
-                ...snapshotData,
-                snapshot: {
-                    start_date: snapshotData.snapshot.start_date.toISOString(),
-                    end_date: snapshotData.snapshot.end_date.toISOString(),
-                }
-            }))
+            const snapshotHistory = userSnapshotsSession.snapshots
+                .map((snapshotData, index) => ({
+                    ...snapshotData,
+                    snapshot: {
+                        start_date: snapshotData.snapshot.start_date.toISOString(),
+                        end_date: snapshotData.snapshot.end_date.toISOString(),
+                    },
+                    month: index + 1
+                }))
+                .reverse()
 
             const goTokenBalanceHistory = getGoTokenBalanceHistory.result
                 .filter(history => history.contractAddress.lowercase === process.env.GO_ADDRESS?.toLowerCase())
-                .map((history) => ({
+                .map((history, index) => ({
                     id: history.transactionHash,
                     date: history.blockTimestamp.toISOString(),
                     type: history.toAddress.lowercase === session.address ? 'Deposit' : 'Withdrawal',
-                    amount: (Number(history.value) / 10 ** 10).toFixed(2)
+                    amount: (Number(history.value) / 10 ** 10).toFixed(2),
+                    month: index + 1
                 }))
+                .reverse()
 
             const userTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === goTokenAddress.toLowerCase())[0] as any
 
