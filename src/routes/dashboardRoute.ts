@@ -19,7 +19,7 @@ export const dashboardRoute = {
 
             await getMoralis()
 
-            const [userToken, goTokenData, currentSnapshot] = await Promise.all([
+            const [userToken, goTokenData, currentSnapshot, getGoTokenBalanceHistory, userSnapshotsSession] = await Promise.all([
                 Moralis.EvmApi.token.getWalletTokenBalances({
                     chain: process.env.CHAIN,
                     address: session.address
@@ -32,8 +32,57 @@ export const dashboardRoute = {
                     where: {
                         completed: false
                     }
+                }),
+                Moralis.EvmApi.token.getWalletTokenTransfers({
+                    "chain": process.env.CHAIN,
+                    order: "DESC",
+                    address: session.address
+                }),
+                db.user.findUnique({
+                    where: { wallet: session.address },
+                    select: {
+                        snapshots: {
+                            select: {
+                                id: true,
+                                stake: true,
+                                status: true,
+                                month: true,
+                                reward: true,
+                                snapshot: {
+                                    select: {
+                                        start_date: true,
+                                        end_date: true
+                                    }
+                                }
+                            },
+                            orderBy: {
+                                created_at: 'desc'
+                            }
+                        }
+                    }
                 })
             ])
+            if (!userSnapshotsSession) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "User not found"
+            })
+
+            const snapshotHistory = userSnapshotsSession.snapshots.map(snapshotData => ({
+                ...snapshotData,
+                snapshot: {
+                    start_date: snapshotData.snapshot.start_date.toISOString(),
+                    end_date: snapshotData.snapshot.end_date.toISOString(),
+                }
+            }))
+
+            const goTokenBalanceHistory = getGoTokenBalanceHistory.result
+                .filter(history => history.contractAddress.lowercase === process.env.GO_ADDRESS?.toLowerCase())
+                .map((history) => ({
+                    id: history.transactionHash,
+                    date: history.blockTimestamp.toISOString(),
+                    type: history.toAddress.lowercase === session.address ? 'Deposit' : 'Withdrawal',
+                    amount: (Number(history.value) / 10 ** 10).toFixed(2)
+                }))
 
             const userTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === goTokenAddress.toLowerCase())[0] as any
 
@@ -118,9 +167,15 @@ export const dashboardRoute = {
             }
 
             const data = {
-                user,
-                snapshot_date,
-                global_stake: goTokenTotalSupply,
+                liquid_staking: {
+                    user,
+                    snapshot_date,
+                    global_stake: goTokenTotalSupply,
+                    balance_history: goTokenBalanceHistory
+                },
+                grow_rewards: {
+                    snapshot_history: snapshotHistory
+                }
             }
 
             return data
@@ -134,5 +189,5 @@ export const dashboardRoute = {
         } finally {
             await db.$disconnect()
         }
-    })
+    }),
 }

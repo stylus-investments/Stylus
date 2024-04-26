@@ -27,11 +27,7 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
         refetchOnReconnect: false
     })
     const updateSession = trpc.session.update.useMutation()
-    const dashboard = trpc.dashboard.get.useQuery(undefined, {
-        refetchOnMount: false,
-        refetchOnReconnect: false,
-        retry: false
-    })
+
     const deleteSession = trpc.session.delete.useMutation()
 
     const disconnectWallet = async () => {
@@ -70,7 +66,7 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
                 await updateSession.mutateAsync(accounts[0], {
                     onSuccess: async () => {
                         await session.refetch();
-                        await dashboard.refetch()
+                        // await dashboard.refetch()
                         toast.success("Wallet Changed!");
                     }
                 });

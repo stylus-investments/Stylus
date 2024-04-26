@@ -6,8 +6,10 @@ import { z } from 'zod'
 
 export const sessionRoute = {
     get: publicProcedure.query(async () => {
-        //return the session
-        return (await getSession()).address
+
+        const session = await getSession()
+
+        return session.address
     }),
     post: publicProcedure.input(z.string()).mutation(async (opts) => {
         try {

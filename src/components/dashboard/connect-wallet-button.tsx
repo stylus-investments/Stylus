@@ -3,17 +3,14 @@ import React from 'react'
 import { Button } from '../ui/button'
 import { trpc } from '@/app/_trpc/client'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 const ConnectWalletButton = () => {
 
+    const router = useRouter()
+
     const session = trpc.session.get.useQuery()
     const createSession = trpc.session.post.useMutation()
-
-    const dashboard = trpc.dashboard.get.useQuery(undefined, {
-        refetchOnMount: false,
-        refetchOnReconnect: false,
-        retry: false
-    })
 
     const connectWallet = async () => {
 
@@ -26,10 +23,10 @@ const ConnectWalletButton = () => {
                 await createSession.mutateAsync(accounts[0], {
                     onSuccess: async () => {
                         await session.refetch()
-                        await dashboard.refetch()
                     }
                 })
-                return toast.success("Wallet Connected!")
+                toast.success("Wallet Connected!")
+                return router.push('/dashboard')
             }
             return alert("Failed to logged in")
         } else {

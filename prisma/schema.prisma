@@ -11,8 +11,8 @@ generator client {
 // development
 
 // datasource db {
-  // provider = "mysql"
-  // url      = env("DATABASE_URL")
+//   provider = "mysql"
+//   url      = env("DATABASE_URL")
 // }
 
 // production
@@ -22,8 +22,6 @@ datasource db {
   url       = env("POSTGRES_PRISMA_URL")
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
-
-
 
 model user {
   id         Int                @id @default(autoincrement())
@@ -52,6 +50,7 @@ model snapshot {
 
 model snapshot_session {
   id          Int      @id @default(autoincrement())
+  month       Int
   stake       String
   reward      String
   status      Int

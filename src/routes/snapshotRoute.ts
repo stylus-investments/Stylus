@@ -152,7 +152,16 @@ export const snapshotRoute = {
             //retrieve token holders and users
             const [tokenHolders, users] = await Promise.all([
                 getTokenHolders(),
-                db.user.findMany()
+                db.user.findMany({
+                    include: {
+                        snapshots: {
+                            orderBy: {
+                                created_at: 'desc'
+                            },
+                            take: 1
+                        }
+                    }
+                })
             ])
 
             if (!tokenHolders) throw new TRPCError({
@@ -173,9 +182,9 @@ export const snapshotRoute = {
 
                 const snapshotEndDate = new Date(previousSnapshots[0].end_date);
 
-                if (snapshotEndDate <= now) {
+                if (now) {
 
-                    //if this is true meaning the snapshot is completed
+                    //if this is truenv meaning the snapshot is completed
                     const updateSnapshot = await db.snapshot.update({
                         where: {
                             id: previousSnapshots[0].id
@@ -225,118 +234,120 @@ export const snapshotRoute = {
 
                     }))
 
-//create another snapshot session
+                    //create another snapshot session
 
-const newSnapshot = await db.snapshot.create({
-    data: { start_date: previousSnapshots[0].end_date, end_date }
-})
-if (!newSnapshot) throw new TRPCError({
-    code: 'CLIENT_CLOSED_REQUEST',
-    message: "Failed to create new snapshot"
-})
+                    const newSnapshot = await db.snapshot.create({
+                        data: { start_date: previousSnapshots[0].end_date, end_date }
+                    })
+                    if (!newSnapshot) throw new TRPCError({
+                        code: 'CLIENT_CLOSED_REQUEST',
+                        message: "Failed to create new snapshot"
+                    })
 
-await Promise.all(tokenHolders.map(async (holder) => {
+                    await Promise.all(tokenHolders.map(async (holder) => {
 
-    const user = users.find(user => user.wallet === holder.owner_address);
+                        const user = users.find(user => user.wallet === holder.owner_address);
 
-    if (user) {
+                        if (user) {
 
-        const reward = Number(holder.balance_formatted) * (1.66 / 100)
+                            const reward = Number(holder.balance_formatted) * (1.66 / 100)
 
-        //create the session and connect it to snapshots
-        const createUserSnapshot = await db.snapshot_session.create({
-            data: {
-                stake: Number(holder.balance_formatted).toFixed(2),
-                reward: reward.toFixed(2),
-                status: 1,
-                user: {
-                    connect: {
-                        id: user.id
-                    }
-                },
-                snapshot: {
-                    connect: {
-                        id: newSnapshot.id
-                    }
-                }
-            }
-        })
-        if (!createUserSnapshot) throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "Failed to create user snapshot"
-        })
-    }
-}))
+                            //create the session and connect it to snapshots
+                            const createUserSnapshot = await db.snapshot_session.create({
+                                data: {
+                                    month: user.snapshots[0].month + 1,
+                                    stake: Number(holder.balance_formatted).toFixed(2),
+                                    reward: reward.toFixed(2),
+                                    status: 1,
+                                    user: {
+                                        connect: {
+                                            id: user.id
+                                        }
+                                    },
+                                    snapshot: {
+                                        connect: {
+                                            id: newSnapshot.id
+                                        }
+                                    }
+                                }
+                            })
+                            if (!createUserSnapshot) throw new TRPCError({
+                                code: 'BAD_REQUEST',
+                                message: "Failed to create user snapshot"
+                            })
+                        }
+                    }))
 
-return okayRes()
+                    return okayRes()
 
                 } else {
-    throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: 'Snapshot still ongoing',
-    });
-}
+                    throw new TRPCError({
+                        code: 'BAD_REQUEST',
+                        message: 'Snapshot still ongoing',
+                    });
+                }
 
             } else {
 
-    now.setUTCHours(16, 0, 0, 0); // Set now to 4:00 PM UTC
-    const end_date = new Date(now)
-    end_date.setUTCDate(now.getUTCDate() + 1); // Add a day to now
-    end_date.setUTCHours(16, 0, 0, 0);
+                now.setUTCHours(16, 0, 0, 0); // Set now to 4:00 PM UTC
+                const end_date = new Date(now)
+                end_date.setUTCDate(now.getUTCDate() + 1); // Add a day to now
+                end_date.setUTCHours(16, 0, 0, 0);
 
-    const newSnapshot = await db.snapshot.create({
-        data: { start_date: now, end_date }
-    })
+                const newSnapshot = await db.snapshot.create({
+                    data: { start_date: now, end_date }
+                })
 
-    if (!newSnapshot) throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: "Failed to create new Snapshot"
-    })
+                if (!newSnapshot) throw new TRPCError({
+                    code: 'BAD_REQUEST',
+                    message: "Failed to create new Snapshot"
+                })
 
-    await Promise.all(tokenHolders.map(async (holder) => {
+                await Promise.all(tokenHolders.map(async (holder) => {
 
-        const user = users.find(user => user.wallet === holder.owner_address);
+                    const user = users.find(user => user.wallet === holder.owner_address);
 
-        if (user) {
+                    if (user) {
 
-            //the reward will be 1.66% each snapshot
-            const reward = Number(holder.balance_formatted) * (1.66 / 100);
+                        //the reward will be 1.66% each snapshot
+                        const reward = Number(holder.balance_formatted) * (1.66 / 100);
 
-            //create the session and connect it to snapshots
-            const createUserSnapshot = await db.snapshot_session.create({
-                data: {
-                    stake: Number(holder.balance_formatted).toFixed(2),
-                    reward: reward.toFixed(2),
-                    status: 1,
-                    user: {
-                        connect: {
-                            id: user.id
-                        }
-                    },
-                    snapshot: {
-                        connect: {
-                            id: newSnapshot.id
-                        }
+                        //create the session and connect it to snapshots
+                        const createUserSnapshot = await db.snapshot_session.create({
+                            data: {
+                                month: user.snapshots[0].month + 1,
+                                stake: Number(holder.balance_formatted).toFixed(2),
+                                reward: reward.toFixed(2),
+                                status: 1,
+                                user: {
+                                    connect: {
+                                        id: user.id
+                                    }
+                                },
+                                snapshot: {
+                                    connect: {
+                                        id: newSnapshot.id
+                                    }
+                                }
+                            }
+                        })
+                        if (!createUserSnapshot) throw new TRPCError({
+                            code: 'BAD_REQUEST',
+                            message: "Failed to create user snapshot"
+                        })
                     }
-                }
-            })
-            if (!createUserSnapshot) throw new TRPCError({
-                code: 'BAD_REQUEST',
-                message: "Failed to create user snapshot"
-            })
-        }
-    }))
-    return okayRes()
-}
+                }))
+                return okayRes()
+            }
 
         } catch (error: any) {
-    console.log(error);
-    throw new TRPCError({
-        code: error.code,
-        message: error.message
-    })
-} finally {
-    await db.$disconnect()
-}
+            console.log(error);
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
+        }
     }),
 }

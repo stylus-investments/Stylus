@@ -3,6 +3,7 @@ import { faLock, faFlag, faSackDollar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '../../ui/button'
 import SnapshotTimer from './SnapshotTimer'
+import BalanceHistory from './balance-history'
 
 interface Props {
     dashboardData: {
@@ -19,6 +20,12 @@ interface Props {
             next: string;
             start: string;
         };
+        balance_history: {
+            id: string;
+            type: string;
+            date: string;
+            amount: string;
+        }[];
         global_stake?: any;
     }
 }
@@ -101,9 +108,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                     </div>
                 </div>
             </div>
-            <div className='w-full py-20 border'>
-
-            </div>
+            <BalanceHistory history={dashboardData.balance_history} />
         </div>
     )
 }

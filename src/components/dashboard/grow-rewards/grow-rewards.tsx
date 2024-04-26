@@ -1,13 +1,29 @@
 import React from 'react'
-import { Card, CardHeader } from '../../ui/card'
 
-const GrowRewards = () => {
+import SnapshotHistory from './snapshot-history';
+
+interface GrowRewardsProps {
+    dashboardData: {
+        snapshot_history: {
+            snapshot: {
+                start_date: string;
+                end_date: string;
+            };
+            id: number;
+            month: number;
+            stake: string;
+            reward: string;
+            status: number;
+        }[];
+    }
+}
+
+const GrowRewards: React.FC<GrowRewardsProps> = ({ dashboardData }) => {
+
     return (
-        <Card>
-            <CardHeader className='text-center'>
-                Coming Soon.
-            </CardHeader>
-        </Card>
+        <>
+            <SnapshotHistory history={dashboardData.snapshot_history} />
+        </>
     )
 }
 

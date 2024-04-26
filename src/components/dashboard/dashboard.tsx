@@ -1,53 +1,58 @@
 'use client'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import Image from 'next/image'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDatabase, faGavel, faSeedling, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faDatabase, faGavel, faSeedling } from '@fortawesome/free-solid-svg-icons'
 import GrowRewards from './grow-rewards/grow-rewards'
 import GlowStaking from './glow-staking/glow-staking'
 import LiquidStaking from './liquid-staking/liquid-staking'
 import { trpc } from '@/app/_trpc/client'
-import ConnectWalletFirst from './connect-wallet-first'
 import { Button } from '../ui/button'
 import Link from 'next/link'
+import { caller } from '@/app/_trpc/server'
 
 interface Props {
-    walletAddress: string
+    initialData: Awaited<ReturnType<(typeof caller['dashboard']['get'])>>
 }
 
-const Dashboard = ({ walletAddress }: Props) => {
+const Dashboard = ({ initialData }: Props) => {
+
+    const [prevSession, setPrevSession] = useState(initialData.liquid_staking.user.wallet)
 
     const session = trpc.session.get.useQuery(undefined, {
-        initialData: walletAddress,
-        refetchOnMount: false,
-        refetchOnReconnect: false
-    })
-
-    const { data } = trpc.dashboard.get.useQuery(undefined, {
         refetchOnMount: false,
         refetchOnReconnect: false,
+    })
+
+    const { data, refetch } = trpc.dashboard.get.useQuery(undefined, {
+        initialData: initialData,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
         retry: false
     })
 
-    if (!session.data) return <ConnectWalletFirst />
+    useEffect(() => {
 
-    if (!data) return (
-        <div className='grid place-content-center h-screen'>
-            <FontAwesomeIcon icon={faSpinner} width={50} height={50} className='animate-spin w-[50px] h-[50px]' />
-        </div>
-    )
+        if (session.data !== prevSession) {
+            setPrevSession(session.data || '')
+            refetch()
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session.data])
 
     return (
-        <main className='container flex flex-col items-center pt-28 pb-10 gap-10'>
+        <main className='container flex flex-col items-center pt-32 pb-10 gap-10'>
 
             <div className='flex flex-col gap-3 items-center text-center'>
-                <Image width={100} height={50} className='h-auto' alt='Coin' src={'/logo.png'} />
-                <h1 className='font-black text-xl'>{(Number(data.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $GO</h1>
+                <Image width={100} height={50} className='h-auto rounded-full' alt='Coin' src={'/go.jpeg'} />
+                <h1 className='font-black text-xl'>{(Number(data.liquid_staking.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $GO</h1>
                 <h1 className='text-muted-foreground'>Total balance in your wallet</h1>
                 <div className='flex items-center gap-5'>
                     <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank'>
-                        <Button className='h-8' variant={'link'}>
+                        <Button className='h-8 rounded-3xl bg-green-500 hover:bg-green-500'>
                             Add More $GO
                         </Button>
                     </Link>
@@ -81,10 +86,10 @@ const Dashboard = ({ walletAddress }: Props) => {
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="go">
-                    <LiquidStaking dashboardData={data} />
+                    <LiquidStaking dashboardData={data.liquid_staking} />
                 </TabsContent>
                 <TabsContent value="grow">
-                    <GrowRewards />
+                    <GrowRewards dashboardData={data.grow_rewards} />
                 </TabsContent>
                 <TabsContent value="glow">
                     <GlowStaking />

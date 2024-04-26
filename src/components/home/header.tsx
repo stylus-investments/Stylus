@@ -13,7 +13,7 @@ const Header = () => {
       </div>
       <div className='flex items-center gap-5'>
         <ToggleTheme />
-        <Link href={'/dashboard'}>
+        <Link href={'/connect'}>
           <Button>
             Launch App
           </Button>
