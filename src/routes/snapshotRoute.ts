@@ -2,6 +2,15 @@ import { publicProcedure } from "@/app/server/trpc";
 import db from "@/db/db";
 import { getTokenHolders, okayRes } from "@/lib/apiResponse";
 import { TRPCError } from "@trpc/server";
+import { RateLimiterMemory } from "rate-limiter-flexible";
+
+const opts = {
+    points: 1,
+    duration: 1,
+};
+
+const rateLimiter = new RateLimiterMemory(opts);
+
 export const snapshotRoute = {
     get: publicProcedure.query(async () => {
 
@@ -109,12 +118,36 @@ export const snapshotRoute = {
 
         try {
 
+            await rateLimiter.consume(1);
+
             //retrieve previou snapshot
-            const previousSnapshot = await db.snapshot.findMany({
+            const previousSnapshots = await db.snapshot.findMany({
                 where: {
                     completed: false
+                },
+                orderBy: {
+                    created_at: 'desc'
                 }
             })
+
+            if (previousSnapshots.length > 1) {
+                // Delete all snapshots except the first one
+                const snapshotsToDelete = previousSnapshots.slice(1);
+
+                await Promise.all(snapshotsToDelete.map(async (snapshot) => {
+                    await db.snapshot_session.deleteMany({
+                        where: {
+                            snapshot_id: snapshot.id
+                        }
+                    });
+
+                    await db.snapshot.delete({
+                        where: {
+                            id: snapshot.id
+                        }
+                    });
+                }));
+            }
 
             //retrieve token holders and users
             const [tokenHolders, users] = await Promise.all([
@@ -133,19 +166,19 @@ export const snapshotRoute = {
 
             const now = new Date()
 
-            if (previousSnapshot.length > 0) {
+            if (previousSnapshots.length > 0) {
 
-                const end_date = new Date(previousSnapshot[0].end_date)
-                end_date.setDate(end_date.getUTCDate() + 1)
+                const end_date = new Date(previousSnapshots[0].end_date)
+                end_date.setUTCDate(end_date.getUTCDate() + 1)
 
-                const snapshotEndDate = new Date(previousSnapshot[0].end_date);
+                const snapshotEndDate = new Date(previousSnapshots[0].end_date);
 
-                if (snapshotEndDate <= now) {
+                if (now) {
 
                     //if this is true meaning the snapshot is completed
                     const updateSnapshot = await db.snapshot.update({
                         where: {
-                            id: previousSnapshot[0].id
+                            id: previousSnapshots[0].id
                         }, data: {
                             completed: true
                         },
@@ -169,15 +202,24 @@ export const snapshotRoute = {
 
                             if (Number(tokenHolder.balance_formatted) < Number(snapshotSession.stake)) {
                                 //this mean user is disqualified
-                                await db.snapshot_session.update({
+                                const updateUserSnapshot = await db.snapshot_session.update({
                                     where: { id: snapshotSession.id }, data: { reward: '0.00', status: 0 }
+                                })
+                                if (!updateUserSnapshot) throw new TRPCError({
+                                    code: "BAD_REQUEST",
+                                    message: "Failed to update user snapshot"
                                 })
 
                             } else {
                                 //update the snapshot status into 2 means = "pending reward"
-                                await db.snapshot_session.update({
+                                const updateUserSnapshot = await db.snapshot_session.update({
                                     where: { id: snapshotSession.id }, data: { status: 2 }
                                 })
+                                if (!updateUserSnapshot) throw new TRPCError({
+                                    code: "BAD_REQUEST",
+                                    message: "Failed to update user snapshot"
+                                })
+
                             }
                         }
 
@@ -186,7 +228,7 @@ export const snapshotRoute = {
                     //create another snapshot session
 
                     const newSnapshot = await db.snapshot.create({
-                        data: { start_date: previousSnapshot[0].end_date, end_date }
+                        data: { start_date: previousSnapshots[0].end_date, end_date }
                     })
                     if (!newSnapshot) throw new TRPCError({
                         code: 'CLIENT_CLOSED_REQUEST',
@@ -202,7 +244,7 @@ export const snapshotRoute = {
                             const reward = Number(holder.balance_formatted) * (1.66 / 100)
 
                             //create the session and connect it to snapshots
-                            await db.snapshot_session.create({
+                            const createUserSnapshot = await db.snapshot_session.create({
                                 data: {
                                     stake: Number(holder.balance_formatted).toFixed(2),
                                     reward: reward.toFixed(2),
@@ -218,6 +260,10 @@ export const snapshotRoute = {
                                         }
                                     }
                                 }
+                            })
+                            if (!createUserSnapshot) throw new TRPCError({
+                                code: 'BAD_REQUEST',
+                                message: "Failed to create user snapshot"
                             })
                         }
                     }))
@@ -257,7 +303,7 @@ export const snapshotRoute = {
                         const reward = Number(holder.balance_formatted) * (1.66 / 100);
 
                         //create the session and connect it to snapshots
-                        await db.snapshot_session.create({
+                        const createUserSnapshot = await db.snapshot_session.create({
                             data: {
                                 stake: Number(holder.balance_formatted).toFixed(2),
                                 reward: reward.toFixed(2),
@@ -273,6 +319,10 @@ export const snapshotRoute = {
                                     }
                                 }
                             }
+                        })
+                        if (!createUserSnapshot) throw new TRPCError({
+                            code: 'BAD_REQUEST',
+                            message: "Failed to create user snapshot"
                         })
                     }
                 }))
