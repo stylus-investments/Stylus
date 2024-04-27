@@ -12,7 +12,9 @@ const SnapshotHistory = ({ wallet }: {
     wallet: string
 }) => {
 
-    const { data, isLoading } = trpc.dashboard.getUserSnapshotHistory.useQuery(wallet)
+    const { data, isLoading } = trpc.dashboard.getUserSnapshotHistory.useQuery(wallet, {
+        refetchOnMount: false
+    })
 
     const [currentTable, setCurrentTable] = useState<any[] | undefined>(undefined)
     const { getCurrentData, currentPage } = usePaginationStore()

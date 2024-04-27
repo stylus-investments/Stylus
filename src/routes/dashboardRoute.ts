@@ -158,6 +158,8 @@ export const dashboardRoute = {
 
         const walletAddress = opts.input
 
+        await getMoralis()
+
         const getGoTokenBalanceHistory = await Moralis.EvmApi.token.getWalletTokenTransfers({
             chain: process.env.CHAIN,
             order: "ASC",

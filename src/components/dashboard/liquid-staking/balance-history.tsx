@@ -8,7 +8,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const BalanceHistory = ({ address }: { address: string }) => {
 
-    const { data, isLoading } = trpc.dashboard.getGoTokenBalanceHistory.useQuery(address)
+    const { data, isLoading } = trpc.dashboard.getGoTokenBalanceHistory.useQuery(address, {
+        refetchOnMount: false
+    })
 
     const [currentTable, setCurrentTable] = useState<any[] | undefined>(undefined)
 
