@@ -1,6 +1,7 @@
 import { publicProcedure } from "@/app/server/trpc";
 import db from "@/db/db";
-import { getTokenHolders, okayRes } from "@/lib/apiResponse";
+import { okayRes } from "@/lib/apiResponse";
+import { getTokenHolders } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 
