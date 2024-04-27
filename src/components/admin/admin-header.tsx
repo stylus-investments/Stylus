@@ -2,12 +2,20 @@
 import React from 'react'
 import { ToggleTheme } from '../ui/toggle-theme'
 import { Button } from '../ui/button'
-import { signOut } from 'next-auth/react'
+import { signIn, signOut, useSession } from 'next-auth/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faRightToBracket } from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link'
 
 const AdminHeader = () => {
+
+    const session = useSession({
+        required: true,
+        onUnauthenticated: () => {
+            signIn()
+        }
+    })
+
     return (
         <div className='flex sticky top-0 left-0 w-screen h-16 backdrop-blur container items-center justify-between border-b'>
             <div className='flex items-center'>
@@ -20,8 +28,7 @@ const AdminHeader = () => {
             <div className='flex items-center gap-5'>
                 <ToggleTheme />
                 <Button onClick={() => signOut({
-                    callbackUrl: `${process.env.NEXT_PUBLIC_URL}/admin/auth`,
-                    redirect: true
+                    redirect: false
                 })} variant={'ghost'} title='Logout'>
                     <FontAwesomeIcon icon={faRightToBracket} width={18} height={18} className='cursor-pointer' />
                 </Button>
