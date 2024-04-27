@@ -12,7 +12,7 @@ const sessionOptions: SessionOptions = {
     cookieName: 'wallet-session',
     cookieOptions: {
         httpOnly: true,
-        secure: false
+        secure: process.env.NODE_ENV === "production" ? true : false
     }
 }
 
