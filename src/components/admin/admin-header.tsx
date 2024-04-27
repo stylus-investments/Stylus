@@ -20,7 +20,7 @@ const AdminHeader = () => {
             <div className='flex items-center gap-5'>
                 <ToggleTheme />
                 <Button onClick={() => signOut({
-                    callbackUrl: '/admin/auth',
+                    callbackUrl: `${process.env.NEXT_PUBLIC_URL}/admin/auth`,
                     redirect: true
                 })} variant={'ghost'} title='Logout'>
                     <FontAwesomeIcon icon={faRightToBracket} width={18} height={18} className='cursor-pointer' />
