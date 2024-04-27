@@ -4,17 +4,7 @@ import SnapshotHistory from './snapshot-history';
 
 interface GrowRewardsProps {
     dashboardData: {
-        snapshot_history: {
-            snapshot: {
-                start_date: string;
-                end_date: string;
-            };
-            id: number;
-            month: number;
-            stake: string;
-            reward: string;
-            status: number;
-        }[];
+        wallet: string
     }
 }
 
@@ -22,7 +12,7 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ dashboardData }) => {
 
     return (
         <>
-            <SnapshotHistory history={dashboardData.snapshot_history} />
+            <SnapshotHistory wallet={dashboardData.wallet} />
         </>
     )
 }

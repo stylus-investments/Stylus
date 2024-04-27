@@ -16,17 +16,7 @@ interface Props {
             wallet: string;
             current_go_balance: string;
         };
-        snapshot_date: {
-            next: string;
-            start: string;
-        };
-        balance_history: {
-            id: string;
-            type: string;
-            month: number
-            date: string;
-            amount: string;
-        }[];
+        next_snapshot: string;
         global_stake?: any;
     }
 }
@@ -52,7 +42,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                         </div>
                         <h1 className='font-black text-lg'>
                             {
-                                new Date(dashboardData.snapshot_date.next).toLocaleString('en-US', {
+                                new Date(dashboardData.next_snapshot).toLocaleString('en-US', {
                                     timeZone: 'UTC',
                                     weekday: 'short',
                                     day: '2-digit',
@@ -64,7 +54,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             }  UTC
                         </h1>
                     </div>
-                    <SnapshotTimer nextSnapshot={dashboardData.snapshot_date.next} />
+                    <SnapshotTimer nextSnapshot={dashboardData.next_snapshot} />
                 </div>
                 <div className='flex w-full flex-col lg:flex-row'>
                     <div className='flex flex-col gap-3 p-5 border w-full'>
@@ -109,7 +99,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                     </div>
                 </div>
             </div>
-            <BalanceHistory history={dashboardData.balance_history} />
+            <BalanceHistory address={dashboardData.user.wallet} />
         </div>
     )
 }

@@ -3,33 +3,29 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import usePaginationStore from '@/state/paginationStore';
 import React, { useEffect, useState } from 'react'
 import TablePagination from '../table-pagination';
+import { trpc } from '@/app/_trpc/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const BalanceHistory = ({ history }: {
-    history: {
-        id: string;
-        type: string;
-        month: number
-        date: string;
-        amount: string;
-    }[]
-}) => {
+const BalanceHistory = ({ address }: { address: string }) => {
 
-    const [currentTable, setCurrentTable] = useState<any[] | null>(null)
+    const { data, isLoading } = trpc.dashboard.getGoTokenBalanceHistory.useQuery(address)
+
+    const [currentTable, setCurrentTable] = useState<any[] | undefined>(undefined)
 
     const { getCurrentData, currentPage } = usePaginationStore()
 
     useEffect(() => {
 
-        setCurrentTable(getCurrentData(history))
+        setCurrentTable(getCurrentData(data))
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [history, currentPage])
+    }, [data, currentPage])
 
     return (
         <Card>
             <CardContent className='flex flex-col gap-5'>
                 <Table>
-                    <TableCaption>Go Transaction History</TableCaption>
+                    <TableCaption>$Go Transaction History</TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>#</TableHead>
@@ -40,7 +36,7 @@ const BalanceHistory = ({ history }: {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {currentTable && currentTable.length > 0 ? currentTable.map((transac) => (
+                        {isLoading ? <BalanceHistorySkeleton /> : currentTable && currentTable.length > 0 ? currentTable.map((transac) => (
                             <TableRow key={transac.id} className='text-muted-foreground hover:text-foreground'>
                                 <TableCell>{transac.month}</TableCell>
                                 <TableCell>{transac.id.substring(0, 10)}....</TableCell>
@@ -71,10 +67,37 @@ const BalanceHistory = ({ history }: {
                         }
                     </TableBody>
                 </Table>
-                <TablePagination data={history} />
+                <TablePagination data={data || []} />
             </CardContent>
         </Card>
 
+    )
+}
+
+const BalanceHistorySkeleton = () => {
+
+    return (
+        <>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(skeleton => (
+                <TableRow key={skeleton}>
+                        <TableCell>
+                            <Skeleton className='w-6 h-5 rounded-3xl' />
+                        </TableCell>
+                        <TableCell>
+                            <Skeleton className='w-36 h-5 rounded-3xl' />
+                        </TableCell>
+                        <TableCell>
+                            <Skeleton className='w-52 h-5 rounded-3xl' />
+                        </TableCell>
+                        <TableCell>
+                            <Skeleton className='w-28 h-5 rounded-3xl' />
+                        </TableCell>
+                        <TableCell>
+                            <Skeleton className='w-20 h-5 rounded-3xl' />
+                        </TableCell>
+                </TableRow>
+            ))}
+        </>
     )
 }
 

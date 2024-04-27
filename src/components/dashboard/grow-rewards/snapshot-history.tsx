@@ -1,33 +1,28 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import usePaginationStore from '@/state/paginationStore';
 import { Card, CardContent } from '@/components/ui/card';
 import TablePagination from '../table-pagination';
+import { trpc } from '@/app/_trpc/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const SnapshotHistory = ({ history }: {
-    history: {
-        snapshot: {
-            start_date: string;
-            end_date: string;
-        };
-        id: number;
-        stake: string;
-        month: number
-        reward: string;
-        status: number;
-    }[]
+const SnapshotHistory = ({ wallet }: {
+    wallet: string
 }) => {
 
-    const [currentTable, setCurrentTable] = useState<any[] | null>(null)
+    const { data, isLoading } = trpc.dashboard.getUserSnapshotHistory.useQuery(wallet)
+
+    const [currentTable, setCurrentTable] = useState<any[] | undefined>(undefined)
     const { getCurrentData, currentPage } = usePaginationStore()
 
     useEffect(() => {
 
-        setCurrentTable(getCurrentData(history))
+        setCurrentTable(getCurrentData(data))
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [history, currentPage])
+    }, [data, currentPage])
 
     const returnSnapshotStatusButton = (status: number) => {
         if (status === 1) return <Button className="h-6 rounded-3xl hover:bg-orange-500 bg-orange-500">Holding Period</Button>
@@ -52,7 +47,7 @@ const SnapshotHistory = ({ history }: {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {currentTable && currentTable.length > 0 ?
+                        {isLoading ? <SnapshotHistorySkeleton /> : currentTable && currentTable.length > 0 ?
                             currentTable.map((snapshot) => (
                                 <TableRow key={(snapshot).id} className='text-muted-foreground hover:text-foreground'>
                                     <TableCell>{snapshot.month}</TableCell>
@@ -94,10 +89,40 @@ const SnapshotHistory = ({ history }: {
                         }
                     </TableBody>
                 </Table>
-                <TablePagination data={history} />
+                <TablePagination data={data || []} />
             </CardContent>
         </Card>
 
+    )
+}
+
+const SnapshotHistorySkeleton = () => {
+
+    return (
+        <>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(skeleton => (
+                <TableRow key={skeleton}>
+                    <TableCell>
+                        <Skeleton className='w-6 h-5 rounded-3xl' />
+                    </TableCell>
+                    <TableCell>
+                        <Skeleton className='w-28 h-5 rounded-3xl' />
+                    </TableCell>
+                    <TableCell>
+                        <Skeleton className='w-36 h-5 rounded-3xl' />
+                    </TableCell>
+                    <TableCell>
+                        <Skeleton className='w-52 h-5 rounded-3xl' />
+                    </TableCell>
+                    <TableCell>
+                        <Skeleton className='w-52 h-5 rounded-3xl' />
+                    </TableCell>
+                    <TableCell>
+                        <Skeleton className='w-32 h-5 rounded-3xl' />
+                    </TableCell>
+                </TableRow>
+            ))}
+        </>
     )
 }
 

@@ -9,7 +9,8 @@ const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
     const [queryClient] = useState(() => new QueryClient({
         defaultOptions: {
             queries: {
-                refetchOnWindowFocus: false
+                refetchOnWindowFocus: false,
+                refetchOnReconnect: false
             }
         }
     }));

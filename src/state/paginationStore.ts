@@ -9,7 +9,7 @@ interface GlobalPaginationStore {
     goToNextPage: (data: any[]) => void
     indexOfLastItem: () => number
     indexOfFirstItem: () => number
-    getCurrentData: (data: any[] | null) => any[] | null
+    getCurrentData: (data: any[] | undefined) => any[] | undefined
 }
 
 const usePaginationStore = create<GlobalPaginationStore>((set, get) => ({
@@ -36,12 +36,12 @@ const usePaginationStore = create<GlobalPaginationStore>((set, get) => ({
             set({ currentPage: currentPage + 1 });  
         }
     },
-    getCurrentData: (data: any[] | null) => {
+    getCurrentData: (data: any[] | undefined) => {
         const { indexOfFirstItem, indexOfLastItem } = get()
         if (data) {
             return data.slice(indexOfFirstItem(), indexOfLastItem())
         }
-        return null
+        return undefined
     },
     getTotalPages: (data: any[]) => {
         const { itemsPerPage } = get()

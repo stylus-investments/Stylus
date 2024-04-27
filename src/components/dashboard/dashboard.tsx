@@ -13,19 +13,19 @@ import Link from 'next/link'
 import { caller } from '@/app/_trpc/server'
 
 interface Props {
-    initialData: Awaited<ReturnType<(typeof caller['dashboard']['get'])>>
+    initialData: Awaited<ReturnType<(typeof caller['dashboard']['getLiquidStaking'])>>
 }
 
 const Dashboard = ({ initialData }: Props) => {
 
-    const [prevSession, setPrevSession] = useState(initialData.liquid_staking.user.wallet)
+    const [prevSession, setPrevSession] = useState(initialData.user.wallet)
 
     const session = trpc.session.get.useQuery(undefined, {
         refetchOnMount: false,
         refetchOnReconnect: false,
     })
 
-    const { data, refetch } = trpc.dashboard.get.useQuery(undefined, {
+    const { data, refetch } = trpc.dashboard.getLiquidStaking.useQuery(undefined, {
         initialData: initialData,
         refetchOnMount: false,
         refetchOnReconnect: false,
@@ -48,7 +48,7 @@ const Dashboard = ({ initialData }: Props) => {
 
             <div className='flex flex-col gap-3 items-center text-center'>
                 <Image width={100} height={50} className='h-auto rounded-full' alt='Coin' src={'/go.jpeg'} />
-                <h1 className='font-black text-xl'>{(Number(data.liquid_staking.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $GO</h1>
+                <h1 className='font-black text-xl'>{(Number(data.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $GO</h1>
                 <h1 className='text-muted-foreground'>Total balance in your wallet</h1>
                 <div className='flex items-center gap-5'>
                     <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank'>
@@ -86,10 +86,12 @@ const Dashboard = ({ initialData }: Props) => {
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="go">
-                    <LiquidStaking dashboardData={data.liquid_staking} />
+                    <LiquidStaking dashboardData={data} />
                 </TabsContent>
                 <TabsContent value="grow">
-                    <GrowRewards dashboardData={data.grow_rewards} />
+                    <GrowRewards dashboardData={{
+                        wallet: data.user.wallet
+                    }} />
                 </TabsContent>
                 <TabsContent value="glow">
                     <GlowStaking />

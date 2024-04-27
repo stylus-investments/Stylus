@@ -24,15 +24,5 @@ const getSession = async () => {
     return session
 }
 
-let isMoralisInitialized = false;
 
-const getMoralis = async () => {
-    if (!isMoralisInitialized) {
-        await Moralis.start({
-            apiKey: process.env.MORALIS_API_KEY
-        });
-        isMoralisInitialized = true;
-    }
-}
-
-export { sessionOptions, getSession, getMoralis }
+export { sessionOptions, getSession }

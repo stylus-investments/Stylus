@@ -1,13 +1,15 @@
 import { publicProcedure } from "@/app/server/trpc";
 import db from "@/db/db";
-import { getMoralis, getSession } from "@/lib/lib";
+import { getSession } from "@/lib/lib";
+import { getMoralis } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import Moralis from "moralis";
+import { z } from "zod";
 
 const goTokenAddress = process.env.GO_ADDRESS as string
 
 export const dashboardRoute = {
-    get: publicProcedure.query(async () => {
+    getLiquidStaking: publicProcedure.query(async () => {
         try {
 
             const session = await getSession()
@@ -19,7 +21,7 @@ export const dashboardRoute = {
 
             await getMoralis()
 
-            const [userToken, goTokenData, currentSnapshot, getGoTokenBalanceHistory, userSnapshotsSession] = await Promise.all([
+            const [userToken, goTokenData, currentSnapshot] = await Promise.all([
                 Moralis.EvmApi.token.getWalletTokenBalances({
                     chain: process.env.CHAIN,
                     address: session.address
@@ -32,11 +34,6 @@ export const dashboardRoute = {
                     where: {
                         completed: false
                     }
-                }),
-                Moralis.EvmApi.token.getWalletTokenTransfers({
-                    "chain": process.env.CHAIN,
-                    order: "ASC",
-                    address: session.address
                 }),
                 db.user.findUnique({
                     where: { wallet: session.address },
@@ -61,32 +58,6 @@ export const dashboardRoute = {
                     }
                 })
             ])
-            if (!userSnapshotsSession) throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "User not found"
-            })
-
-            const snapshotHistory = userSnapshotsSession.snapshots
-                .map((snapshotData, index) => ({
-                    ...snapshotData,
-                    snapshot: {
-                        start_date: snapshotData.snapshot.start_date.toISOString(),
-                        end_date: snapshotData.snapshot.end_date.toISOString(),
-                    },
-                    month: index + 1
-                }))
-                .reverse()
-
-            const goTokenBalanceHistory = getGoTokenBalanceHistory.result
-                .filter(history => history.contractAddress.lowercase === process.env.GO_ADDRESS?.toLowerCase())
-                .map((history, index) => ({
-                    id: history.transactionHash,
-                    date: history.blockTimestamp.toISOString(),
-                    type: history.toAddress.lowercase === session.address ? 'Deposit' : 'Withdrawal',
-                    amount: (Number(history.value) / 10 ** 10).toFixed(2),
-                    month: index + 1
-                }))
-                .reverse()
 
             const userTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === goTokenAddress.toLowerCase())[0] as any
 
@@ -132,20 +103,15 @@ export const dashboardRoute = {
                 }
             }
 
-            let snapshot_date = {
-                next: '',
-                start: ''
-            }
+            let next_snapshot: string
 
             if (currentSnapshot.length > 0) {
-                snapshot_date.start = currentSnapshot[0].start_date.toString()
-                snapshot_date.next = currentSnapshot[0].end_date.toString()
+                next_snapshot = currentSnapshot[0].end_date.toString()
             } else {
                 const tomorrow = new Date();
                 tomorrow.setDate(tomorrow.getDate() + 1);
                 tomorrow.setHours(0, 0, 0, 0);
-                snapshot_date.next = tomorrow.toString();
-                snapshot_date.start = tomorrow.toString();
+                next_snapshot = tomorrow.toString();
             }
 
             if (userWallet.snapshots.length > 0) {
@@ -171,15 +137,9 @@ export const dashboardRoute = {
             }
 
             const data = {
-                liquid_staking: {
-                    user,
-                    snapshot_date,
-                    global_stake: goTokenTotalSupply,
-                    balance_history: goTokenBalanceHistory
-                },
-                grow_rewards: {
-                    snapshot_history: snapshotHistory
-                }
+                user,
+                next_snapshot,
+                global_stake: goTokenTotalSupply,
             }
 
             return data
@@ -194,4 +154,77 @@ export const dashboardRoute = {
             await db.$disconnect()
         }
     }),
+    getGoTokenBalanceHistory: publicProcedure.input(z.string()).query(async (opts) => {
+
+        const walletAddress = opts.input
+
+        const getGoTokenBalanceHistory = await Moralis.EvmApi.token.getWalletTokenTransfers({
+            chain: process.env.CHAIN,
+            order: "ASC",
+            address: walletAddress
+        })
+
+        if (!getGoTokenBalanceHistory) throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: "Failed to get wallet go balance history"
+        })
+
+        const goTokenBalanceHistory = getGoTokenBalanceHistory.result
+            .filter(history => history.contractAddress.lowercase === process.env.GO_ADDRESS?.toLowerCase())
+            .map((history, index) => ({
+                id: history.transactionHash,
+                date: history.blockTimestamp.toISOString(),
+                type: history.toAddress.lowercase === walletAddress ? 'Deposit' : 'Withdrawal',
+                amount: (Number(history.value) / 10 ** 10).toFixed(2),
+                month: index + 1
+            }))
+            .reverse()
+
+        return goTokenBalanceHistory
+
+    }),
+    getUserSnapshotHistory: publicProcedure.input(z.string()).query(async (opts) => {
+        const walletAddress = opts.input
+
+        const getUserSnapshotHistory = await db.user.findUnique({
+            where: { wallet: walletAddress },
+            select: {
+                snapshots: {
+                    select: {
+                        id: true,
+                        stake: true,
+                        status: true,
+                        reward: true,
+                        snapshot: {
+                            select: {
+                                start_date: true,
+                                end_date: true
+                            }
+                        }
+                    },
+                    orderBy: {
+                        created_at: 'asc'
+                    }
+                }
+            }
+        })
+        if (!getUserSnapshotHistory) throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Failed to get user snapshot history"
+        })
+
+        const snapshotHistory = getUserSnapshotHistory.snapshots
+            .map((snapshotData, index) => ({
+                ...snapshotData,
+                snapshot: {
+                    start_date: snapshotData.snapshot.start_date.toISOString(),
+                    end_date: snapshotData.snapshot.end_date.toISOString(),
+                },
+                month: index + 1
+            }))
+            .reverse()
+
+        return snapshotHistory
+
+    })
 }

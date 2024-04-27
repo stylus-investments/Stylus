@@ -5,6 +5,7 @@ import { getSession } from "@/lib/lib";
 import { z } from 'zod'
 
 export const sessionRoute = {
+
     get: publicProcedure.query(async () => {
 
         const session = await getSession()

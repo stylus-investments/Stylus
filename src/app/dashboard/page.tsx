@@ -11,13 +11,13 @@ const DashboardPage = async () => {
     const sessionData = await caller.session.get()
     if (!sessionData) redirect('/connect')
 
-    const dashboardData = await caller.dashboard.get()
+    const liquidStakingData = await caller.dashboard.getLiquidStaking()
 
     return (
         <>
             <DashboardHeader
                 walletAddress={sessionData} />
-            <Dashboard initialData={dashboardData} />
+            <Dashboard initialData={liquidStakingData} />
         </>
     )
 }
