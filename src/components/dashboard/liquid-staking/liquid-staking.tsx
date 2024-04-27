@@ -73,11 +73,11 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             <div>
                                 Your stake
                             </div>
-                            {dashboardData.user.snapshot.status === 1 && < Button className='h-7 bg-green-500 hover:bg-green-500'>
+                            {dashboardData.user.snapshot.status === 1 && < Button className='h-7 bg-green-500 hover:bg-green-500 rounded-3xl'>
                                 Active
                             </Button>
                             }
-                            {!dashboardData.user.snapshot.status && <Button variant={'destructive'} className='h-7'>
+                            {!dashboardData.user.snapshot.status && <Button variant={'destructive'} className='h-7 rounded-3xl'>
                                 Forfeited
                             </Button>}
                         </div>
@@ -90,7 +90,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             <div>
                                 Current Balance
                             </div>
-                            {Number(dashboardData.user.current_go_balance) > 0 && <Button className=' h-8 bg-orange-400 hover:bg-orange-400 text-white'>Holding</Button>}
+                            {Number(dashboardData.user.current_go_balance) > 0 && <Button className=' h-8 bg-orange-400 rounded-3xl hover:bg-orange-400 text-white'>Holding</Button>}
                         </div>
                         <h1 className='font-black sm:text-lg md:text-xl'>
                             <h1 className='font-black sm:text-lg md:text-xl'>{(Number(dashboardData.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $GO</h1>

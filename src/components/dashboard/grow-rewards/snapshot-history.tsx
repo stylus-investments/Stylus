@@ -30,10 +30,10 @@ const SnapshotHistory = ({ history }: {
     }, [history, currentPage])
 
     const returnSnapshotStatusButton = (status: number) => {
-        if (status === 1) return <Button className="h-6 hover:bg-orange-500 bg-orange-500">Holding Period</Button>
-        if (status === 2) return <Button className="h-6 hover:bg-orange-400 bg-orange-400">Pending Rewards</Button>
-        if (status === 3) return <Button className="h-6 hover:bg-green-500 bg-green-500">Rewarded</Button>
-        return <Button className='bg-red-500 h-6 hover:bg-red-500'>Went Below Minimum</Button>
+        if (status === 1) return <Button className="h-6 rounded-3xl hover:bg-orange-500 bg-orange-500">Holding Period</Button>
+        if (status === 2) return <Button className="h-6 rounded-3xl hover:bg-orange-400 bg-orange-400">Pending Rewards</Button>
+        if (status === 3) return <Button className="h-6 rounded-3xl hover:bg-green-500 bg-green-500">Rewarded</Button>
+        return <Button className='bg-red-500 h-6 rounded-3xl hover:bg-red-500'>Went Below Minimum</Button>
     }
 
     return (
