@@ -11,20 +11,7 @@ const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
     const [trpcClient] = useState(() => trpc.createClient({
         links: [
             httpBatchLink({
-                url: '/api/trpc',
-                fetch(url, options) {
-                    return fetch(url, {
-                        ...options,
-                        credentials: 'include',
-                    });
-                },
-                headers() {
-                    return {
-                        'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-                        'Access-Control-Allow-Headers': 'X-Requested-With,content-type',
-                    }
-                }
+                url: '/api/trpc'
             }),
         ]
     }))
