@@ -12,13 +12,14 @@ const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
         links: [
             httpBatchLink({
                 url: `${process.env.NEXT_PUBLIC_URL as string}/api/trpc`,
-                fetch(url, options) {
-                    return fetch(url, {
-                        ...options,
-                        credentials: 'include'
-                    })
+                headers() {
+                    return {
+                        'Access-Control-Allow-Origin': `${process.env.NEXT_PUBLIC_URL}`,
+                        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                        'Access-Control-Allow-Headers': 'X-Requested-With,content-type',
+                    }
                 }
-            })
+            }),
         ]
     }))
 
