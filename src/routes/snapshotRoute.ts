@@ -114,7 +114,7 @@ export const snapshotRoute = {
             await db.$disconnect()
         }
     }),
-    reset: publicProcedure.query(async () => {
+    reset: publicProcedure.mutation(async () => {
 
         try {
 

@@ -7,6 +7,11 @@ import { trpc } from './client'
 
 const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
     const [queryClient] = useState(() => new QueryClient({
+        defaultOptions: {
+            queries: {
+                refetchOnWindowFocus: false
+            }
+        }
     }));
     const [trpcClient] = useState(() => trpc.createClient({
         links: [
