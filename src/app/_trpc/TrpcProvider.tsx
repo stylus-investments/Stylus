@@ -14,7 +14,7 @@ const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
                 url: `${process.env.NEXT_PUBLIC_URL as string}/api/trpc`,
                 headers() {
                     return {
-                        'Access-Control-Allow-Origin': `${process.env.NEXT_PUBLIC_URL}`,
+                        'Access-Control-Allow-Origin': '*',
                         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
                         'Access-Control-Allow-Headers': 'X-Requested-With,content-type',
                     }
