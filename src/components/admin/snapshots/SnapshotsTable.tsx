@@ -1,16 +1,9 @@
+import { caller } from '@/app/_trpc/server'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import React from 'react'
 
 interface SnapshotTableProps {
-    snapshotData: {
-        session: undefined;
-        total_holders: number;
-        total_unpaid_holders: number;
-        id: number;
-        start_date: Date;
-        end_date: Date;
-        completed: boolean;
-    }[]
+    snapshotData: Awaited<ReturnType<(typeof caller['snapshot']['get'])>>
 }
 
 const SnapshotsTable: React.FC<SnapshotTableProps> = (props) => {

@@ -16,7 +16,17 @@ const SnapshotHistory = ({ wallet }: {
         refetchOnMount: false
     })
 
-    const [currentTable, setCurrentTable] = useState<any[] | undefined>(undefined)
+    const [currentTable, setCurrentTable] = useState<{
+        snapshot: {
+            start_date: string;
+            end_date: string;
+        };
+        id: number;
+        stake: string;
+        reward: string;
+        status: number;
+        month: number;
+    }[] | undefined | undefined>(undefined)
     const { getCurrentData, currentPage } = usePaginationStore()
 
     useEffect(() => {

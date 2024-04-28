@@ -16,7 +16,7 @@ datasource db {
 model user {
   id         Int                @id @default(autoincrement())
   wallet     String             @unique
-  snapshots  snapshot_session[]
+  snapshots  user_snapshot[]
   created_at DateTime           @default(now())
   updated_at DateTime           @updatedAt
 }
@@ -33,12 +33,12 @@ model snapshot {
   start_date DateTime
   end_date   DateTime
   completed  Boolean            @default(false)
-  session    snapshot_session[]
+  user_snapshot    user_snapshot[]
   created_at DateTime           @default(now())
   updated_at DateTime           @updatedAt
 }
 
-model snapshot_session {
+model user_snapshot {
   id          Int      @id @default(autoincrement())
   stake       String
   reward      String
