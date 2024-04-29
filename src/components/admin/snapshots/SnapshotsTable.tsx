@@ -29,7 +29,7 @@ const SnapshotsTable: React.FC<SnapshotTableProps> = (props) => {
                 </TableHeader>
                 <TableBody>
                     {snapshotData.length > 0 ? snapshotData.map(data => (
-                        <TableRow key={data.id}>
+                        <TableRow key={data.id} className='text-muted-foreground hover:text-foreground'>
                             <TableCell className="font-medium">{data.id}</TableCell>
                             <TableCell>
                                 {

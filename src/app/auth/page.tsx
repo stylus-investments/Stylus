@@ -1,7 +1,7 @@
 'use client'
-import useAuthStore from '@/app/states/authStore'
 import LoginForm from '@/components/auth/LoginForm'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import useAuthStore from '@/state/authStore'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'

@@ -1,5 +1,5 @@
-import { createCaller } from '../server/trpc'
-import { appRouter } from '../server';
+import { createCaller } from '../../trpc/trpc'
+import { appRouter } from '../../trpc';
 
 export const serverClient = createCaller(appRouter)
 

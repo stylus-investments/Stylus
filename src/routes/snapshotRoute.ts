@@ -1,4 +1,4 @@
-import { publicProcedure } from "@/app/server/trpc";
+import { publicProcedure } from "@/trpc/trpc";
 import db from "@/db/db";
 import { okayRes } from "@/lib/apiResponse";
 import { getTokenHolders } from "@/lib/moralis";
@@ -18,11 +18,6 @@ export const snapshotRoute = {
     getAllSnapshot: publicProcedure.query(async () => {
 
         try {
-
-            const session = await getAuth()
-            if (!session) throw new TRPCError({
-                code: "UNAUTHORIZED"
-            })
 
             const snapshots = await db.snapshot.findMany({
                 select: {

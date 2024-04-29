@@ -1,4 +1,4 @@
-import { publicProcedure } from "@/app/server/trpc";
+import { publicProcedure } from "@/trpc/trpc";
 import db from "@/db/db";
 import { getSession } from "@/lib/lib";
 import { getMoralis } from "@/lib/moralis";

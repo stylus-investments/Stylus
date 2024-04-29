@@ -1,13 +1,18 @@
+import { caller } from '@/app/_trpc/server'
 import AdminHeader from '@/components/admin/admin-header'
-import { cookies } from 'next/headers'
+import UsersTable from '@/components/admin/users/UsersTable'
 import React from 'react'
 
-const AdminUsersPage = () => {
+export const revalidate = 10800
 
-    cookies()
+const AdminUsersPage = async () => {
+
+    const usersData = await caller.user.getAll()
+
     return (
         <>
             <AdminHeader />
+            <UsersTable userData={usersData} />
         </>
     )
 }
