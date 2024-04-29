@@ -5,6 +5,7 @@ import { getTokenHolders } from "@/lib/moralis";
 import { getAuth } from "@/lib/nextAuth";
 import { TRPCError } from "@trpc/server";
 import { RateLimiterMemory } from "rate-limiter-flexible";
+import { z } from 'zod'
 
 const opts = {
     points: 1,
@@ -14,7 +15,7 @@ const opts = {
 const rateLimiter = new RateLimiterMemory(opts);
 
 export const snapshotRoute = {
-    get: publicProcedure.query(async () => {
+    getAllSnapshot: publicProcedure.query(async () => {
 
         try {
 
@@ -71,7 +72,21 @@ export const snapshotRoute = {
             await db.$disconnect()
         }
     }),
-    getData: publicProcedure.input(Number).query(async (opts) => {
+    getSnapshotByID: publicProcedure.input(z.number()).query(async (opts) => {
+        const snapshotID = opts.input
+
+        const snapshot = await db.snapshot.findUnique({
+            where: {
+                id: snapshotID
+            }
+        })
+        if (!snapshot) throw new TRPCError({
+            code: 'NOT_FOUND'
+        })
+
+        return snapshot
+    }),
+    getData: publicProcedure.input(z.number()).query(async (opts) => {
 
         try {
 
@@ -85,6 +100,7 @@ export const snapshotRoute = {
                 code: 'NOT_FOUND',
                 message: "Snapshot ID not found"
             })
+
 
             const snapshot = await db.snapshot.findUnique({
                 where: { id: snapshotID }, select: {
@@ -107,6 +123,7 @@ export const snapshotRoute = {
                 code: "NOT_FOUND",
                 message: "Snapshot not found"
             })
+
             const modifySnapshotData = snapshot.user_snapshot.map(user_snapshot => ({
                 ...user_snapshot,
                 user: undefined,
@@ -351,4 +368,47 @@ export const snapshotRoute = {
             await db.$disconnect()
         }
     }),
+    updateUserSnapshot: publicProcedure.input(z.number()).mutation(async (opts) => {
+
+        const snapshotID = opts.input
+
+        const session = await getAuth()
+        if (!session) throw new TRPCError({
+            code: 'UNAUTHORIZED'
+        })
+
+        const snapshot = await db.snapshot.findUnique({
+            where: { id: snapshotID },
+            include: {
+                user_snapshot: {
+                    select: {
+                        id: true
+                    }
+                }
+            }
+        })
+        if (!snapshot) throw new TRPCError({
+            code: 'NOT_FOUND'
+        })
+        if (!snapshot.completed) throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: "Snapshot is not completed"
+        })
+
+        const updateUserSnapshots = await db.user_snapshot.updateMany({
+            where: {
+                snapshot_id: snapshot.id,
+                status: 2
+            }, data: {
+                status: 3
+            }
+        })
+        if (!updateUserSnapshots) throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Failed to update user snapshots"
+        })
+
+        return okayRes()
+
+    })
 }

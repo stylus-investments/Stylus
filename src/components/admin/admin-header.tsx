@@ -19,7 +19,7 @@ const AdminHeader = () => {
     return (
         <div className='flex sticky top-0 left-0 w-screen h-16 backdrop-blur container items-center justify-between border-b'>
             <div className='flex items-center'>
-                <h1 className='text-2xl font-black text-primary'>ADMIN PANEL</h1>
+                <h1 className='text-2xl font-black text-primary'>GrowPoint</h1>
             </div>
             <div className='flex items-center gap-10 text-muted-foreground'>
                 <Link className='hover:text-foreground' href={'/admin/users'} >Users</Link>

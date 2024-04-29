@@ -37,9 +37,8 @@ const nextAuthOptions = {
         }
     },
     pages: {
-        signIn: '/admin/auth',
-        error: '/admin/error',
-        signOut: '/admin/auth'
+        signIn: '/auth',
+        error: '/error',
     },
 } satisfies NextAuthOptions
 

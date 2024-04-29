@@ -7,7 +7,7 @@ import React from 'react'
 const AdminSnapshotsPage = async () => {
 
     cookies()
-    const snapshotData = await caller.snapshot.get()
+    const snapshotData = await caller.snapshot.getAllSnapshot()
 
     return (
         <>

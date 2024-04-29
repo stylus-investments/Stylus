@@ -1,9 +1,11 @@
 import { caller } from '@/app/_trpc/server'
+import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import Link from 'next/link'
 import React from 'react'
 
 interface SnapshotTableProps {
-    snapshotData: Awaited<ReturnType<(typeof caller['snapshot']['get'])>>
+    snapshotData: Awaited<ReturnType<(typeof caller['snapshot']['getAllSnapshot'])>>
 }
 
 const SnapshotsTable: React.FC<SnapshotTableProps> = (props) => {
@@ -58,7 +60,30 @@ const SnapshotsTable: React.FC<SnapshotTableProps> = (props) => {
                             <TableCell>{data.completed ? 'YES' : 'NO'}</TableCell>
                             < TableCell > {data.total_holders}</TableCell>
                             <TableCell>{data.total_unpaid_holders}</TableCell>
-                            <TableCell></TableCell>
+                            <TableCell>
+                                <Link
+                                    href={`/admin/snapshots/users/${data.id}?start_date=${new Date(data.start_date).toLocaleString('en-US', {
+                                        timeZone: 'UTC',
+                                        weekday: 'short',
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                    })
+                                        } UTC&end_date=${new Date(data.end_date).toLocaleString('en-US', {
+                                            timeZone: 'UTC',
+                                            weekday: 'short',
+                                            day: '2-digit',
+                                            month: 'short',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })
+                                        } UTC`} >
+                                    <Button className='h-7 rounded-3xl'>View</Button>
+                                </Link>
+                            </TableCell>
                         </TableRow>
                     )) :
                         <TableRow>
@@ -67,7 +92,7 @@ const SnapshotsTable: React.FC<SnapshotTableProps> = (props) => {
                     }
                 </TableBody>
             </Table>
-        </div>
+        </div >
     )
 }
 
