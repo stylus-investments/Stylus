@@ -16,6 +16,9 @@ export const userRoute = {
                         status: true
                     }
                 }
+            },
+            orderBy: {
+                created_at: 'desc'
             }
         })
         if (!users) throw new TRPCError({

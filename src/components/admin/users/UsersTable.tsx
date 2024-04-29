@@ -38,7 +38,6 @@ const UsersTable: React.FC<SnapshotTableProps> = ({ userData }) => {
                         <TableHead>Wallet Address</TableHead>
                         <TableHead>Total Snapshots</TableHead>
                         <TableHead>Forfiet Count</TableHead>
-                        <TableHead>Created</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead>Operation</TableHead>
                     </TableRow>
