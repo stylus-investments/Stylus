@@ -49,11 +49,20 @@ export const snapshotRoute = {
 
                 return {
                     ...snap,
+                    start_date: snap.start_date.toISOString(),
+                    end_date: snap.end_date.toISOString(),
                     user_snapshot: undefined,
                     total_holders: snap.user_snapshot.length || 0,
                     total_unpaid_holders: unpaidRemaining
                 }
-            })
+            }) as {
+                total_holders: number;
+                total_unpaid_holders: number;
+                id: number;
+                start_date: string;
+                end_date: string;
+                completed: boolean;
+            }[]
 
             return modifySnapshotData
 
@@ -66,20 +75,6 @@ export const snapshotRoute = {
         } finally {
             await db.$disconnect()
         }
-    }),
-    getSnapshotByID: publicProcedure.input(z.number()).query(async (opts) => {
-        const snapshotID = opts.input
-
-        const snapshot = await db.snapshot.findUnique({
-            where: {
-                id: snapshotID
-            }
-        })
-        if (!snapshot) throw new TRPCError({
-            code: 'NOT_FOUND'
-        })
-
-        return snapshot
     }),
     getData: publicProcedure.input(z.number()).query(async (opts) => {
 

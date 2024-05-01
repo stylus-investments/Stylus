@@ -178,7 +178,7 @@ export const dashboardRoute = {
                 date: history.blockTimestamp.toISOString(),
                 type: history.toAddress.lowercase === walletAddress ? 'Deposit' : 'Withdrawal',
                 amount: (Number(history.value) / 10 ** 10).toFixed(2),
-                month: index + 1
+                number: index + 1
             }))
             .reverse()
 
