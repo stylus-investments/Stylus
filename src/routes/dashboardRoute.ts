@@ -1,7 +1,7 @@
 import { publicProcedure } from "@/trpc/trpc";
 import db from "@/db/db";
 import { getSession } from "@/lib/lib";
-import { getMoralis } from "@/lib/moralis";
+import { getMoralis, getTokenHolders } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import Moralis from "moralis";
 import { z } from "zod";
@@ -21,15 +21,12 @@ export const dashboardRoute = {
 
             await getMoralis()
 
-            const [userToken, goTokenData, currentSnapshot] = await Promise.all([
+            const [userToken, goTokenHolders, currentSnapshot] = await Promise.all([
                 Moralis.EvmApi.token.getWalletTokenBalances({
                     chain: process.env.CHAIN,
                     address: session.address
                 }),
-                Moralis.EvmApi.token.getTokenMetadata({
-                    chain: process.env.CHAIN as string,
-                    addresses: [goTokenAddress]
-                }) as any,
+                await getTokenHolders(),
                 db.snapshot.findMany({
                     where: {
                         completed: false
@@ -73,7 +70,15 @@ export const dashboardRoute = {
             }
 
             const formattedBalance = getFormattedBalance()
-            const goTokenTotalSupply = goTokenData.raw[0].total_supply_formatted
+            const goTokenGlobalStake = goTokenHolders && goTokenHolders.reduce((total, holder) => {
+
+                if (holder.owner_address.toLowerCase() === String(process.env.GO_DISTRIBUTER).toLowerCase()) {
+
+                    return total
+                }
+
+                return total + Number(holder.balance_formatted)
+            }, 0).toFixed(2) || "0.00"
 
             const userWallet = await db.user.findUnique({
                 where: { wallet: session.address },
@@ -139,7 +144,7 @@ export const dashboardRoute = {
             const data = {
                 user,
                 next_snapshot,
-                global_stake: goTokenTotalSupply,
+                global_stake: goTokenGlobalStake,
             }
 
             return data
@@ -163,7 +168,8 @@ export const dashboardRoute = {
         const getGoTokenBalanceHistory = await Moralis.EvmApi.token.getWalletTokenTransfers({
             chain: process.env.CHAIN,
             order: "ASC",
-            address: walletAddress
+            address: walletAddress,
+            contractAddresses: [process.env.GO_ADDRESS as string]
         })
 
         if (!getGoTokenBalanceHistory) throw new TRPCError({
@@ -172,7 +178,6 @@ export const dashboardRoute = {
         })
 
         const goTokenBalanceHistory = getGoTokenBalanceHistory.result
-            .filter(history => history.address.lowercase === process.env.GO_ADDRESS?.toLowerCase())
             .map((history, index) => ({
                 id: history.transactionHash,
                 date: history.blockTimestamp.toISOString(),
@@ -181,11 +186,11 @@ export const dashboardRoute = {
                 number: index + 1
             }))
             .reverse()
-
         return goTokenBalanceHistory
 
     }),
     getUserSnapshotHistory: publicProcedure.input(z.string()).query(async (opts) => {
+
         const walletAddress = opts.input
 
         const getUserSnapshotHistory = await db.user.findUnique({

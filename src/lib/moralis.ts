@@ -1,5 +1,6 @@
 import axios from "axios";
 import Moralis from "moralis";
+import { EvmChain } from "@moralisweb3/common-evm-utils";
 
 interface TokenHolders {
     balance: string
@@ -18,6 +19,13 @@ const getMoralis = async () => {
         await Moralis.start({
             apiKey: process.env.MORALIS_API_KEY
         });
+
+        const stream = {
+            chains: [EvmChain.BASE],
+            description: "Growpoint webhook",
+            tag: "grow",
+            webhookUrl: "/api/t"
+        }
         isMoralisInitialized = true;
     }
 }
