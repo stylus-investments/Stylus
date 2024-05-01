@@ -3,6 +3,8 @@ import db from "@/db/db";
 import { okayRes } from "@/lib/apiResponse";
 import { getSession } from "@/lib/lib";
 import { z } from 'zod'
+import Moralis from "moralis";
+import { getMoralis } from "@/lib/moralis";
 
 export const sessionRoute = {
 
@@ -24,7 +26,16 @@ export const sessionRoute = {
             })
 
             //if this wallet doesn't exist in our database then create one
-            if (!existingAddress) await db.user.create({ data: { wallet: opts.input } })
+            if (!existingAddress) {
+                await getMoralis()
+                await Promise.all([
+                    Moralis.Streams.addAddress({
+                        id: process.env.MORALIS_STREAM_ID as string,
+                        address: [opts.input]
+                    }),
+                    db.user.create({ data: { wallet: opts.input } })
+                ])
+            }
 
             //save the session
             await session.save()
@@ -50,7 +61,18 @@ export const sessionRoute = {
             })
 
             //if this wallet doesn't exist in our database then create one
-            if (!existingAddress) await db.user.create({ data: { wallet: opts.input } })
+            if (!existingAddress) {
+
+                await getMoralis()
+                await Promise.all([
+                    Moralis.Streams.addAddress({
+                        id: process.env.MORALIS_STREAM_ID as string,
+                        address: [opts.input]
+                    }),
+                    db.user.create({ data: { wallet: opts.input } })
+                ])
+
+            }
 
             //update the session
             session.address = opts.input
