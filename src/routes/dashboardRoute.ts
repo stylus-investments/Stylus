@@ -172,7 +172,7 @@ export const dashboardRoute = {
         })
 
         const goTokenBalanceHistory = getGoTokenBalanceHistory.result
-            .filter(history => history.contractAddress.lowercase === process.env.GO_ADDRESS?.toLowerCase())
+            .filter(history => history.address.lowercase === process.env.GO_ADDRESS?.toLowerCase())
             .map((history, index) => ({
                 id: history.transactionHash,
                 date: history.blockTimestamp.toISOString(),
