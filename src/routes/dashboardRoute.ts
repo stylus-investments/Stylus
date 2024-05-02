@@ -5,7 +5,7 @@ import { getMoralis, getTokenHolders } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import Moralis from "moralis";
 import { z } from "zod";
-
+import 'dotenv/config'
 const goTokenAddress = process.env.GO_ADDRESS as string
 
 export const dashboardRoute = {
@@ -21,12 +21,13 @@ export const dashboardRoute = {
 
             await getMoralis()
 
+
             const [userToken, goTokenHolders, currentSnapshot] = await Promise.all([
                 Moralis.EvmApi.token.getWalletTokenBalances({
                     chain: process.env.CHAIN,
                     address: session.address
                 }),
-                await getTokenHolders(),
+                getTokenHolders(),
                 db.snapshot.findMany({
                     where: {
                         completed: false
@@ -56,6 +57,16 @@ export const dashboardRoute = {
                 })
             ])
 
+            if (!currentSnapshot) {
+                session.destroy()
+                await session.save()
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User not found"
+                })
+            }
+
+
             const userTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === goTokenAddress.toLowerCase())[0] as any
 
             const balance = userTokenData && userTokenData.balance
@@ -64,9 +75,9 @@ export const dashboardRoute = {
             const getFormattedBalance = () => {
                 if (balance && decimals) {
                     const formatBalance = Number(balance) / (10 ** decimals)
-                    return formatBalance.toFixed(2)
+                    return formatBalance.toString()
                 }
-                return "0.00"
+                return "0.0000000000"
             }
 
             const formattedBalance = getFormattedBalance()
@@ -78,7 +89,7 @@ export const dashboardRoute = {
                 }
 
                 return total + Number(holder.balance_formatted)
-            }, 0).toFixed(2) || "0.00"
+            }, 0).toString() || "0.0000000000"
 
             const userWallet = await db.user.findUnique({
                 where: { wallet: session.address },
@@ -134,8 +145,8 @@ export const dashboardRoute = {
                     wallet: userWallet.wallet,
                     current_go_balance: formattedBalance,
                     snapshot: {
-                        current_stake: "0.00",
-                        reward: "0.00",
+                        current_stake: "0.0000000000",
+                        reward: "0.0000000000",
                         status: 4
                     }
                 }
@@ -159,7 +170,7 @@ export const dashboardRoute = {
             await db.$disconnect()
         }
     }),
-    getGoTokenBalanceHistory: publicProcedure.input(z.string()).query(async (opts) => {
+    getGoTokenBalanceHistory: publicProcedure.input(String).query(async (opts) => {
 
         const walletAddress = opts.input
 
@@ -172,6 +183,8 @@ export const dashboardRoute = {
             contractAddresses: [process.env.GO_ADDRESS as string]
         })
 
+        // console.log(getGoTokenBalanceHistory.raw)
+
         if (!getGoTokenBalanceHistory) throw new TRPCError({
             code: 'BAD_REQUEST',
             message: "Failed to get wallet go balance history"
@@ -181,11 +194,13 @@ export const dashboardRoute = {
             .map((history, index) => ({
                 id: history.transactionHash,
                 date: history.blockTimestamp.toISOString(),
-                type: history.toAddress.lowercase === walletAddress ? 'Deposit' : 'Withdrawal',
-                amount: (Number(history.value) / 10 ** 10).toFixed(2),
+                type: history.toAddress.lowercase === walletAddress.toLowerCase() ? 'Deposit' : 'Withdrawal',
+                amount: (Number(history.value) / 10 ** 10).toString(),
                 number: index + 1
             }))
             .reverse()
+
+
         return goTokenBalanceHistory
 
     }),

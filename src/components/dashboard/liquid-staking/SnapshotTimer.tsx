@@ -1,4 +1,5 @@
-import { faClock } from "@fortawesome/free-solid-svg-icons";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { faCircleInfo, faClock } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 
@@ -41,9 +42,21 @@ const SnapshotTimer = ({ nextSnapshot }: { nextSnapshot: string }) => {
 
     return (
         <div className='flex flex-col gap-3 p-5 bg-muted border w-full'>
-            <div className='text-muted-foreground flex items-center gap-3'>
-                <FontAwesomeIcon icon={faClock} width={18} height={18} />
-                Timer
+            <div className='text-muted-foreground flex items-center justify-between gap-3'>
+                <div className="flex items-center gap-3">
+                    <FontAwesomeIcon icon={faClock} width={18} height={18} />
+                    Timer
+                </div>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger disabled>
+                            <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-foreground' />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            Countdown until the next snapshot for rewards.
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             </div>
             <h1 className='font-black text-xl'>
                 {timeLeft.days} days {timeLeft.hours} hours {timeLeft.minutes} minutes {timeLeft.seconds} seconds

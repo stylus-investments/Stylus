@@ -48,7 +48,13 @@ const Dashboard = ({ initialData }: Props) => {
 
             <div className='flex flex-col gap-3 items-center text-center'>
                 <Image width={100} height={50} className='h-auto rounded-full' alt='Coin' src={'/go.jpeg'} />
-                <h1 className='font-black text-xl'>{(Number(data.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $GO</h1>
+                <h1 className='font-black text-xl'>
+                    {(Number(data.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                    <span className='text-sm' >
+                        .{(Number(data.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                    </span>
+                    <span className='ml-2 text-xl'>$GO</span>
+                </h1>
                 <h1 className='text-muted-foreground'>Total balance in your wallet</h1>
                 <div className='flex items-center gap-5'>
                     <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank'>

@@ -213,16 +213,17 @@ export const snapshotRoute = {
                     //retrieve all snapshot user
                     const user_snapshots = updateSnapshot.user_snapshot
 
+                    //update all snapshot check if the user is forfiet or not
                     await Promise.all(user_snapshots.map(async (usrSnapshot) => {
 
                         const tokenHolder = tokenHolders.find(holder => holder.owner_address === usrSnapshot.user.wallet && usrSnapshot.status === 1);
 
                         if (tokenHolder) {
 
-                            if (Number(tokenHolder.balance_formatted) < Number(usrSnapshot.stake)) {
+                            if ((Number(tokenHolder.balance_formatted) < Number(usrSnapshot.stake)) && usrSnapshot.status) {
                                 //this mean user is disqualified
                                 const updateUserSnapshot = await db.user_snapshot.update({
-                                    where: { id: usrSnapshot.id }, data: { reward: '0.00', status: 0 }
+                                    where: { id: usrSnapshot.id }, data: { reward: '0.0000000000', status: 0 }
                                 })
                                 if (!updateUserSnapshot) throw new TRPCError({
                                     code: "BAD_REQUEST",
@@ -244,8 +245,7 @@ export const snapshotRoute = {
 
                     }))
 
-                    //create another snapshot user_snapshot
-
+                    //create another snapshot
                     const newSnapshot = await db.snapshot.create({
                         data: { start_date: previousSnapshots[0].end_date, end_date }
                     })
@@ -254,6 +254,7 @@ export const snapshotRoute = {
                         message: "Failed to create new snapshot"
                     })
 
+                    //connect all users in current snapshot if they have go balance
                     await Promise.all(tokenHolders.map(async (holder) => {
 
                         const user = users.find(user => user.wallet === holder.owner_address);
@@ -265,8 +266,8 @@ export const snapshotRoute = {
                             //create the user_snapshot and connect it to snapshots
                             const createUserSnapshot = await db.user_snapshot.create({
                                 data: {
-                                    stake: Number(holder.balance_formatted).toFixed(2),
-                                    reward: reward.toFixed(2),
+                                    stake: Number(holder.balance_formatted).toString(),
+                                    reward: reward.toFixed(10),
                                     status: 1,
                                     user: {
                                         connect: {
@@ -324,8 +325,8 @@ export const snapshotRoute = {
                         //create userSnapshot and connect it to snapshots
                         const createUserSnapshot = await db.user_snapshot.create({
                             data: {
-                                stake: Number(holder.balance_formatted).toFixed(2),
-                                reward: reward.toFixed(2),
+                                stake: Number(holder.balance_formatted).toString(),
+                                reward: reward.toFixed(10),
                                 status: 1,
                                 user: {
                                     connect: {
