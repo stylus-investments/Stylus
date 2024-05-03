@@ -27,6 +27,8 @@ const getTokenHolders = async () => {
 
     try {
 
+        await getMoralis()
+
         const { data } = await axios.get(`https://deep-index.moralis.io/api/v2.2/erc20/${process.env.GO_ADDRESS}/owners?&order=DESC`, {
             params: {
                 chain: process.env.CHAIN
@@ -39,6 +41,7 @@ const getTokenHolders = async () => {
         return data.result as TokenHolders[]
 
     } catch (error) {
+        console.error("getTokenHoldersError", error)
     }
 }
 

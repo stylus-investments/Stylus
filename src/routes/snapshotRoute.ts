@@ -261,7 +261,7 @@ export const snapshotRoute = {
 
                         if (user) {
 
-                            const reward = Number(holder.balance_formatted) * (1.66 / 100)
+                            const reward = Number(holder.balance_formatted) * (0.5 / 100)
 
                             //create the user_snapshot and connect it to snapshots
                             const createUserSnapshot = await db.user_snapshot.create({
@@ -320,7 +320,7 @@ export const snapshotRoute = {
                     if (user) {
 
                         //the reward will be 1.66% each snapshot
-                        const reward = Number(holder.balance_formatted) * (1.66 / 100);
+                        const reward = Number(holder.balance_formatted) * (0.5 / 100);
 
                         //create userSnapshot and connect it to snapshots
                         const createUserSnapshot = await db.user_snapshot.create({

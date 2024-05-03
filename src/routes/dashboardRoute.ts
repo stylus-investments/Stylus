@@ -65,6 +65,14 @@ export const dashboardRoute = {
                     message: "User not found"
                 })
             }
+            if (!userToken) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "Failed to get user token"
+            })
+            if (!goTokenHolders) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "Failed to get token holders"
+            })
 
 
             const userTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === goTokenAddress.toLowerCase())[0] as any

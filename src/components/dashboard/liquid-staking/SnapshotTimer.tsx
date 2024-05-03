@@ -41,7 +41,7 @@ const SnapshotTimer = ({ nextSnapshot }: { nextSnapshot: string }) => {
     });
 
     return (
-        <div className='flex flex-col gap-3 p-5 bg-muted border w-full'>
+        <div className='flex flex-col gap-3 p-5 border w-full'>
             <div className='text-muted-foreground flex items-center justify-between gap-3'>
                 <div className="flex items-center gap-3">
                     <FontAwesomeIcon icon={faClock} width={18} height={18} />
@@ -50,7 +50,7 @@ const SnapshotTimer = ({ nextSnapshot }: { nextSnapshot: string }) => {
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger disabled>
-                            <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-foreground' />
+                            <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='text-muted hover:text-muted-foreground' />
                         </TooltipTrigger>
                         <TooltipContent>
                             Countdown until the next snapshot for rewards.

@@ -18,21 +18,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <link rel="icon" href="/go.webp" sizes="any" />
-      <TrpcProvider>
-        <NextAuthSessionProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <body>
+      <NextAuthSessionProvider>
+        <TrpcProvider>
+          <body>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
               {children}
               <Toaster />
-            </body>
-          </ThemeProvider>
-        </NextAuthSessionProvider>
-      </TrpcProvider>
+            </ThemeProvider>
+          </body>
+        </TrpcProvider>
+      </NextAuthSessionProvider>
     </html>
   );
 }

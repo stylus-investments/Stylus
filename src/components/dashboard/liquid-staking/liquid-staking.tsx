@@ -37,7 +37,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger disabled>
-                                        <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-foreground' />
+                                        <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                     </TooltipTrigger>
                                     <TooltipContent>
                                         Total $GO tokens currently staked across all accounts.
@@ -62,7 +62,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger disabled>
-                                        <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-foreground' />
+                                        <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                     </TooltipTrigger>
                                     <TooltipContent>
                                         Scheduled time for the next snapshot to calculate rewards.
@@ -105,7 +105,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger disabled>
-                                        <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-foreground' />
+                                        <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                     </TooltipTrigger>
                                     <TooltipContent>
                                         Your active stake in $GO tokens as recorded in the last snapshot.
@@ -134,7 +134,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger disabled>
-                                        <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-foreground' />
+                                        <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                     </TooltipTrigger>
                                     <TooltipContent>
                                         Current amount of $GO tokens in your crypto wallet.
@@ -151,7 +151,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                         </h1>
                         <small className='text-muted-foreground'>Crypto wallet holdings</small>
                     </div>
-                    <div className='flex flex-col gap-3 w-full p-5 border bg-muted'>
+                    <div className='flex flex-col gap-3 w-full p-5 border'>
                         <div className='text-muted-foreground flex items-center justify-between gap-3'>
                             <div className='flex items-center gap-3'>
                                 <FontAwesomeIcon icon={faSackDollar} width={18} height={18} />
@@ -160,7 +160,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger disabled>
-                                        <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-foreground' />
+                                        <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                     </TooltipTrigger>
                                     <TooltipContent>
                                         Expected $GROW tokens you will earn after this epoch ends.

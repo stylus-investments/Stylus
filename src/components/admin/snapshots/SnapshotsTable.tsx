@@ -17,7 +17,7 @@ const SnapshotsTable: React.FC<SnapshotTableProps> = ({ snapshotData }) => {
     const { data } = trpc.snapshot.getAllSnapshot.useQuery(undefined, {
         initialData: snapshotData,
         refetchOnMount: false,
-        refetchOnReconnect: false
+        refetchOnReconnect: false,
     })
 
     const { currentPage, getCurrentData } = usePaginationStore()
