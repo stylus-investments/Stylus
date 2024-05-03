@@ -47,7 +47,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                         </div>
                         <h1 className='font-black text-xl'>
                             {(Number(dashboardData.global_stake)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
-                            <span className='text-sm' >
+                            <span className='text-xs' >
                                 .{(Number(dashboardData.global_stake)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>$GO</span>
@@ -115,7 +115,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                         </div>
                         <h1 className='font-black text-xl'>
                             {(Number(dashboardData.user.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
-                            <span className='text-sm' >
+                            <span className='text-xs' >
                                 .{(Number(dashboardData.user.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>$GO</span>
@@ -144,7 +144,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                         </div>
                         <h1 className='font-black text-xl'>
                             {(Number(dashboardData.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
-                            <span className='text-sm' >
+                            <span className='text-xs' >
                                 .{(Number(dashboardData.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>$GO</span>
@@ -171,7 +171,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                         <div className='w-full flex items-center justify-between'>
                             <h1 className='font-black text-xl'>
                                 {(Number(dashboardData.user.snapshot.reward)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
-                                <span className='text-sm' >
+                                <span className='text-xs' >
                                     .{(Number(dashboardData.user.snapshot.reward)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                                 </span>
                                 <span className='ml-2'>$GROW</span>
