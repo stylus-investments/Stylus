@@ -5,6 +5,7 @@ import { getSession } from "@/lib/lib";
 import { z } from 'zod'
 import Moralis from "moralis";
 import { getMoralis } from "@/lib/moralis";
+import { TRPCError } from "@trpc/server";
 
 export const sessionRoute = {
 
@@ -43,9 +44,14 @@ export const sessionRoute = {
             //return true
             return okayRes()
 
-        } catch (error) {
+        } catch (error: any) {
             console.log(error);
-            throw error
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
         }
     }),
     update: publicProcedure.input(z.string()).mutation(async (opts) => {
@@ -83,9 +89,14 @@ export const sessionRoute = {
             //return true
             return okayRes()
 
-        } catch (error) {
+        } catch (error: any) {
             console.log(error);
-            throw error
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
         }
     }),
     delete: publicProcedure.mutation(async () => {
@@ -99,9 +110,14 @@ export const sessionRoute = {
 
             return okayRes()
 
-        } catch (error) {
+        } catch (error: any) {
             console.log(error);
-            throw error
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
         }
     })
 }

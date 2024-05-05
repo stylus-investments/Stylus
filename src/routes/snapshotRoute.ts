@@ -361,45 +361,56 @@ export const snapshotRoute = {
     }),
     updateUserSnapshot: publicProcedure.input(z.number()).mutation(async (opts) => {
 
-        const snapshotID = opts.input
+        try {
 
-        const session = await getAuth()
-        if (!session) throw new TRPCError({
-            code: 'UNAUTHORIZED'
-        })
+            const snapshotID = opts.input
 
-        const snapshot = await db.snapshot.findUnique({
-            where: { id: snapshotID },
-            include: {
-                user_snapshot: {
-                    select: {
-                        id: true
+            const session = await getAuth()
+            if (!session) throw new TRPCError({
+                code: 'UNAUTHORIZED'
+            })
+
+            const snapshot = await db.snapshot.findUnique({
+                where: { id: snapshotID },
+                include: {
+                    user_snapshot: {
+                        select: {
+                            id: true
+                        }
                     }
                 }
-            }
-        })
-        if (!snapshot) throw new TRPCError({
-            code: 'NOT_FOUND'
-        })
-        if (!snapshot.completed) throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "Snapshot is not completed"
-        })
+            })
+            if (!snapshot) throw new TRPCError({
+                code: 'NOT_FOUND'
+            })
+            if (!snapshot.completed) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "Snapshot is not completed"
+            })
 
-        const updateUserSnapshots = await db.user_snapshot.updateMany({
-            where: {
-                snapshot_id: snapshot.id,
-                status: 2
-            }, data: {
-                status: 3
-            }
-        })
-        if (!updateUserSnapshots) throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Failed to update user snapshots"
-        })
+            const updateUserSnapshots = await db.user_snapshot.updateMany({
+                where: {
+                    snapshot_id: snapshot.id,
+                    status: 2
+                }, data: {
+                    status: 3
+                }
+            })
+            if (!updateUserSnapshots) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to update user snapshots"
+            })
 
-        return okayRes()
+            return okayRes()
 
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
+        }
     })
 }

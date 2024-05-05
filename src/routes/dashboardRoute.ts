@@ -5,7 +5,6 @@ import { getMoralis, getTokenHolders } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import Moralis from "moralis";
 import { z } from "zod";
-import 'dotenv/config'
 const goTokenAddress = process.env.GO_ADDRESS as string
 
 export const dashboardRoute = {
@@ -180,81 +179,103 @@ export const dashboardRoute = {
     }),
     getGoTokenBalanceHistory: publicProcedure.input(String).query(async (opts) => {
 
-        const walletAddress = opts.input
+        try {
 
-        await getMoralis()
+            const walletAddress = opts.input
 
-        const getGoTokenBalanceHistory = await Moralis.EvmApi.token.getWalletTokenTransfers({
-            chain: process.env.CHAIN,
-            order: "ASC",
-            address: walletAddress,
-            contractAddresses: [process.env.GO_ADDRESS as string]
-        })
+            await getMoralis()
 
-        // console.log(getGoTokenBalanceHistory.raw)
+            const getGoTokenBalanceHistory = await Moralis.EvmApi.token.getWalletTokenTransfers({
+                chain: process.env.CHAIN,
+                order: "ASC",
+                address: walletAddress,
+                contractAddresses: [process.env.GO_ADDRESS as string]
+            })
 
-        if (!getGoTokenBalanceHistory) throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "Failed to get wallet go balance history"
-        })
+            // console.log(getGoTokenBalanceHistory.raw)
 
-        const goTokenBalanceHistory = getGoTokenBalanceHistory.result
-            .map((history, index) => ({
-                id: history.transactionHash,
-                date: history.blockTimestamp.toISOString(),
-                type: history.toAddress.lowercase === walletAddress.toLowerCase() ? 'Deposit' : 'Withdrawal',
-                amount: (Number(history.value) / 10 ** 10).toString(),
-                number: index + 1
-            }))
-            .reverse()
+            if (!getGoTokenBalanceHistory) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "Failed to get wallet go balance history"
+            })
 
+            const goTokenBalanceHistory = getGoTokenBalanceHistory.result
+                .map((history, index) => ({
+                    id: history.transactionHash,
+                    date: history.blockTimestamp.toISOString(),
+                    type: history.toAddress.lowercase === walletAddress.toLowerCase() ? 'Deposit' : 'Withdrawal',
+                    amount: (Number(history.value) / 10 ** 10).toString(),
+                    number: index + 1
+                }))
+                .reverse()
 
-        return goTokenBalanceHistory
+            return goTokenBalanceHistory
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
+        }
 
     }),
     getUserSnapshotHistory: publicProcedure.input(z.string()).query(async (opts) => {
 
-        const walletAddress = opts.input
+        try {
+            const walletAddress = opts.input
 
-        const getUserSnapshotHistory = await db.user.findUnique({
-            where: { wallet: walletAddress },
-            select: {
-                snapshots: {
-                    select: {
-                        id: true,
-                        stake: true,
-                        status: true,
-                        reward: true,
-                        snapshot: {
-                            select: {
-                                start_date: true,
-                                end_date: true
+            const getUserSnapshotHistory = await db.user.findUnique({
+                where: { wallet: walletAddress },
+                select: {
+                    snapshots: {
+                        select: {
+                            id: true,
+                            stake: true,
+                            status: true,
+                            reward: true,
+                            snapshot: {
+                                select: {
+                                    start_date: true,
+                                    end_date: true
+                                }
                             }
+                        },
+                        orderBy: {
+                            created_at: 'asc'
                         }
-                    },
-                    orderBy: {
-                        created_at: 'asc'
                     }
                 }
-            }
-        })
-        if (!getUserSnapshotHistory) throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Failed to get user snapshot history"
-        })
+            })
+            if (!getUserSnapshotHistory) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to get user snapshot history"
+            })
 
-        const snapshotHistory = getUserSnapshotHistory.snapshots
-            .map((snapshotData, index) => ({
-                ...snapshotData,
-                snapshot: {
-                    start_date: snapshotData.snapshot.start_date.toISOString(),
-                    end_date: snapshotData.snapshot.end_date.toISOString(),
-                },
-                month: index + 1
-            }))
-            .reverse()
+            const snapshotHistory = getUserSnapshotHistory.snapshots
+                .map((snapshotData, index) => ({
+                    ...snapshotData,
+                    snapshot: {
+                        start_date: snapshotData.snapshot.start_date.toISOString(),
+                        end_date: snapshotData.snapshot.end_date.toISOString(),
+                    },
+                    month: index + 1
+                }))
+                .reverse()
 
-        return snapshotHistory
+            return snapshotHistory
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
+        }
 
     })
 }
