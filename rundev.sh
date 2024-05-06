@@ -15,6 +15,6 @@ docker rm growpoint >/dev/null 2>&1
 docker run -it \
   -p 3000:3000 \
   -v $(pwd):/usr/src/app \
-  -v growpoint:/usr/src/app/node_modules \
+  -v growpoint-dev:/usr/src/app/node_modules \
   --name growpoint \
-  growpoint
+  growpoint-dev
