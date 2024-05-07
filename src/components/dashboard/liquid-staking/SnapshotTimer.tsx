@@ -1,3 +1,4 @@
+import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { faCircleInfo, faClock } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -41,11 +42,13 @@ const SnapshotTimer = ({ nextSnapshot }: { nextSnapshot: string }) => {
     });
 
     return (
-        <div className='flex flex-col gap-3 p-5 border w-full'>
+        <div className='flex flex-col gap-3 p-5 border lg:rounded-tr-lg w-full'>
             <div className='text-muted-foreground flex items-center justify-between gap-3'>
                 <div className="flex items-center gap-3">
                     <FontAwesomeIcon icon={faClock} width={18} height={18} />
-                    Timer
+                    <Label>
+                        Timer
+                    </Label>
                 </div>
                 <TooltipProvider>
                     <Tooltip>
@@ -58,7 +61,7 @@ const SnapshotTimer = ({ nextSnapshot }: { nextSnapshot: string }) => {
                     </Tooltip>
                 </TooltipProvider>
             </div>
-            <h1 className='font-black text-xl'>
+            <h1 className='font-black md:text-lg xl:text-xl'>
                 {timeLeft.days} days {timeLeft.hours} hours {timeLeft.minutes} minutes {timeLeft.seconds} seconds
             </h1>
         </div>

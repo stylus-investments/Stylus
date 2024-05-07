@@ -37,10 +37,10 @@ const SnapshotHistory = ({ wallet }: {
     }, [data, currentPage])
 
     const returnSnapshotStatusButton = (status: number) => {
-        if (status === 1) return <Button className="h-6 rounded-3xl hover:bg-orange-500 bg-orange-500">Holding Period</Button>
-        if (status === 2) return <Button className="h-6 rounded-3xl hover:bg-orange-400 bg-orange-400">Pending Rewards</Button>
-        if (status === 3) return <Button className="h-6 rounded-3xl hover:bg-green-500 bg-green-500">Rewarded</Button>
-        return <Button className='bg-red-500 h-6 rounded-3xl hover:bg-red-500'>Went Below Minimum</Button>
+        if (status === 1) return <Button className="h-6 hover:bg-orange-500 bg-orange-500">Holding Period</Button>
+        if (status === 2) return <Button className="h-6 hover:bg-orange-400 bg-orange-400">Pending Rewards</Button>
+        if (status === 3) return <Button className="h-6 hover:bg-green-500 bg-green-500">Rewarded</Button>
+        return <Button className='bg-red-500 h-6 hover:bg-red-500'>Went Below Minimum</Button>
     }
 
     return (
@@ -49,21 +49,20 @@ const SnapshotHistory = ({ wallet }: {
                 <Card>
                     <CardContent className='flex flex-col gap-2'>
                         <Table>
-                            <TableCaption>Snapshot History</TableCaption>
                             <TableHeader>
-                                <TableRow>
-                                    <TableHead>Month</TableHead>
-                                    <TableHead>Snapshot</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Start</TableHead>
-                                    <TableHead>Finish</TableHead>
-                                    <TableHead>Rewards</TableHead>
+                                <TableRow className='text-xs sm:text-sm'>
+                                    <TableHead className='min-w-10'>Month</TableHead>
+                                    <TableHead className='min-w-16'>Snapshot</TableHead>
+                                    <TableHead className='min-w-32'>Status</TableHead>
+                                    <TableHead className='min-w-56'>Start</TableHead>
+                                    <TableHead className='min-w-56'>Finish</TableHead>
+                                    <TableHead className='min-w-56'>Rewards</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {currentTable && currentTable.length > 0 ?
                                     currentTable.map((snapshot) => (
-                                        <TableRow key={(snapshot).id} className='text-muted-foreground hover:text-foreground'>
+                                        <TableRow key={(snapshot).id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
                                             <TableCell>{snapshot.month}</TableCell>
                                             <TableCell>{snapshot.stake}</TableCell>
                                             <TableCell>{returnSnapshotStatusButton(snapshot.status)}</TableCell>
@@ -103,6 +102,7 @@ const SnapshotHistory = ({ wallet }: {
                                 }
                             </TableBody>
                         </Table>
+                        <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>Snapshot History</div>
                         <TablePagination data={data || []} />
                     </CardContent>
                 </Card>

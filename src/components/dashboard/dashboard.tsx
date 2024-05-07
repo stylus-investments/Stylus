@@ -44,7 +44,7 @@ const Dashboard = ({ initialData }: Props) => {
     }, [session.data])
 
     return (
-        <main className='container flex flex-col items-center pt-32 pb-10 gap-10'>
+        <main className='padding md:container flex flex-col items-center pt-32 pb-10 gap-10'>
 
             <div className='flex flex-col gap-3 items-center text-center'>
                 <Image width={100} height={50} className='h-auto rounded-full' alt='Coin' src={'/go.jpeg'} />
@@ -58,7 +58,7 @@ const Dashboard = ({ initialData }: Props) => {
                 <h1 className='text-muted-foreground'>Total balance in your wallet</h1>
                 <div className='flex items-center gap-5'>
                     <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank'>
-                        <Button className='h-8 rounded-3xl bg-green-500 hover:bg-green-500'>
+                        <Button className='h-8 bg-green-500 hover:bg-green-500'>
                             Add More $GO
                         </Button>
                     </Link>

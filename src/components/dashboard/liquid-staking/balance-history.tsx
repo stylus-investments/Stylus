@@ -35,21 +35,22 @@ const BalanceHistory = ({ address }: { address: string }) => {
                 <Card>
                     <CardContent className='flex flex-col gap-5'>
                         <Table>
-                            <TableCaption>$GO Transaction History</TableCaption>
                             <TableHeader>
-                                <TableRow>
-                                    <TableHead>#</TableHead>
-                                    <TableHead>Transaction ID</TableHead>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Transaction Type</TableHead>
-                                    <TableHead>Amount $GO</TableHead>
+                                <TableRow className='text-xs md:text-sm'>
+                                    <TableHead className='w-5'>#</TableHead>
+                                    <TableHead className='min-w-32'>Transaction ID</TableHead>
+                                    <TableHead className=' min-w-52'>Date</TableHead>
+                                    <TableHead className='min-w-32'>Transaction Type</TableHead>
+                                    <TableHead className='min-w-32'>Amount $GO</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {currentTable && currentTable.length > 0 ? currentTable.map((transac) => (
-                                    <TableRow key={transac.id} className='text-muted-foreground hover:text-foreground'>
+                                    <TableRow key={transac.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
                                         <TableCell>{transac.number}</TableCell>
-                                        <TableCell>{transac.id.substring(0, 10)}....</TableCell>
+                                        <TableCell>
+                                            {transac.id.substring(0, 10)}....
+                                        </TableCell>
                                         <TableCell>
                                             {
                                                 new Date(transac.date).toLocaleString('en-US', {
@@ -77,9 +78,10 @@ const BalanceHistory = ({ address }: { address: string }) => {
                                 }
                             </TableBody>
                         </Table>
+                        <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>$GO Transaction History</div>
                         <TablePagination data={data || []} />
                     </CardContent>
-                </Card>
+                </Card >
             }
         </>
     )

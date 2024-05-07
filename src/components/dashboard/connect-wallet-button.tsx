@@ -17,6 +17,20 @@ const ConnectWalletButton = () => {
         if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
             /* Metamask is installed*/
 
+            // const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+            // if (isMobile) {
+            //     // Inform the user to continue to the MetaMask app
+            //     const confirmMobile = confirm("Continue to MetaMask app?");
+
+            //     if (confirmMobile) {
+
+            //         window.location.href = `https://metamask.app.link/dapp/${process.env.NEXT_PUBLIC_URL}/`
+
+            //     }
+            //     return;
+            // }
+
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
 
             if (accounts.length > 0) {
@@ -35,9 +49,14 @@ const ConnectWalletButton = () => {
     }
 
     return (
-        <Button onClick={connectWallet}>
-            Connect Wallet
-        </Button>
+        <>
+            <Button onClick={connectWallet} className='hidden md:flex'>
+                Connect Wallet
+            </Button>
+            <Button onClick={connectWallet} className='md:hidden rounded-md'>
+                Connect
+            </Button>
+        </>
     )
 }
 
