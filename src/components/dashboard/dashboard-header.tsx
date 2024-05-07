@@ -68,6 +68,7 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
         <nav className='md:hidden flex items-center justify-between w-full'>
             <Link href={'/'} className='flex items-center '>
                 <Image src={'/logo.png'} alt='logo' width={48} height={16} className='w-auto h-auto' />
+                <h1 className='text-2xl font-black text-primary'>GrowPoint</h1>
             </Link>
             <div className='flex items-center gap-1 sm:gap-2'>
                 <ToggleTheme />
@@ -174,7 +175,7 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
     }, [session.data])
 
     return (
-        <header className='flex fixed top-0 left-0 w-screen h-16 padding items-center backdrop-blur justify-between border-b'>
+        <header className='flex fixed top-0 left-0 w-screen h-16 padding items-center backdrop-blur justify-between border-b z-20'>
             {largeScreen}
             {mobileScreen}
         </header>
