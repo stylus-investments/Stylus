@@ -13,7 +13,7 @@ const Header = () => {
         <Image src={'/logo.png'} alt='logo' width={48} height={20} className='w-auto h-auto' />
         <h1 className='md:flex text-2xl md:text-3xl font-black text-primary'>GrowPoint</h1>
       </Link>
-      <div className='flex items-center gap-5'>
+      <div className='flex items-center gap-1'>
         <ToggleTheme />
         <Link href={'/connect'}>
           <Button variant={'ghost'}>
@@ -21,15 +21,6 @@ const Header = () => {
             <span className='hidden md:flex'>Launch App</span>
           </Button>
         </Link>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            padding: 12,
-          }}
-        >
-         
-        </div>
       </div>
     </div>
   )
