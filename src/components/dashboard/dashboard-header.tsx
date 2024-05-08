@@ -40,8 +40,7 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
                         </DropdownMenuItem>
                         <DropdownMenuItem className='flex items-center gap-2'
                             onClick={() => signOut({
-                                redirect: true,
-                                callbackUrl: '/'
+                                redirect: false,
                             })}
                         >
                             <span>Logout</span>
@@ -66,15 +65,6 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
                 {walletAddress ?
                     <>
                         <div className='md:flex items-center gap-3 hidden'>
-                            {/* <Button variant={'ghost'} className='cursor-pointer'>
-                                {`${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`}
-                            </Button>
-                            <Button className='px-3' variant={'ghost'}>
-                                <FontAwesomeIcon icon={faRightFromBracket} width={16} height={16} className='cursor-pointer' onClick={() => signOut({
-                                    redirect: true,
-                                    callbackUrl: '/'
-                                })} />
-                            </Button> */}
                             <ConnectWalletButton />
                         </div>
                     </>

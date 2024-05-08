@@ -129,9 +129,6 @@ export const dashboardRoute = {
                 })
             ])
 
-            console.log("user Wallet", userWallet)
-            console.log("user snapshot", userSnapshots)
-
             if (!userWallet || !userSnapshots) throw new TRPCError({
                 code: 'NOT_FOUND',
                 message: "User Not Found"
