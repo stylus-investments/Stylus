@@ -23,6 +23,7 @@ import { RainbowKitSiweNextAuthProvider, GetSiweMessageOptions } from '@rainbow-
 const getSiweMessageOptions: GetSiweMessageOptions = () => ({
     statement: 'Sign in to Growpoint',
 });
+
 const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
     const [queryClient] = useState(() => new QueryClient({
         defaultOptions: {

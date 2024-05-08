@@ -2,6 +2,7 @@ import { NextAuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
 import { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from "next";
+import db from "@/db/db";
 
 declare module "next-auth" {
     interface Session {
@@ -24,13 +25,21 @@ const nextAuthOptions = {
 
                 if (credentials.message) {
 
-                    const message = JSON.parse(credentials.message);
+                    const wallet = JSON.parse(credentials.message).address;
+
+                    const existingUser = await db.user.findUnique({ where: { wallet } })
+
+                    if (!existingUser) {
+                        await db.user.create({
+                            data: { wallet }
+                        })
+                    }
 
                     return {
                         signature: credentials.signature,
                         csrfToken: credentials.csrfToken,
                         callbackUrl: credentials.ballbackUrl,
-                        wallet: message.address
+                        wallet
                     }
 
                 } else {

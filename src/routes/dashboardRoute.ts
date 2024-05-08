@@ -118,6 +118,7 @@ export const dashboardRoute = {
                         wallet: session.user.wallet
                     },
                     select: {
+                        wallet: false,
                         snapshots: {
                             select: {
                                 status: true,
@@ -127,6 +128,9 @@ export const dashboardRoute = {
                     }
                 })
             ])
+
+            console.log("user Wallet", userWallet)
+            console.log("user snapshot", userSnapshots)
 
             if (!userWallet || !userSnapshots) throw new TRPCError({
                 code: 'NOT_FOUND',
@@ -158,9 +162,9 @@ export const dashboardRoute = {
                 liquid_staking: {
                     snapshot: {
                         next_snapshot: currentSnapshot[0].end_date.toString(),
-                        current_stake: userWallet.snapshots[0].stake && userWallet.snapshots[0].stake || "0.0000000000",
-                        reward: userWallet.snapshots[0].reward || "0.0000000000",
-                        status: userWallet.snapshots[0].status || 4,
+                        current_stake: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].stake && userWallet.snapshots[0].stake : "0.0000000000",
+                        reward: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].reward : "0.0000000000",
+                        status: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].status : 4,
                     },
                     wallet: userWallet.wallet,
                     current_go_balance: formattedGoBalance,
@@ -168,7 +172,7 @@ export const dashboardRoute = {
                 },
                 grow_rewards: {
                     current_grow_balance: formattedGrowBalance,
-                    upcoming_reward: userWallet.snapshots[0].reward || "0.0000000000",
+                    upcoming_reward: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].reward : "0.0000000000",
                     total_reward_received: userTotalGrowRewardsReceived
                 }
             }

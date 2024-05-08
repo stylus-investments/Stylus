@@ -11,6 +11,8 @@ import { trpc } from '@/app/_trpc/client'
 import { Button } from '../ui/button'
 import Link from 'next/link'
 import { caller } from '@/app/_trpc/server'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 interface Props {
     initialData: Awaited<ReturnType<(typeof caller['dashboard']['getLiquidStaking'])>>
@@ -18,11 +20,14 @@ interface Props {
 
 const Dashboard = ({ initialData }: Props) => {
 
+    const router = useRouter()
     const [prevSession, setPrevSession] = useState(initialData.liquid_staking.wallet)
 
-    const session = trpc.session.get.useQuery(undefined, {
-        refetchOnMount: false,
-        refetchOnReconnect: false,
+    const { data: session } = useSession({
+        required: true,
+        onUnauthenticated() {
+            router.push('/connect')
+        },
     })
 
     const { data, refetch } = trpc.dashboard.getLiquidStaking.useQuery(undefined, {
@@ -35,13 +40,13 @@ const Dashboard = ({ initialData }: Props) => {
 
     useEffect(() => {
 
-        if (session.data !== prevSession) {
-            setPrevSession(session.data || '')
+        if (session?.user.wallet !== prevSession) {
+            setPrevSession(session?.user.wallet || '')
             refetch()
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [session.data])
+    }, [session])
 
     return (
         <main className='padding md:container flex flex-col items-center pt-32 pb-10 gap-10'>
