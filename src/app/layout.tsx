@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import '@rainbow-me/rainbowkit/styles.css'
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Toaster } from "@/components/ui/sonner"
 import TrpcProvider from "./_trpc/TrpcProvider";

@@ -9,17 +9,15 @@ import { Label } from '@/components/ui/label'
 
 interface Props {
     dashboardData: {
-        user: {
-            snapshot: {
-                reward: string;
-                status: number;
-                current_stake: string;
-            };
-            wallet: string;
-            current_go_balance: string;
+        snapshot: {
+            status: number;
+            reward: string;
+            next_snapshot: string;
+            current_stake: string;
         };
-        next_snapshot: string;
-        global_stake?: any;
+        wallet: string;
+        current_go_balance: string;
+        global_stake: string;
     }
 }
 
@@ -77,7 +75,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                         </div>
                         <h1 className='font-black md:text-lg '>
                             {
-                                new Date(dashboardData.next_snapshot).toLocaleString('en-US', {
+                                new Date(dashboardData.snapshot.next_snapshot).toLocaleString('en-US', {
                                     timeZone: 'UTC',
                                     weekday: 'short',
                                     day: '2-digit',
@@ -89,7 +87,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             }  UTC
                         </h1>
                     </div>
-                    <SnapshotTimer nextSnapshot={dashboardData.next_snapshot} />
+                    <SnapshotTimer nextSnapshot={dashboardData.snapshot.next_snapshot} />
                 </div>
                 <div className='flex w-full flex-col lg:flex-row'>
                     <div className='flex flex-col gap-3 p-5 border w-full lg:rounded-bl-lg'>
@@ -99,11 +97,11 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                                 <Label>
                                     Your stake
                                 </Label>
-                                {dashboardData.user.snapshot.status === 1 && < Button className='h-6 bg-green-500 hover:bg-green-500 '>
+                                {dashboardData.snapshot.status === 1 && < Button className='h-6 bg-green-500 hover:bg-green-500 '>
                                     Active
                                 </Button>
                                 }
-                                {!dashboardData.user.snapshot.status && <Button variant={'destructive'} className='h-6 '>
+                                {!dashboardData.snapshot.status && <Button variant={'destructive'} className='h-6 '>
                                     Forfeited
                                 </Button>}
                             </div>
@@ -119,9 +117,9 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             </TooltipProvider>
                         </div>
                         <h1 className='font-black md:text-lg '>
-                            {(Number(dashboardData.user.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                            {(Number(dashboardData.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
                             <span className='text-xs' >
-                                .{(Number(dashboardData.user.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                                .{(Number(dashboardData.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>$GO</span>
                         </h1>
@@ -134,7 +132,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                                 <Label>
                                     Current Balance
                                 </Label>
-                                {Number(dashboardData.user.current_go_balance) > 0 && <Button className=' h-6 bg-orange-400  hover:bg-orange-400 text-white'>Holding</Button>}
+                                {Number(dashboardData.current_go_balance) > 0 && <Button className=' h-6 bg-orange-400  hover:bg-orange-400 text-white'>Holding</Button>}
                             </div>
                             <TooltipProvider>
                                 <Tooltip>
@@ -148,9 +146,9 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             </TooltipProvider>
                         </div>
                         <h1 className='font-black md:text-lg '>
-                            {(Number(dashboardData.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                            {(Number(dashboardData.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
                             <span className='text-xs' >
-                                .{(Number(dashboardData.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                                .{(Number(dashboardData.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>$GO</span>
                         </h1>
@@ -175,9 +173,9 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                         </div>
                         <div className='w-full flex items-center justify-between'>
                             <h1 className='font-black md:text-lg '>
-                                {(Number(dashboardData.user.snapshot.reward)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                                {(Number(dashboardData.snapshot.reward)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
                                 <span className='text-xs' >
-                                    .{(Number(dashboardData.user.snapshot.reward)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                                    .{(Number(dashboardData.snapshot.reward)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                                 </span>
                                 <span className='ml-2'>$GROW</span>
                             </h1>
@@ -186,7 +184,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                     </div>
                 </div>
             </div>
-            <BalanceHistory address={dashboardData.user.wallet} />
+            <BalanceHistory address={dashboardData.wallet} />
         </div>
     )
 }

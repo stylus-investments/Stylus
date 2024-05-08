@@ -1,16 +1,26 @@
 'use client'
-import React from 'react'
+import React, { useEffect } from 'react'
 import ConnectWalletButton from './connect-wallet-button'
-import { trpc } from '@/app/_trpc/client'
 import DashboardSkeleton from './dashboard-skeleton'
 import Image from 'next/image'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 const ConnectWalletFirst = () => {
 
-    const session = trpc.session.get.useQuery(undefined, {
-        refetchOnMount: false,
-        refetchOnReconnect: false
-    })
+    const router = useRouter()
+
+    const session = useSession()
+
+    useEffect(() => {
+
+        if (session.status === 'authenticated') {
+            console.log("test logout")
+            router.push('/dashboard')
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session])
 
     return (
         <>

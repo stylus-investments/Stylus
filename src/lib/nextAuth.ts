@@ -3,6 +3,14 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
 import { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from "next";
 
+declare module "next-auth" {
+    interface Session {
+        user: {
+            wallet: string
+        }
+    }
+}
+
 const nextAuthOptions = {
     providers: [
         CredentialsProvider({
@@ -12,13 +20,27 @@ const nextAuthOptions = {
                 password: { label: "Password", type: "password", placeholder: "Password" }
             },
 
-            async authorize(credentials) {
+            async authorize(credentials: any) {
 
-                const { data } = await axios.post(`${process.env.NEXTAUTH_URL}/api/auth/login`, credentials)
+                if (credentials.message) {
 
-                if (!data) return null
+                    const message = JSON.parse(credentials.message);
 
-                return data
+                    return {
+                        signature: credentials.signature,
+                        csrfToken: credentials.csrfToken,
+                        callbackUrl: credentials.ballbackUrl,
+                        wallet: message.address
+                    }
+
+                } else {
+
+                    const { data } = await axios.post(`${process.env.NEXTAUTH_URL}/api/auth/login`, credentials)
+
+                    if (!data) return null
+
+                    return data
+                }
             },
         })
     ],

@@ -6,7 +6,7 @@ export const POST = async (req: NextRequest) => {
 
         const { username, password } = await req.json()
 
-        const admin = await db.admin.findFirst({
+        const admin = await db.admin.findUnique({
             where: { username, password }
         })
 

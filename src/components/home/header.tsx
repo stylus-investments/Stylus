@@ -21,6 +21,15 @@ const Header = () => {
             <span className='hidden md:flex'>Launch App</span>
           </Button>
         </Link>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            padding: 12,
+          }}
+        >
+         
+        </div>
       </div>
     </div>
   )

@@ -4,19 +4,20 @@ import DashboardHeader from '@/components/dashboard/dashboard-header';
 import Dashboard from '@/components/dashboard/dashboard';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import { getAuth } from '@/lib/nextAuth';
 
 const DashboardPage = async () => {
 
     cookies()
-    const sessionData = await caller.session.get()
-    if (!sessionData) redirect('/connect')
+    const session = await getAuth()
+    if (!session) redirect('/connect')
 
     const liquidStakingData = await caller.dashboard.getLiquidStaking()
 
     return (
         <>
             <DashboardHeader
-                walletAddress={sessionData} />
+                walletAddress={session.user.wallet} />
             <Dashboard initialData={liquidStakingData} />
         </>
     )

@@ -18,7 +18,7 @@ interface Props {
 
 const Dashboard = ({ initialData }: Props) => {
 
-    const [prevSession, setPrevSession] = useState(initialData.user.wallet)
+    const [prevSession, setPrevSession] = useState(initialData.liquid_staking.wallet)
 
     const session = trpc.session.get.useQuery(undefined, {
         refetchOnMount: false,
@@ -49,9 +49,9 @@ const Dashboard = ({ initialData }: Props) => {
             <div className='flex flex-col gap-3 items-center text-center'>
                 <Image width={100} height={50} className='h-auto rounded-full' alt='Coin' src={'/go.jpeg'} />
                 <h1 className='font-black text-xl'>
-                    {(Number(data.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                    {(Number(data.liquid_staking.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
                     <span className='text-xs' >
-                        .{(Number(data.user.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                        .{(Number(data.liquid_staking.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                     </span>
                     <span className='ml-2 text-xl'>$GO</span>
                 </h1>
@@ -92,11 +92,12 @@ const Dashboard = ({ initialData }: Props) => {
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="go">
-                    <LiquidStaking dashboardData={data} />
+                    <LiquidStaking dashboardData={data.liquid_staking} />
                 </TabsContent>
                 <TabsContent value="grow">
                     <GrowRewards dashboardData={{
-                        wallet: data.user.wallet
+                        ...data.grow_rewards,
+                        wallet: data.liquid_staking.wallet
                     }} />
                 </TabsContent>
                 <TabsContent value="glow">

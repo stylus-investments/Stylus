@@ -1,19 +1,21 @@
 import { publicProcedure } from "@/trpc/trpc";
 import db from "@/db/db";
-import { getSession } from "@/lib/lib";
 import { getMoralis, getTokenHolders } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import Moralis from "moralis";
 import { z } from "zod";
+import { getAuth } from "@/lib/nextAuth";
+
 const goTokenAddress = process.env.GO_ADDRESS as string
+const growTokenAddress = process.env.GO_ADDRESS as string
 
 export const dashboardRoute = {
     getLiquidStaking: publicProcedure.query(async () => {
         try {
 
-            const session = await getSession()
+            const session = await getAuth()
 
-            if (!session.address) throw new TRPCError({
+            if (!session) throw new TRPCError({
                 code: 'UNAUTHORIZED',
                 message: "Unauthorized"
             })
@@ -24,7 +26,7 @@ export const dashboardRoute = {
             const [userToken, goTokenHolders, currentSnapshot] = await Promise.all([
                 Moralis.EvmApi.token.getWalletTokenBalances({
                     chain: process.env.CHAIN,
-                    address: session.address
+                    address: session.user.wallet
                 }),
                 getTokenHolders(),
                 db.snapshot.findMany({
@@ -33,7 +35,7 @@ export const dashboardRoute = {
                     }
                 }),
                 db.user.findUnique({
-                    where: { wallet: session.address },
+                    where: { wallet: session.user.wallet },
                     select: {
                         snapshots: {
                             select: {
@@ -55,15 +57,6 @@ export const dashboardRoute = {
                     }
                 })
             ])
-
-            if (!currentSnapshot) {
-                session.destroy()
-                await session.save()
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "User not found"
-                })
-            }
             if (!userToken) throw new TRPCError({
                 code: 'BAD_REQUEST',
                 message: "Failed to get user token"
@@ -73,96 +66,111 @@ export const dashboardRoute = {
                 message: "Failed to get token holders"
             })
 
-
-            const userTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === goTokenAddress.toLowerCase())[0] as any
-
-            const balance = userTokenData && userTokenData.balance
-            const decimals = userTokenData && userTokenData.decimals
-
-            const getFormattedBalance = () => {
-                if (balance && decimals) {
-                    const formatBalance = Number(balance) / (10 ** decimals)
+            const getFormattedBalance = ({ balance, decimal }: any) => {
+                if (balance && decimal) {
+                    const formatBalance = Number(balance) / (10 ** decimal)
                     return formatBalance.toString()
                 }
                 return "0.0000000000"
             }
 
-            const formattedBalance = getFormattedBalance()
+            /*
+            Liquid Staking Data
+            */
+
+            const goUserTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === goTokenAddress.toLowerCase())[0] as any
+
+            const goBalance = goUserTokenData && goUserTokenData.balance
+            const goDecimal = goUserTokenData && goUserTokenData.decimals
+
+            const formattedGoBalance = getFormattedBalance({
+                balance: goBalance,
+                decimal: goDecimal
+            })
+
             const goTokenGlobalStake = goTokenHolders && goTokenHolders.reduce((total, holder) => {
 
                 if (holder.owner_address.toLowerCase() === String(process.env.GO_DISTRIBUTER).toLowerCase()) {
-
                     return total
                 }
 
                 return total + Number(holder.balance_formatted)
             }, 0).toString() || "0.0000000000"
 
-            const userWallet = await db.user.findUnique({
-                where: { wallet: session.address },
-                select: {
-                    wallet: true,
-                    snapshots: {
-                        where: {
-                            snapshot: {
-                                completed: false
+
+
+            const [userWallet, userSnapshots] = await Promise.all([
+                db.user.findUnique({
+                    where: { wallet: session.user.wallet },
+                    select: {
+                        wallet: true,
+                        snapshots: {
+                            where: {
+                                snapshot: {
+                                    completed: false
+                                }
                             }
                         }
                     }
-                }
-            })
-            if (!userWallet) throw new TRPCError({
+                }),
+                db.user.findUnique({
+                    where: {
+                        wallet: session.user.wallet
+                    },
+                    select: {
+                        snapshots: {
+                            select: {
+                                status: true,
+                                reward: true
+                            }
+                        }
+                    }
+                })
+            ])
+
+            if (!userWallet || !userSnapshots) throw new TRPCError({
                 code: 'NOT_FOUND',
                 message: "User Not Found"
             })
 
-            let user: {
-                wallet: string
-                current_go_balance: string
-                snapshot: {
-                    current_stake: string
-                    reward: string
-                    status: number
-                }
-            }
 
-            let next_snapshot: string
+            /* 
+            Grow Rewards Data
+            */
 
-            if (currentSnapshot.length > 0) {
-                next_snapshot = currentSnapshot[0].end_date.toString()
-            } else {
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                tomorrow.setHours(0, 0, 0, 0);
-                next_snapshot = tomorrow.toString();
-            }
+            const userTotalGrowRewardsReceived = userSnapshots.snapshots.reduce((total, snapshot) => {
+                if (snapshot.status === 3) {
+                    return total + Number(snapshot.reward)
+                }
+                return total
+            }, 0).toFixed(10)
 
-            if (userWallet.snapshots.length > 0) {
-                user = {
-                    wallet: userWallet.wallet,
-                    current_go_balance: formattedBalance,
-                    snapshot: {
-                        current_stake: userWallet.snapshots[0].stake && userWallet.snapshots[0].stake,
-                        reward: userWallet.snapshots[0].reward,
-                        status: userWallet.snapshots[0].status
-                    }
-                }
-            } else {
-                user = {
-                    wallet: userWallet.wallet,
-                    current_go_balance: formattedBalance,
-                    snapshot: {
-                        current_stake: "0.0000000000",
-                        reward: "0.0000000000",
-                        status: 4
-                    }
-                }
-            }
+            const growUserTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === growTokenAddress.toLocaleLowerCase())[0] as any
+            const growBalance = growUserTokenData && growUserTokenData.balance
+            const growDecimal = growUserTokenData && growUserTokenData.decimals
+
+            const formattedGrowBalance = getFormattedBalance({
+                balance: growBalance,
+                decimal: growDecimal
+            })
 
             const data = {
-                user,
-                next_snapshot,
-                global_stake: goTokenGlobalStake,
+                liquid_staking: {
+                    snapshot: {
+                        next_snapshot: currentSnapshot[0].end_date.toString(),
+                        current_stake: userWallet.snapshots[0].stake && userWallet.snapshots[0].stake || "0.0000000000",
+                        reward: userWallet.snapshots[0].reward || "0.0000000000",
+                        status: userWallet.snapshots[0].status || 4,
+                    },
+                    wallet: userWallet.wallet,
+                    current_go_balance: formattedGoBalance,
+                    global_stake: goTokenGlobalStake,
+                },
+                grow_rewards: {
+                    current_grow_balance: formattedGrowBalance,
+                    upcoming_reward: userWallet.snapshots[0].reward || "0.0000000000",
+                    total_reward_received: userTotalGrowRewardsReceived
+                }
             }
 
             return data
