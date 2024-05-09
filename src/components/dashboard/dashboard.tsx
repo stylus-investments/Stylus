@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import Image from 'next/image'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -7,7 +7,6 @@ import { faDatabase, faGavel, faSeedling } from '@fortawesome/free-solid-svg-ico
 import GrowRewards from './grow-rewards/grow-rewards'
 import GlowStaking from './glow-staking/glow-staking'
 import LiquidStaking from './liquid-staking/liquid-staking'
-import { trpc } from '@/app/_trpc/client'
 import { Button } from '../ui/button'
 import Link from 'next/link'
 import { caller } from '@/app/_trpc/server'
@@ -21,42 +20,23 @@ interface Props {
 const Dashboard = ({ initialData }: Props) => {
 
     const router = useRouter()
-    const [prevSession, setPrevSession] = useState(initialData.liquid_staking.wallet)
 
-    const { data: session } = useSession({
+    const session = useSession({
         required: true,
         onUnauthenticated() {
             router.push('/connect')
         },
     })
 
-    const { data, refetch } = trpc.dashboard.getLiquidStaking.useQuery(undefined, {
-        initialData: initialData,
-        refetchOnMount: false,
-        refetchOnReconnect: false,
-        refetchOnWindowFocus: false,
-        retry: false
-    })
-
-    useEffect(() => {
-
-        if (session?.user.wallet !== prevSession) {
-            setPrevSession(session?.user.wallet || '')
-            refetch()
-        }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [session])
-
     return (
         <main className='padding md:container flex flex-col items-center pt-32 pb-10 gap-10'>
 
             <div className='flex flex-col gap-3 items-center text-center'>
-                <Image width={100} height={50} className='h-auto rounded-full' alt='Coin' src={'/go.jpeg'} />
+                <Image width={100} height={50} className='h-auto rounded-full' alt='Go' src={'/go.jpeg'} />
                 <h1 className='font-black text-xl'>
-                    {(Number(data.liquid_staking.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                    {(Number(initialData.liquid_staking.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
                     <span className='text-xs' >
-                        .{(Number(data.liquid_staking.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                        .{(Number(initialData.liquid_staking.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                     </span>
                     <span className='ml-2 text-xl'>$GO</span>
                 </h1>
@@ -97,12 +77,12 @@ const Dashboard = ({ initialData }: Props) => {
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="go">
-                    <LiquidStaking dashboardData={data.liquid_staking} />
+                    <LiquidStaking dashboardData={initialData.liquid_staking} />
                 </TabsContent>
                 <TabsContent value="grow">
                     <GrowRewards dashboardData={{
-                        ...data.grow_rewards,
-                        wallet: data.liquid_staking.wallet
+                        ...initialData.grow_rewards,
+                        wallet: initialData.liquid_staking.wallet
                     }} />
                 </TabsContent>
                 <TabsContent value="glow">

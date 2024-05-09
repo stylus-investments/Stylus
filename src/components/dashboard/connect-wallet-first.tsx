@@ -8,15 +8,12 @@ import { useRouter } from 'next/navigation'
 
 const ConnectWalletFirst = () => {
 
-    const router = useRouter()
-
     const session = useSession()
 
     useEffect(() => {
 
         if (session.status === 'authenticated') {
-            console.log("test logout")
-            router.push('/dashboard')
+            window.location.href = '/dashboard'
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps

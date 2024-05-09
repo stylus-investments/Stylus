@@ -46,7 +46,7 @@ const ConnectWalletButton = () => {
 
                                 if (chain.unsupported) {
                                     return (
-                                        <button onClick={openChainModal} type="button">
+                                        <button onClick={openChainModal}>
                                             Wrong network
                                         </button>
                                     );
@@ -54,7 +54,7 @@ const ConnectWalletButton = () => {
 
                                 return (
                                     <div >
-                                        <Button onClick={openAccountModal} type="button">
+                                        <Button onClick={openAccountModal} variant={'outline'}>
                                             {account.displayName}
                                         </Button>
                                     </div>
