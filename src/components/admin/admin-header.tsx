@@ -17,7 +17,7 @@ const AdminHeader = () => {
     })
 
     return (
-        <div className='flex sticky top-0 left-0 w-screen h-16 backdrop-blur container items-center justify-between border-b'>
+        <div className='flex sticky top-0 left-0 w-screen z-20 h-16 backdrop-blur container items-center justify-between border-b'>
             <div className='flex items-center'>
                 <h1 className='text-2xl font-black text-primary'>GrowPoint</h1>
             </div>

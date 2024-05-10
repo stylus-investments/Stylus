@@ -11,6 +11,7 @@ const DashboardPage = async () => {
     cookies()
     const session = await getAuth()
     if (!session) redirect('/connect')
+    if (session && !session.user.wallet) redirect('/admin/users')
 
     const liquidStakingData = await caller.dashboard.getLiquidStaking()
 

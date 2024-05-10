@@ -8,9 +8,15 @@ import { getAuth } from '@/lib/nextAuth'
 const ConnectPage = async () => {
 
     cookies()
+    
     const session = await getAuth()
 
-    if (session?.user) redirect('/dashboard')
+    if (session?.user) {
+        if (session.user.wallet) [
+            redirect('/dashboard')
+        ]
+        redirect('/admin/users')
+    }
 
     return (
         <>
