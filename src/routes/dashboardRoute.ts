@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getAuth } from "@/lib/nextAuth";
 
 const goTokenAddress = process.env.GO_ADDRESS as string
-const growTokenAddress = process.env.GO_ADDRESS as string
+const growTokenAddress = process.env.GROW_ADDRESS as string
 
 export const dashboardRoute = {
     getLiquidStaking: publicProcedure.query(async () => {
@@ -153,7 +153,8 @@ export const dashboardRoute = {
                 balance: growBalance,
                 decimal: growDecimal
             })
-
+            
+            console.log(formattedGoBalance, formattedGrowBalance)
             const data = {
                 liquid_staking: {
                     snapshot: {
