@@ -22,7 +22,6 @@ export const dashboardRoute = {
 
             await getMoralis()
 
-
             const [userToken, goTokenHolders, currentSnapshot] = await Promise.all([
                 Moralis.EvmApi.token.getWalletTokenBalances({
                     chain: process.env.CHAIN,

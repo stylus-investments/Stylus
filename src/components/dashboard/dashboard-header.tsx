@@ -21,35 +21,37 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
             </Link>
             <div className='flex items-center gap-1 sm:gap-2'>
                 <ToggleTheme />
-                {walletAddress && <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button className='px-3 text-foreground' variant={'ghost'}>
-                            <FontAwesomeIcon icon={faBarsStaggered} width={16} height={16} className='cursor-pointer' />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className='flex items-center gap-2'>
-                            <span>
-                                {`${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`}
-                            </span>
-                            <DropdownMenuShortcut>
-                                <FontAwesomeIcon icon={faWallet} width={16} height={16} />
-                            </DropdownMenuShortcut>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className='flex items-center gap-2'
-                            onClick={() => signOut({
-                                redirect: false,
-                            })}
-                        >
-                            <span>Logout</span>
-                            <DropdownMenuShortcut>
-                                <FontAwesomeIcon icon={faRightFromBracket} width={16} height={16} className='cursor-pointer' />
-                            </DropdownMenuShortcut>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>}
+                {walletAddress &&
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button className='px-3 text-foreground' variant={'ghost'}>
+                                <FontAwesomeIcon icon={faBarsStaggered} width={16} height={16} className='cursor-pointer' />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className='flex items-center gap-2'>
+                                <span>
+                                    {`${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`}
+                                </span>
+                                <DropdownMenuShortcut>
+                                    <FontAwesomeIcon icon={faWallet} width={16} height={16} />
+                                </DropdownMenuShortcut>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className='flex items-center gap-2'
+                                onClick={() => signOut({
+                                    redirect: false,
+                                })}
+                            >
+                                <span>Logout</span>
+                                <DropdownMenuShortcut>
+                                    <FontAwesomeIcon icon={faRightFromBracket} width={16} height={16} className='cursor-pointer' />
+                                </DropdownMenuShortcut>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                }
             </div>
         </nav>
     )
@@ -63,15 +65,9 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
             <div className='flex items-center gap-2'>
                 <ToggleTheme />
                 {walletAddress ?
-                    <>
-                        <div className='md:flex items-center gap-3 hidden'>
-                            <ConnectWalletButton />
-                        </div>
-                    </>
+                    <ConnectWalletButton />
                     :
-                    <div className='hidden md:flex'>
-                        <ConnectWalletButton />
-                    </div>
+                    <ConnectWalletButton />
                 }
             </div>
         </nav>
