@@ -35,6 +35,8 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "dotenv": "^16.4.5",
+    "embla-carousel-autoplay": "^8.0.4",
+    "embla-carousel-react": "^8.0.4",
     "encoding": "^0.1.13",
     "ethers": "^5.7.2",
     "iron-session": "^8.0.1",
