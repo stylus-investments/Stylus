@@ -5,10 +5,11 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Toaster } from "@/components/ui/sonner"
 import TrpcProvider from "./_trpc/TrpcProvider";
 import NextAuthSessionProvider from "@/components/auth/NextAuthSessionProvider";
+import { footerTexts } from "@/constant/footerTexts";
 
 export const metadata: Metadata = {
   title: "GrowPoint",
-  description: "Merging open finance with real world assets, creating a robust ecosystem for stable growth and innovative yield opportunities.Making. Growth. Relevant.",
+  description: footerTexts.description
 };
 
 export default function RootLayout({

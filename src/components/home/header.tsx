@@ -8,7 +8,7 @@ import { faRocket } from '@fortawesome/free-solid-svg-icons'
 
 const Header = () => {
   return (
-    <div className='flex fixed top-0 left-0 w-screen h-16 backdrop-blur padding items-center justify-between border-b'>
+    <div className='flex top-0 left-0 w-screen padding fixed md:sticky md:p-0 md:w-full h-16 backdrop-blur padding items-center z-10 justify-between border-b'>
       <Link href={'/'} className='flex items-center'>
         <Image src={'/logo.png'} alt='logo' width={48} height={20} className='w-auto h-auto' />
         <h1 className='md:flex text-2xl md:text-3xl font-black text-primary'>GrowPoint</h1>
