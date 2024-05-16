@@ -1,21 +1,31 @@
 import React from 'react'
 import Image from 'next/image'
+
 function Partners() {
+
     return (
-        <div className='flex flex-col md:flex-row gap-10 md:gap-20 items- w-full text-center md:text-left md:h-screen justify-center md:pb-16 md:border-x'>
+        <div className='flex flex-col md:flex-row gap-10 md:gap-20 items-center w-full text-center md:text-left justify-center md:pb-16'>
             <div className='flex flex-col gap-20 w-full md:w-1/2 items-center  md:items-start'>
-                <h1 className='font-thin text-6xl md:text-7xl'>Making Finance Accessible</h1>
+                <h1 className='font-thin text-6xl' data-aos="fade-in">Making Finance Accessible</h1>
                 <div className='flex items-center gap-8'>
-                    <Image src={'/partners/coinbase.png'} alt='Coinbase' width={50} height={50} className='rounded-full' />
-                    <div className='text-muted-foreground md:px-10'>Coinbase Wallet will be our primary wallet for mobile onboarding on web2 users.</div>
+                    <Image data-aos="fade-right" src={'/partners/coinbase.png'} alt='Coinbase' width={50} height={50} className='rounded-full' />
+                    <div data-aos="fade-up" className='text-muted-foreground md:px-10'>Coinbase Wallet will be our primary wallet for mobile onboarding on web2 users.</div>
                 </div>
                 <div className='flex items-center gap-5'>
-                    <Image src={'/partners/metamask.png'} alt='Metamask' width={50} height={50} className='rounded-full' />
-                    <div className='text-muted-foreground md:px-10'>Metamask along with other wallets that supports BASE will still be supported.</div>
+                    <Image data-aos="fade-right" src={'/partners/metamask.png'} alt='Metamask' width={50} height={50} className='rounded-full' />
+                    <div data-aos="fade-up" className='text-muted-foreground md:px-10'>Metamask along with other wallets that supports BASE will still be supported.</div>
                 </div>
             </div>
             <div className='md:w-1/4'>
-                <Image src={'/dashboard.jpeg'} alt='Go' width={140} height={30} className='h-auto shadow-2xl rounded-lg w-full md:w-72' />
+                <div className="relative mx-auto border-gray-900 dark:border-gray-900 bg-gray-900 border-[14px] rounded-[2.5rem] w-[300px] shadow-2xl" data-aos="flip-left" >
+                    <div className="h-[32px] w-[3px] bg-gray-900 dark:bg-gray-900 absolute -start-[17px] top-[72px] rounded-s-lg"></div>
+                    <div className="h-[46px] w-[3px] bg-gray-900 dark:bg-gray-900 absolute -start-[17px] top-[124px] rounded-s-lg"></div>
+                    <div className="h-[46px] w-[3px] bg-gray-900 dark:bg-gray-900 absolute -start-[17px] top-[178px] rounded-s-lg"></div>
+                    <div className="h-[64px] w-[3px] bg-gray-900 dark:bg-gray-900 absolute -end-[17px] top-[142px] rounded-e-lg"></div>
+                    <div className="rounded-[2rem] overflow-hidden w-[272px] h-[572px] bg-primary dark:bg-card">
+                        <Image src={'/dashboard.jpeg'} alt='Go' width={140} height={30} className='h-auto shadow-2xl rounded-lg w-full' />
+                    </div>
+                </div>
             </div>
         </div>
     )

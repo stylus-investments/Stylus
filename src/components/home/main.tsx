@@ -5,9 +5,9 @@ import Image from 'next/image'
 
 const Main = () => {
     return (
-        <div className='flex flex-col md:flex-row gap-10 md:gap-20 items-center w-full text-center md:text-left h-screen justify-center md:pb-16 md:border-x'>
-            <div className='flex flex-col gap-4 w-full md:w-1/2 items-center  md:items-start'>
-                <h1 className='font-thin text-6xl md:text-7xl'>Making Growth Relevant</h1>
+        <div className='flex flex-col md:flex-row gap-10 md:gap-20 items-center w-full text-center md:text-left h-screen justify-center md:pb-16 '>
+            <div className='flex flex-col gap-5 w-full md:w-1/2 items-center  md:items-start'>
+                <h1 className='font-thin text-6xl'>Making Growth Relevant</h1>
                 <h2 className='text-sm text-muted-foreground md:text-base'>
                     Liquid stake your USDC through $GO
                     Earn yield up to 10 - 36 % anually
