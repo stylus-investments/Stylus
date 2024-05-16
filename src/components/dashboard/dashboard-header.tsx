@@ -65,7 +65,36 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
             <div className='flex items-center gap-2'>
                 <ToggleTheme />
                 {walletAddress ?
-                    <ConnectWalletButton />
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant={'outline'}>
+                                {`${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className='flex items-center gap-2'>
+                                <span>
+                                    {`${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`}
+                                </span>
+                                <DropdownMenuShortcut>
+                                    <FontAwesomeIcon icon={faWallet} width={16} height={16} />
+                                </DropdownMenuShortcut>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className='flex items-center gap-2'
+                                onClick={() => signOut({
+                                    redirect: false,
+                                })}
+                            >
+                                <span>Logout</span>
+                                <DropdownMenuShortcut>
+                                    <FontAwesomeIcon icon={faRightFromBracket} width={16} height={16} className='cursor-pointer' />
+                                </DropdownMenuShortcut>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
                     :
                     <ConnectWalletButton />
                 }
