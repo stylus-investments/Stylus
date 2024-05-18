@@ -4,14 +4,14 @@ import Image from 'next/image'
 function Partners() {
 
     return (
-        <div className='flex flex-col md:flex-row gap-10 md:gap-20 items-center w-full text-center md:text-left justify-center md:pb-16'>
-            <div className='flex flex-col gap-20 w-full md:w-1/2 items-center  md:items-start'>
+        <div className='flex flex-col md:flex-row gap-10 items-center w-full text-center md:text-left lg:justify-center pb-20'>
+            <div className='flex flex-col gap-12 w-full md:w-1/2 lg:w-2/3 items-center  md:items-start'>
                 <h1 className='font-thin text-6xl' data-aos="fade-in">Making Finance Accessible</h1>
-                <div className='flex items-center gap-8'>
+                <div className='flex items-center gap-3'>
                     <Image data-aos="fade-right" src={'/partners/coinbase.png'} alt='Coinbase' width={50} height={50} className='rounded-full' />
                     <div data-aos="fade-up" className='text-muted-foreground md:px-10'>Coinbase Wallet will be our primary wallet for mobile onboarding on web2 users.</div>
                 </div>
-                <div className='flex items-center gap-5'>
+                <div className='flex items-center gap-3'>
                     <Image data-aos="fade-right" src={'/partners/metamask.png'} alt='Metamask' width={50} height={50} className='rounded-full' />
                     <div data-aos="fade-up" className='text-muted-foreground md:px-10'>Metamask along with other wallets that supports BASE will still be supported.</div>
                 </div>

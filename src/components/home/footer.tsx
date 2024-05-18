@@ -16,20 +16,14 @@ const Footer = () => {
                     <Link href='/terms'>Terms</Link>
                     <Link href='/privacy'>Privacy</Link>
                 </div>
-                <ul className='flex gap-5 items-center order-1 md:order-2'>
+                <ul className='flex gap-4 items-center order-1 md:order-2'>
                     <Label >Join Us</Label>
                     <Link href={'https://twitter.com/growpointapp'} target='_blank'>
                         <FontAwesomeIcon icon={faTwitter} />
                     </Link>
-                    <Link href={'#'} target='_blank'>
-                        <FontAwesomeIcon icon={faFacebook} />
-                    </Link>
-                    <Link href={'#'} target='_blank'>
-                        <FontAwesomeIcon icon={faFacebook} />
-                    </Link>
                 </ul>
                 <ul className='flex flex-col md:flex-row md:items-center gap-4 order-3'>
-                    <li className='flex items-center gap-4'>
+                    <li className='flex items-center gap-3'>
                         <FontAwesomeIcon icon={faEnvelope} className='w-4' />
                         <p className='text-sm'>moore@growpoint.app</p>
                     </li>

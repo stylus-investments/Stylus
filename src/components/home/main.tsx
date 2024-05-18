@@ -1,13 +1,19 @@
 import Link from 'next/link'
 import React from 'react'
 import { Button } from '../ui/button'
-import Image from 'next/image'
+import { Label } from '../ui/label'
 
 const Main = () => {
     return (
-        <div className='flex flex-col md:flex-row gap-10 md:gap-20 items-center w-full text-center md:text-left h-screen justify-center md:pb-16 '>
-            <div className='flex flex-col gap-5 w-full md:w-1/2 items-center  md:items-start'>
-                <h1 className='font-thin text-6xl'>Making Growth Relevant</h1>
+        <div className='flex flex-col gap-10 md:gap-12 items-center w-full text-center h-screen justify-center pt-10 md:pt-0 md:pb-16'>
+            <div className='flex flex-col gap-5 sm:gap-6 md:gap-7 w-full items-center'>
+                <div className='flex flex-col border-b pb-10 items-center gap-4'>
+                    <Label className='text-lg'>Live on pre mainet phase</Label>
+                    <p className='text-muted-foreground'>
+                        We will be onboarding Web2 users through this amazing program, enabling them to experience DeFi in a tangible way with <span className='font-black text-foreground text-lg underline ml-2'>GrowPoint</span>
+                    </p>
+                </div>
+                <h1 className='font-thin text-6xl md:text-7xl'>Making Growth Relevant</h1>
                 <h2 className='text-sm text-muted-foreground md:text-base'>
                     Liquid stake your USDC through $GO
                     Earn yield up to 10 - 36 % anually
@@ -18,9 +24,6 @@ const Main = () => {
                         Start Earning
                     </Button>
                 </Link>
-            </div>
-            <div className='self-center md:w-1/4'>
-                <Image src={'/go.webp'} alt='Go' width={140} height={30} className='h-auto rounded-full md:w-56' />
             </div>
         </div>
     )

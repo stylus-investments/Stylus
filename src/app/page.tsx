@@ -19,7 +19,7 @@ const HomePage = () => {
   }, [])
 
   return (
-    <div className='padding lg:container overflow-x-hidden lg:overflow-visible'>
+    <div className='padding xl:container overflow-x-hidden xl:overflow-visible'>
       <Header />
       <Main />
       <Partners />
