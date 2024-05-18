@@ -35,7 +35,7 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ dashboardData }) => {
                                         <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        Total $GO tokens currently staked across all accounts.
+                                        Current $GROW Balance.
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -62,7 +62,7 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ dashboardData }) => {
                                         <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        Scheduled time for the next snapshot to calculate rewards.
+                                       Total $Grow received rewards.
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -90,7 +90,7 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ dashboardData }) => {
                                         <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='text-muted hover:text-muted-foreground' />
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        Countdown until the next snapshot for rewards.
+                                        Next snapshot $Grow expected rewards.
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -117,7 +117,7 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ dashboardData }) => {
                                         <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='text-muted hover:text-muted-foreground' />
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        Countdown until the next snapshot for rewards.
+                                        Current Yield Rate
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>

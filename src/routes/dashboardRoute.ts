@@ -154,7 +154,6 @@ export const dashboardRoute = {
                 decimal: growDecimal
             })
             
-            console.log(formattedGoBalance, formattedGrowBalance)
             const data = {
                 liquid_staking: {
                     snapshot: {
@@ -200,8 +199,6 @@ export const dashboardRoute = {
                 address: walletAddress,
                 contractAddresses: [process.env.GO_ADDRESS as string]
             })
-
-            // console.log(getGoTokenBalanceHistory.raw)
 
             if (!getGoTokenBalanceHistory) throw new TRPCError({
                 code: 'BAD_REQUEST',
