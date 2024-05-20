@@ -13,8 +13,8 @@ const Footer = () => {
             <div className='pt-10 w-full border-t flex flex-col gap-5 md:flex-row md:justify-between'>
                 <div className='flex gap-4 items-center order-2 md:order-1 text-sm'>
                     © 2024, GrowPoint
-                    <Link href='/terms'>Terms</Link>
-                    <Link href='/privacy'>Privacy</Link>
+                    <Link href='#'>Terms</Link>
+                    <Link href='#'>Privacy</Link>
                 </div>
                 <ul className='flex gap-4 items-center order-1 md:order-2'>
                     <Label >Join Us</Label>
