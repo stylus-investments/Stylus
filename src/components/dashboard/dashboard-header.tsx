@@ -16,7 +16,7 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
     const mobileScreen = (
         <nav className='md:hidden flex items-center justify-between w-full'>
             <Link href={'/'} className='flex items-center '>
-                <Image src={'/logo.png'} alt='logo' width={48} height={16} className='w-auto h-auto' />
+                <Image src={'/logo.png'} alt='logo' width={40} height={16} className='h-auto' />
                 <h1 className='text-2xl font-black text-primary'>GrowPoint</h1>
             </Link>
             <div className='flex items-center gap-1 sm:gap-2'>
@@ -59,8 +59,8 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
     const largeScreen = (
         <nav className='hidden md:flex items-center justify-between w-full'>
             <Link href={'/'} className='flex items-center'>
-                <Image src={'/logo.png'} alt='logo' width={48} height={16} className='w-auto h-auto' />
-                <h1 className='text-2xl md:text-3xl font-black text-primary'>GrowPoint</h1>
+                <Image src={'/logo.png'} alt='logo' width={40} height={16} className='h-auto' />
+                <h1 className='text-2xl font-black text-primary'>GrowPoint</h1>
             </Link>
             <div className='flex items-center gap-2'>
                 <ToggleTheme />
@@ -74,14 +74,6 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
                         <DropdownMenuContent>
                             <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className='flex items-center gap-2'>
-                                <span>
-                                    {`${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`}
-                                </span>
-                                <DropdownMenuShortcut>
-                                    <FontAwesomeIcon icon={faWallet} width={16} height={16} />
-                                </DropdownMenuShortcut>
-                            </DropdownMenuItem>
                             <DropdownMenuItem className='flex items-center gap-2'
                                 onClick={() => signOut({
                                     redirect: false,
@@ -103,7 +95,7 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
     )
 
     return (
-        <header className='flex fixed top-0 left-0 w-screen h-16 padding items-center backdrop-blur justify-between border-b z-20'>
+        <header className='flex top-0 left-0 w-screen padding fixed md:sticky md:p-0 md:w-full h-16 backdrop-blur padding items-center z-50 justify-between border-b'>
             {largeScreen}
             {mobileScreen}
         </header>

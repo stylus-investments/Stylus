@@ -6,7 +6,7 @@ import SnapshotTimer from './SnapshotTimer'
 import BalanceHistory from './balance-history'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Label } from '@/components/ui/label'
-import GuideCards from './guide-cards'
+import GuideAccordions from './guide-accordions'
 
 interface Props {
     dashboardData: {
@@ -186,7 +186,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                 </div>
             </div>
             <BalanceHistory address={dashboardData.wallet} />
-            <GuideCards />
+            <GuideAccordions />
         </div>
     )
 }

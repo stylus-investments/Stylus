@@ -8,7 +8,7 @@ import { getAuth } from '@/lib/nextAuth'
 const ConnectPage = async () => {
 
     cookies()
-    
+
     const session = await getAuth()
 
     if (session?.user) {
@@ -19,10 +19,10 @@ const ConnectPage = async () => {
     }
 
     return (
-        <>
+        <div className='padding xl:container overflow-x-hidden xl:overflow-visible'>
             <DashboardHeader walletAddress={''} />
             <ConnectWalletFirst />
-        </>
+        </div>
     )
 }
 

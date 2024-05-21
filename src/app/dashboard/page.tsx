@@ -16,11 +16,11 @@ const DashboardPage = async () => {
     const liquidStakingData = await caller.dashboard.getLiquidStaking()
 
     return (
-        <>
+        <div className='padding xl:container overflow-x-hidden xl:overflow-visible'>
             <DashboardHeader
                 walletAddress={session.user.wallet} />
             <Dashboard initialData={liquidStakingData} />
-        </>
+        </div>
     )
 }
 

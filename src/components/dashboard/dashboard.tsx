@@ -29,7 +29,7 @@ const Dashboard = ({ initialData }: Props) => {
     })
 
     return (
-        <main className='padding md:container flex flex-col items-center pt-32 pb-10 gap-10'>
+        <main className='flex flex-col items-center pt-32 pb-10 gap-10'>
 
             <div className='flex flex-col gap-3 items-center text-center'>
                 <Image width={100} height={50} className='h-auto rounded-full' alt='Go' src={'/go.jpeg'} />
