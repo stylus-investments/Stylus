@@ -10,7 +10,7 @@ const Main = () => {
                 <div className='flex flex-col border-b pb-10 items-center gap-4'>
                     <Label className='text-lg'>Live on pre mainet phase</Label>
                     <p className='text-muted-foreground'>
-                        We will be onboarding Web2 users through this amazing program, enabling them to experience DeFi in a tangible way with <span className='font-black text-foreground text-lg underline ml-2'>GrowPoint</span>
+                        We will be onboarding Web2 users through this amazing program, enabling them to experience DeFi in a tangible way with <span className='font-black text-foreground text-lg underline ml-2'>Savern</span>
                     </p>
                 </div>
                 <h1 className='font-thin text-6xl md:text-7xl'>Making Growth Relevant</h1>

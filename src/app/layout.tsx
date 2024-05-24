@@ -8,7 +8,7 @@ import NextAuthSessionProvider from "@/components/auth/NextAuthSessionProvider";
 import { footerTexts } from "@/constant/footerTexts";
 
 export const metadata: Metadata = {
-  title: "GrowPoint",
+  title: "Savern",
   description: footerTexts.description
 };
 
