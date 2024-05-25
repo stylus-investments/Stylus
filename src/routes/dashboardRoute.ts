@@ -6,8 +6,8 @@ import Moralis from "moralis";
 import { z } from "zod";
 import { getAuth } from "@/lib/nextAuth";
 
-const goTokenAddress = process.env.GO_ADDRESS as string
-const growTokenAddress = process.env.GROW_ADDRESS as string
+const saveTokenAddress = process.env.SAVE_ADDRESS as string
+const earnTokenAddress = process.env.EARN_ADDRESS as string
 
 export const dashboardRoute = {
     getLiquidStaking: publicProcedure.query(async () => {
@@ -22,7 +22,7 @@ export const dashboardRoute = {
 
             await getMoralis()
 
-            const [userToken, goTokenHolders, currentSnapshot] = await Promise.all([
+            const [userToken, saveTokenHolders, currentSnapshot] = await Promise.all([
                 Moralis.EvmApi.token.getWalletTokenBalances({
                     chain: process.env.CHAIN,
                     address: session.user.wallet
@@ -60,7 +60,7 @@ export const dashboardRoute = {
                 code: 'BAD_REQUEST',
                 message: "Failed to get user token"
             })
-            if (!goTokenHolders) throw new TRPCError({
+            if (!saveTokenHolders) throw new TRPCError({
                 code: 'BAD_REQUEST',
                 message: "Failed to get token holders"
             })
@@ -77,17 +77,17 @@ export const dashboardRoute = {
             Liquid Staking Data
             */
 
-            const goUserTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === goTokenAddress.toLowerCase())[0] as any
+            const saveTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === saveTokenAddress.toLowerCase())[0] as any
 
-            const goBalance = goUserTokenData && goUserTokenData.balance
-            const goDecimal = goUserTokenData && goUserTokenData.decimals
+            const saveBalance = saveTokenData && saveTokenData.balance
+            const saveDecimal = saveTokenData && saveTokenData.decimals
 
-            const formattedGoBalance = getFormattedBalance({
-                balance: goBalance,
-                decimal: goDecimal
+            const formattedSaveBalance = getFormattedBalance({
+                balance: saveBalance,
+                decimal: saveDecimal
             })
 
-            const goTokenGlobalStake = goTokenHolders && goTokenHolders.reduce((total, holder) => {
+            const saveTokenGlobalStake = saveTokenHolders && saveTokenHolders.reduce((total, holder) => {
 
                 if (holder.owner_address.toLowerCase() === String(process.env.GO_DISTRIBUTER).toLowerCase()) {
                     return total
@@ -138,22 +138,22 @@ export const dashboardRoute = {
             Grow Rewards Data
             */
 
-            const userTotalGrowRewardsReceived = userSnapshots.snapshots.reduce((total, snapshot) => {
+            const userTotalEarnTokenRewardsReceived = userSnapshots.snapshots.reduce((total, snapshot) => {
                 if (snapshot.status === 3) {
                     return total + Number(snapshot.reward)
                 }
                 return total
             }, 0).toFixed(10)
 
-            const growUserTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === growTokenAddress.toLocaleLowerCase())[0] as any
-            const growBalance = growUserTokenData && growUserTokenData.balance
-            const growDecimal = growUserTokenData && growUserTokenData.decimals
+            const earnUserTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === earnTokenAddress.toLocaleLowerCase())[0] as any
+            const earnBalance = earnUserTokenData && earnUserTokenData.balance
+            const earnDecimal = earnUserTokenData && earnUserTokenData.decimals
 
-            const formattedGrowBalance = getFormattedBalance({
-                balance: growBalance,
-                decimal: growDecimal
+            const formattedEarnBalance = getFormattedBalance({
+                balance: earnBalance,
+                decimal: earnDecimal
             })
-            
+
             const data = {
                 liquid_staking: {
                     snapshot: {
@@ -163,13 +163,13 @@ export const dashboardRoute = {
                         status: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].status : 4,
                     },
                     wallet: userWallet.wallet,
-                    current_go_balance: formattedGoBalance,
-                    global_stake: goTokenGlobalStake,
+                    current_save_balance: formattedSaveBalance,
+                    global_stake: saveTokenGlobalStake,
                 },
                 grow_rewards: {
-                    current_grow_balance: formattedGrowBalance,
+                    current_earn_balance: formattedEarnBalance,
                     upcoming_reward: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].reward : "0.0000000000",
-                    total_reward_received: userTotalGrowRewardsReceived
+                    total_reward_received: userTotalEarnTokenRewardsReceived
                 }
             }
 
@@ -197,7 +197,7 @@ export const dashboardRoute = {
                 chain: process.env.CHAIN,
                 order: "ASC",
                 address: walletAddress,
-                contractAddresses: [process.env.GO_ADDRESS as string]
+                contractAddresses: [process.env.SAVE_ADDRESS as string]
             })
 
             if (!getGoTokenBalanceHistory) throw new TRPCError({

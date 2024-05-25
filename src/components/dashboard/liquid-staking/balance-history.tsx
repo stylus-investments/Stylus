@@ -41,7 +41,7 @@ const BalanceHistory = ({ address }: { address: string }) => {
                                     <TableHead className='min-w-32'>Transaction ID</TableHead>
                                     <TableHead className=' min-w-52'>Date</TableHead>
                                     <TableHead className='min-w-32'>Transaction Type</TableHead>
-                                    <TableHead className='min-w-32'>Amount $GO</TableHead>
+                                    <TableHead className='min-w-32'>Amount SAVE</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -78,7 +78,7 @@ const BalanceHistory = ({ address }: { address: string }) => {
                                 }
                             </TableBody>
                         </Table>
-                        <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>$GO Transaction History</div>
+                        <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>SAVE Transaction History</div>
                         <TablePagination data={data || []} />
                     </CardContent>
                 </Card >

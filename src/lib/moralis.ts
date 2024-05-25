@@ -32,7 +32,7 @@ const getTokenHolders = async () => {
 
         await getMoralis()
 
-        const { data } = await axios.get(`https://deep-index.moralis.io/api/v2.2/erc20/${process.env.GO_ADDRESS}/owners?&order=DESC`, {
+        const { data } = await axios.get(`https://deep-index.moralis.io/api/v2.2/erc20/${process.env.SAVE_ADDRESS}/owners?&order=DESC`, {
             params: {
                 chain: process.env.CHAIN
             },

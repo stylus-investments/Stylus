@@ -1,5 +1,5 @@
 import React from 'react'
-import { faLock, faFlag, faSackDollar, faCircleInfo, faHandHoldingDollar } from '@fortawesome/free-solid-svg-icons'
+import { faLock, faFlag, faSackDollar, faCircleInfo, faHandHoldingDollar, faDollarSign } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '../../ui/button'
 import SnapshotTimer from './SnapshotTimer'
@@ -7,25 +7,85 @@ import BalanceHistory from './balance-history'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Label } from '@/components/ui/label'
 import GuideAccordions from './guide-accordions'
-
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import Image from 'next/image'
+import { Separator } from '@/components/ui/separator'
+import { caller } from '@/app/_trpc/server'
+import Link from 'next/link'
 interface Props {
-    dashboardData: {
-        snapshot: {
-            status: number;
-            reward: string;
-            next_snapshot: string;
-            current_stake: string;
-        };
-        wallet: string;
-        current_go_balance: string;
-        global_stake: string;
-    }
+    initialData: Awaited<ReturnType<(typeof caller['dashboard']['getLiquidStaking'])>>
 }
 
-const LiquidStaking = ({ dashboardData }: Props) => {
+const LiquidStaking = ({ initialData }: Props) => {
+
+    const dashboardData = initialData.liquid_staking
 
     return (
-        <div className='flex flex-col gap-10'>
+        <div className='flex flex-col gap-10 w-full'>
+            <div className='flex flex-col gap-5 xl:gap-10 xl:flex-row'>
+                <div className='flex w-full gap-5 xl:w-1/2 flex-col md:flex-row'>
+                    <Card className='w-full sm:w-96 md:w-1/2 xl:w-full'>
+                        <CardHeader>
+                            <div className='flex items-center w-full justify-between'>
+                                <div className='font-normal'>Current Balance</div>
+                                <div className='text-muted-foreground'>
+                                    <FontAwesomeIcon icon={faDollarSign} width={16} height={16} />
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className='flex flex-col'>
+                            <div className='font-black text-2xl'>
+                                16000 USD
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card className='w-full sm:w-96 md:w-1/2 xl:w-full pt-6'>
+                        <CardContent className='flex flex-col gap-3 justify-end'>
+                            <div className='flex gap-3 items-center text-center w-full'>
+                                <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/save.webp'} />
+                                <h1 className='font-black text-lg'>
+                                    {(Number(initialData.liquid_staking.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                                    <span className='text-xs font-normal' >
+                                        .{(Number(initialData.liquid_staking.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                                    </span>
+                                    <span className='ml-2 text-lg'>SAVE</span>
+                                </h1>
+                            </div>
+                            <Separator />
+                            <div className='flex gap-3 items-center text-center w-full'>
+                                <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/usdc.svg'} />
+                                <h1 className='font-black text-lg'>
+                                    {(Number(initialData.liquid_staking.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                                    <span className='text-xs font-normal' >
+                                        .{(Number(initialData.liquid_staking.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                                    </span>
+                                    <span className='ml-2 text-lg'>USDC</span>
+                                </h1>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+                <ul className='flex flex-col sm:flex-row sm:gap-3 text-muted-foreground w-full md:w-auto lg:w-1/2 xl:items-end text-sm gap-3 order-1 md:order-2'>
+                    <div className='flex items-center gap-3 w-full md:w-auto'>
+                        <Button className='w-full h-9' variant={'ghost'}>
+                            Deposit USDC
+                        </Button>
+                        <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank' className='w-full'>
+                            <Button className='w-full h-9' variant={'ghost'}>
+                                Buy SAVE
+                            </Button>
+                        </Link>
+                    </div>
+                    <div className='flex items-center gap-3 w-full md:w-auto'>
+                        <Button className='w-full h-9' variant={'ghost'}>
+                            Transfer
+                        </Button>
+                        <Button className='w-full h-9' variant={'ghost'}>
+                            Bond SAVE
+                        </Button>
+                    </div>
+                </ul>
+            </div>
             <div className='flex flex-col'>
                 <div className='flex flex-col lg:flex-row w-full'>
                     <div className='flex flex-col gap-3 p-5 border rounded-t-lg lg:rounded-tr-none w-full'>
@@ -133,7 +193,7 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                                 <Label>
                                     Current Balance
                                 </Label>
-                                {Number(dashboardData.current_go_balance) > 0 && <Button className=' h-6 bg-orange-400  hover:bg-orange-400 text-white'>Holding</Button>}
+                                {Number(dashboardData.current_save_balance) > 0 && <Button className=' h-6 bg-orange-400  hover:bg-orange-400 text-white'>Holding</Button>}
                             </div>
                             <TooltipProvider>
                                 <Tooltip>
@@ -147,9 +207,9 @@ const LiquidStaking = ({ dashboardData }: Props) => {
                             </TooltipProvider>
                         </div>
                         <h1 className='font-black md:text-lg '>
-                            {(Number(dashboardData.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                            {(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
                             <span className='text-xs' >
-                                .{(Number(dashboardData.current_go_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                                .{(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>$GO</span>
                         </h1>

@@ -92,7 +92,7 @@ const SnapshotHistory = ({ wallet }: {
                                                     })
                                                 }  UTC
                                             </TableCell>
-                                            <TableCell>{snapshot.reward} $GROW</TableCell>
+                                            <TableCell>{snapshot.reward} EARN</TableCell>
                                         </TableRow>
                                     ))
                                     :

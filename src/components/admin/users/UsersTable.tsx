@@ -31,7 +31,7 @@ const UsersTable: React.FC<SnapshotTableProps> = ({ userData }) => {
     return (
         <div className='container pt-20 flex flex-col gap-8'>
             <Table>
-                <TableCaption>Snapshot History</TableCaption>
+                <TableCaption>User List</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[100px]">ID</TableHead>

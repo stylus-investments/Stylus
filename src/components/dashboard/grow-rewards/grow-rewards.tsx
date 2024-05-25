@@ -3,22 +3,86 @@ import React from 'react'
 import SnapshotHistory from './snapshot-history';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Label } from '@/components/ui/label';
-import { faCircleInfo, faSackDollar, faHandHoldingDollar, faMoneyBillTrendUp, faCoins } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faSackDollar, faHandHoldingDollar, faMoneyBillTrendUp, faCoins, faDollarSign } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-
+import { caller } from '@/app/_trpc/server';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import Image from 'next/image';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 interface GrowRewardsProps {
-    dashboardData: {
-        wallet: string;
-        current_grow_balance: string;
-        upcoming_reward: string;
-        total_reward_received: string;
-    }
+    initialData: Awaited<ReturnType<(typeof caller['dashboard']['getLiquidStaking'])>>
 }
 
-const GrowRewards: React.FC<GrowRewardsProps> = ({ dashboardData }) => {
+const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
+
+    const dashboardData = initialData.grow_rewards
 
     return (
         <div className='flex flex-col gap-10'>
+            <div className='flex flex-col gap-5 xl:gap-10 xl:flex-row'>
+                <div className='flex w-full gap-5 xl:w-1/2 flex-col md:flex-row'>
+                    <Card className='w-full sm:w-96 md:w-1/2 xl:w-full'>
+                        <CardHeader>
+                            <div className='flex items-center w-full justify-between'>
+                                <div className='font-normal'>Rewards Accumlated</div>
+                                <div className='text-muted-foreground'>
+                                    <FontAwesomeIcon icon={faDollarSign} width={16} height={16} />
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className='flex flex-col'>
+                            <div className='font-black text-2xl'>
+                                300 USD
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card className='w-full sm:w-96 md:w-1/2 xl:w-full pt-6'>
+                        <CardContent className='flex flex-col gap-3 justify-end'>
+                            <div className='flex gap-3 items-center text-center w-full'>
+                                <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/save.webp'} />
+                                <h1 className='font-black text-lg'>
+                                    {(Number(initialData.grow_rewards.current_earn_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                                    <span className='text-xs font-normal' >
+                                        .{(Number(initialData.grow_rewards.current_earn_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                                    </span>
+                                    <span className='ml-2 text-lg'>EARN</span>
+                                </h1>
+                            </div>
+                            <Separator />
+                            <div className='flex gap-3 items-center text-center w-full'>
+                                <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/save.webp'} />
+                                <h1 className='font-black text-lg'>
+                                    {(Number(initialData.liquid_staking.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                                    <span className='text-xs font-normal' >
+                                        .{(Number(initialData.liquid_staking.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                                    </span>
+                                    <span className='ml-2 text-lg'>SVN</span>
+                                </h1>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+                <ul className='flex flex-col sm:flex-row sm:gap-3 text-muted-foreground w-full md:w-auto lg:w-1/2 xl:items-end text-sm gap-3 order-1 md:order-2'>
+                    <div className='flex items-center gap-3 w-full md:w-auto'>
+                        <Button className='w-full h-9' variant={'ghost'}>
+                            USDC Out
+                        </Button>
+                        <Button className='w-full h-9' variant={'ghost'}>
+                            Sell Earn
+                        </Button>
+                    </div>
+                    <div className='flex items-center gap-3 w-full md:w-auto'>
+                        <Button className='w-full h-9' variant={'ghost'}>
+                            Incubate
+                        </Button>
+                        <Button className='w-full h-9' variant={'ghost'}>
+                            IDO SVN
+                        </Button>
+                    </div>
+                </ul>
+            </div>
             <div className='flex flex-col'>
                 <div className='flex flex-col lg:flex-row w-full'>
                     <div className='flex flex-col gap-3 p-5 border rounded-t-lg rounded-b-lg lg:rounded-br-none lg:rounded-tr-none w-full'>
@@ -41,9 +105,9 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ dashboardData }) => {
                             </TooltipProvider>
                         </div>
                         <h1 className='font-black md:text-lg '>
-                            {(Number(dashboardData.current_grow_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                            {(Number(dashboardData.current_earn_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
                             <span className='text-xs' >
-                                .{(Number(dashboardData.current_grow_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                                .{(Number(dashboardData.current_earn_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>$GROW</span>
                         </h1>
@@ -62,7 +126,7 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ dashboardData }) => {
                                         <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                       Total $Grow received rewards.
+                                        Total $Grow received rewards.
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -129,7 +193,7 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ dashboardData }) => {
                 </div>
 
             </div>
-            <SnapshotHistory wallet={dashboardData.wallet} />
+            <SnapshotHistory wallet={initialData.liquid_staking.wallet} />
         </div>
     )
 }

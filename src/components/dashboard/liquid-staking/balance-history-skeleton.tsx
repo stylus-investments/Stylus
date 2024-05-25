@@ -10,14 +10,14 @@ export const BalanceHistorySkeleton = () => {
         <Card>
             <CardContent className='flex flex-col gap-5'>
                 <Table>
-                    <TableCaption>$GO Transaction History</TableCaption>
+                    <TableCaption>SAVE Transaction History</TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>#</TableHead>
                             <TableHead>Transaction ID</TableHead>
                             <TableHead>Date</TableHead>
                             <TableHead>Transaction Type</TableHead>
-                            <TableHead>Amount $GO</TableHead>
+                            <TableHead>Amount SAVE</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

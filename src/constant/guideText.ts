@@ -9,7 +9,7 @@ const guideTexts = [
     },
     {
         title: "Current Balance",
-        description: "Represents the real-time balance of $GO in your crypto wallet, adjusted by deposits or withdrawals. It's important to note that your $GO tokens are liquid-staked directly in your wallet, not on the website."
+        description: "Represents the real-time balance of SAVE in your crypto wallet, adjusted by deposits or withdrawals. It's important to note that your SAVE tokens are liquid-staked directly in your wallet, not on the website."
     },
     {
         title: "Timer",

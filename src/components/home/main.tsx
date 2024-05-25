@@ -15,7 +15,7 @@ const Main = () => {
                 </div>
                 <h1 className='font-thin text-6xl md:text-7xl'>Making Growth Relevant</h1>
                 <h2 className='text-sm text-muted-foreground md:text-base'>
-                    Liquid stake your USDC through $GO
+                    Liquid stake your USDC through SAVE
                     Earn yield up to 10 - 36 % anually
                     Be part of our dedicated community
                 </h2>
