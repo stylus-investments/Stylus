@@ -15,18 +15,22 @@ const getTokenPrice = async (tokenAddress: string) => {
     return tokenPrice || "0.00"
 }
 
+
+
 const getCurrentBalance = ({ usdcPrice, totalUsdc, totalSave }: {
     usdcPrice: string
     totalUsdc: string
     totalSave: string
 }) => {
 
-    const usdcConvertedPrice = (Number(usdcPrice) * 0.95) * Number(totalUsdc)
-    const convertedSavePrice = (Number(usdcPrice) * 0.993) * Number(totalSave)
+    const usdcConvertedPrice = Number(usdcPrice) * Number(totalUsdc)
+    const convertedSavePrice = Number(usdcPrice) * Number(totalSave)
 
     return (usdcConvertedPrice + convertedSavePrice).toString()
 
 }
+
+
 
 const getRewardsAccumulated = ({ usdcPrice, totalEarn, totalSvn }: {
     usdcPrice: string
@@ -34,12 +38,15 @@ const getRewardsAccumulated = ({ usdcPrice, totalEarn, totalSvn }: {
     totalSvn: string
 }) => {
 
-    const earnConvertedPrice = (Number(usdcPrice) * 0.95) * Number(totalEarn)
+    const earnConvertedPrice = Number(usdcPrice) * Number(totalEarn)
     const svnConvertedPrice = (Number(totalSvn) * 0.002)
 
     return (earnConvertedPrice + svnConvertedPrice).toString()
 
 }
+
+
+
 
 const getFormattedBalance = ({ balance, decimal }: any) => {
     if (balance && decimal) {
