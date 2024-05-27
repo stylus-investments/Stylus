@@ -38,10 +38,10 @@ const BalanceHistory = ({ address }: { address: string }) => {
                             <TableHeader>
                                 <TableRow className='text-xs md:text-sm'>
                                     <TableHead className='w-5'>#</TableHead>
-                                    <TableHead className='min-w-32'>Transaction ID</TableHead>
-                                    <TableHead className=' min-w-52'>Date</TableHead>
-                                    <TableHead className='min-w-32'>Transaction Type</TableHead>
                                     <TableHead className='min-w-32'>Amount SAVE</TableHead>
+                                    <TableHead className='min-w-32'>Transaction Type</TableHead>
+                                    <TableHead className=' min-w-52'>Date</TableHead>
+                                    <TableHead className='min-w-32'>Transaction ID</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -49,8 +49,11 @@ const BalanceHistory = ({ address }: { address: string }) => {
                                     <TableRow key={transac.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
                                         <TableCell>{transac.number}</TableCell>
                                         <TableCell>
-                                            {transac.id.substring(0, 10)}....
+                                            {
+                                                transac.type === 'Withdrawal' ? `(${transac.amount})` : transac.amount
+                                            }
                                         </TableCell>
+                                        <TableCell>{transac.type}</TableCell>
                                         <TableCell>
                                             {
                                                 new Date(transac.date).toLocaleString('en-US', {
@@ -64,11 +67,8 @@ const BalanceHistory = ({ address }: { address: string }) => {
                                                 })
                                             }  UTC
                                         </TableCell>
-                                        <TableCell>{transac.type}</TableCell>
                                         <TableCell>
-                                            {
-                                                transac.type === 'Withdrawal' ? `(${transac.amount})` : transac.amount
-                                            }
+                                            {transac.id.substring(0, 10)}....
                                         </TableCell>
                                     </TableRow>
                                 )) :

@@ -14,10 +14,10 @@ export const BalanceHistorySkeleton = () => {
                     <TableHeader>
                         <TableRow>
                             <TableHead>#</TableHead>
-                            <TableHead>Transaction ID</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Transaction Type</TableHead>
                             <TableHead>Amount SAVE</TableHead>
+                            <TableHead>Transaction Type</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Transaction ID</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -27,17 +27,18 @@ export const BalanceHistorySkeleton = () => {
                                     <Skeleton className='w-7 h-6 rounded-3xl' />
                                 </TableCell>
                                 <TableCell>
-                                    <Skeleton className='w-72 h-6 rounded-3xl' />
-                                </TableCell>
-                                <TableCell>
-                                    <Skeleton className='w-64 h-6 rounded-3xl' />
+                                    <Skeleton className='w-32 h-6 rounded-3xl' />
                                 </TableCell>
                                 <TableCell>
                                     <Skeleton className='w-28 h-6 rounded-3xl' />
                                 </TableCell>
                                 <TableCell>
-                                    <Skeleton className='w-32 h-6 rounded-3xl' />
+                                    <Skeleton className='w-64 h-6 rounded-3xl' />
                                 </TableCell>
+                                <TableCell>
+                                    <Skeleton className='w-72 h-6 rounded-3xl' />
+                                </TableCell>
+
                             </TableRow>
                         ))
                         }

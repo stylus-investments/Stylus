@@ -13,11 +13,11 @@ const SnapshotHistorySkeleton = () => {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Month</TableHead>
-                            <TableHead>Snapshot</TableHead>
+                            <TableHead>Rewards</TableHead>
                             <TableHead>Status</TableHead>
+                            <TableHead>Snapshot</TableHead>
                             <TableHead>Start</TableHead>
                             <TableHead>Finish</TableHead>
-                            <TableHead>Rewards</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -27,19 +27,19 @@ const SnapshotHistorySkeleton = () => {
                                     <Skeleton className='w-6 h-5 rounded-3xl' />
                                 </TableCell>
                                 <TableCell>
-                                    <Skeleton className='w-28 h-5 rounded-3xl' />
+                                    <Skeleton className='w-32 h-5 rounded-3xl' />
                                 </TableCell>
                                 <TableCell>
                                     <Skeleton className='w-36 h-5 rounded-3xl' />
                                 </TableCell>
                                 <TableCell>
-                                    <Skeleton className='w-52 h-5 rounded-3xl' />
+                                    <Skeleton className='w-28 h-5 rounded-3xl' />
                                 </TableCell>
                                 <TableCell>
                                     <Skeleton className='w-52 h-5 rounded-3xl' />
                                 </TableCell>
                                 <TableCell>
-                                    <Skeleton className='w-32 h-5 rounded-3xl' />
+                                    <Skeleton className='w-52 h-5 rounded-3xl' />
                                 </TableCell>
                             </TableRow>
                         ))}

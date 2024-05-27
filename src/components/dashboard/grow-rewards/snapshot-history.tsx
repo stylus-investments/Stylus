@@ -52,11 +52,11 @@ const SnapshotHistory = ({ wallet }: {
                             <TableHeader>
                                 <TableRow className='text-xs sm:text-sm'>
                                     <TableHead className='min-w-10'>Month</TableHead>
-                                    <TableHead className='min-w-16'>Snapshot</TableHead>
+                                    <TableHead className='min-w-56'>Rewards</TableHead>
                                     <TableHead className='min-w-32'>Status</TableHead>
+                                    <TableHead className='min-w-16'>Snapshot</TableHead>
                                     <TableHead className='min-w-56'>Start</TableHead>
                                     <TableHead className='min-w-56'>Finish</TableHead>
-                                    <TableHead className='min-w-56'>Rewards</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -64,8 +64,9 @@ const SnapshotHistory = ({ wallet }: {
                                     currentTable.map((snapshot) => (
                                         <TableRow key={(snapshot).id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
                                             <TableCell>{snapshot.month}</TableCell>
-                                            <TableCell>{snapshot.stake}</TableCell>
+                                            <TableCell>{snapshot.reward} EARN</TableCell>
                                             <TableCell>{returnSnapshotStatusButton(snapshot.status)}</TableCell>
+                                            <TableCell>{snapshot.stake}</TableCell>
                                             <TableCell>
                                                 {
                                                     new Date(snapshot.snapshot.start_date).toLocaleString('en-US', {
@@ -92,7 +93,6 @@ const SnapshotHistory = ({ wallet }: {
                                                     })
                                                 }  UTC
                                             </TableCell>
-                                            <TableCell>{snapshot.reward} EARN</TableCell>
                                         </TableRow>
                                     ))
                                     :
