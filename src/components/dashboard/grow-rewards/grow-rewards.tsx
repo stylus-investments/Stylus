@@ -34,9 +34,9 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
                         </CardHeader>
                         <CardContent className='flex flex-col'>
                             <h1 className='font-black text-2xl'>
-                                {(Number(initialData.grow_rewards.rewardsAccumulated)).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).split('.')[0]}
+                                {(Number(initialData.grow_rewards.rewardsAccumulated)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                                 <span className='text-xs font-normal' >
-                                    .{(Number(initialData.grow_rewards.rewardsAccumulated)).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).split('.')[1]}
+                                    .{(Number(initialData.grow_rewards.rewardsAccumulated)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                                 </span>
                                 <span className='ml-2 text-lg'>USD</span>
                             </h1>
@@ -47,9 +47,9 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
                             <div className='flex gap-3 items-center text-center w-full'>
                                 <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/save.webp'} />
                                 <h1 className='font-black text-lg'>
-                                    {(Number(initialData.grow_rewards.current_earn_balance)).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).split('.')[0]}
+                                    {(Number(initialData.grow_rewards.current_earn_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                                     <span className='text-xs font-normal' >
-                                        .{(Number(initialData.grow_rewards.current_earn_balance)).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).split('.')[1]}
+                                        .{(Number(initialData.grow_rewards.current_earn_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                                     </span>
                                     <span className='ml-2 text-lg'>EARN</span>
                                 </h1>
@@ -58,9 +58,9 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
                             <div className='flex gap-3 items-center text-center w-full'>
                                 <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/save.webp'} />
                                 <h1 className='font-black text-lg'>
-                                    {(Number(initialData.grow_rewards.current_svn_balance)).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).split('.')[0]}
+                                    {(Number(initialData.grow_rewards.current_svn_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                                     <span className='text-xs font-normal' >
-                                        .{(Number(initialData.grow_rewards.current_svn_balance)).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).split('.')[1]}
+                                        .{(Number(initialData.grow_rewards.current_svn_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                                     </span>
                                     <span className='ml-2 text-lg'>SVN</span>
                                 </h1>
@@ -109,9 +109,9 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
                             </TooltipProvider>
                         </div>
                         <h1 className='font-black md:text-lg '>
-                            {(Number(dashboardData.current_earn_balance)).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).split('.')[0]}
+                            {(Number(dashboardData.current_earn_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                             <span className='text-xs' >
-                                .{(Number(dashboardData.current_earn_balance)).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).split('.')[1]}
+                                .{(Number(dashboardData.current_earn_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>EARN</span>
                         </h1>
@@ -136,9 +136,9 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
                             </TooltipProvider>
                         </div>
                         <h1 className='font-black md:text-lg '>
-                            {(Number(dashboardData.total_reward_received)).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).split('.')[0]}
+                            {(Number(dashboardData.total_reward_received)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                             <span className='text-xs' >
-                                .{(Number(dashboardData.total_reward_received)).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).split('.')[1]}
+                                .{(Number(dashboardData.total_reward_received)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>EARN</span>
 
@@ -164,9 +164,9 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
                             </TooltipProvider>
                         </div>
                         <h1 className='font-black md:text-lg xl:text-xl'>
-                            {(Number(dashboardData.upcoming_reward)).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).split('.')[0]}
+                            {(Number(dashboardData.upcoming_reward)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                             <span className='text-xs' >
-                                .{(Number(dashboardData.upcoming_reward)).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).split('.')[1]}
+                                .{(Number(dashboardData.upcoming_reward)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>EARN</span>
                         </h1>
