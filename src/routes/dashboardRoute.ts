@@ -5,9 +5,12 @@ import { TRPCError } from "@trpc/server";
 import Moralis from "moralis";
 import { z } from "zod";
 import { getAuth } from "@/lib/nextAuth";
+import { getCurrentBalance, getFormattedBalance, getRewardsAccumulated, getTokenPrice } from "@/lib/prices";
 
 const saveTokenAddress = process.env.SAVE_ADDRESS as string
 const earnTokenAddress = process.env.EARN_ADDRESS as string
+const usdcTokenAddress = process.env.USDC_ADDRESS as string
+const svnTokenAddress = process.env.SVN_ADDRESS as string
 
 export const dashboardRoute = {
     getLiquidStaking: publicProcedure.query(async () => {
@@ -22,83 +25,20 @@ export const dashboardRoute = {
 
             await getMoralis()
 
-            const [userToken, saveTokenHolders, currentSnapshot] = await Promise.all([
+            const [userToken, saveTokenHolders, currentSnapshot, userWallet, userSnapshots] = await Promise.all([
                 Moralis.EvmApi.token.getWalletTokenBalances({
                     chain: process.env.CHAIN,
                     address: session.user.wallet
                 }),
+
                 getTokenHolders(),
+
                 db.snapshot.findMany({
                     where: {
                         completed: false
                     }
                 }),
-                db.user.findUnique({
-                    where: { wallet: session.user.wallet },
-                    select: {
-                        snapshots: {
-                            select: {
-                                id: true,
-                                stake: true,
-                                status: true,
-                                reward: true,
-                                snapshot: {
-                                    select: {
-                                        start_date: true,
-                                        end_date: true
-                                    }
-                                }
-                            },
-                            orderBy: {
-                                created_at: 'asc'
-                            }
-                        }
-                    }
-                })
-            ])
-            if (!userToken) throw new TRPCError({
-                code: 'BAD_REQUEST',
-                message: "Failed to get user token"
-            })
-            if (!saveTokenHolders) throw new TRPCError({
-                code: 'BAD_REQUEST',
-                message: "Failed to get token holders"
-            })
 
-            const getFormattedBalance = ({ balance, decimal }: any) => {
-                if (balance && decimal) {
-                    const formatBalance = Number(balance) / (10 ** decimal)
-                    return formatBalance.toString()
-                }
-                return "0.0000000000"
-            }
-
-            /*
-            Liquid Staking Data
-            */
-
-            const saveTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === saveTokenAddress.toLowerCase())[0] as any
-
-            const saveBalance = saveTokenData && saveTokenData.balance
-            const saveDecimal = saveTokenData && saveTokenData.decimals
-
-            const formattedSaveBalance = getFormattedBalance({
-                balance: saveBalance,
-                decimal: saveDecimal
-            })
-
-            const saveTokenGlobalStake = saveTokenHolders && saveTokenHolders.reduce((total, holder) => {
-
-                if (holder.owner_address.toLowerCase() === String(process.env.GO_DISTRIBUTER).toLowerCase()) {
-                    return total
-                }
-
-                return total + Number(holder.balance_formatted)
-            }, 0).toString() || "0.0000000000"
-
-
-
-            const [userWallet, userSnapshots] = await Promise.all([
                 db.user.findUnique({
                     where: { wallet: session.user.wallet },
                     select: {
@@ -112,6 +52,7 @@ export const dashboardRoute = {
                         }
                     }
                 }),
+
                 db.user.findUnique({
                     where: {
                         wallet: session.user.wallet
@@ -127,16 +68,69 @@ export const dashboardRoute = {
                     }
                 })
             ])
+            if (!userToken) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "Failed to get user token"
+            })
+            if (!saveTokenHolders) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "Failed to get token holders"
+            })
 
             if (!userWallet || !userSnapshots) throw new TRPCError({
                 code: 'NOT_FOUND',
                 message: "User Not Found"
             })
 
+            /*
 
-            /* 
-            Grow Rewards Data
+            token balance data
+
             */
+
+            const getTokenData = (tokenAddress: string) => {
+                return userToken.raw.find(token => token.token_address.toLowerCase() === tokenAddress.toLowerCase()) || {};
+            };
+
+            // Function to get formatted balance
+            const getFormattedTokenBalance = (tokenAddress: string) => {
+                const tokenData: any = getTokenData(tokenAddress);
+                const balance = tokenData.balance || 0;
+                const decimals = tokenData.decimals || 0;
+                return getFormattedBalance({
+                    balance: balance,
+                    decimal: decimals
+                });
+            };
+
+            const usdcPrice = await getTokenPrice(usdcTokenAddress)
+
+            const formattedSaveBalance = getFormattedTokenBalance(saveTokenAddress);
+            const formattedUsdcBalance = getFormattedTokenBalance(usdcTokenAddress);
+            const formattedEarnBalance = getFormattedTokenBalance(earnTokenAddress);
+            const formattedSvnBalance = getFormattedTokenBalance(svnTokenAddress);
+
+            const currentBalance = getCurrentBalance({
+                usdcPrice,
+                totalUsdc: formattedSaveBalance,
+                totalSave: formattedSaveBalance
+            })
+
+            const rewardsAccumulated = getRewardsAccumulated({
+                usdcPrice,
+                totalEarn: formattedEarnBalance,
+                totalSvn: formattedSvnBalance
+            })
+
+            const saveTokenGlobalStake = saveTokenHolders && saveTokenHolders.reduce((total, holder) => {
+
+                if (holder.owner_address.toLowerCase() === String(process.env.GO_DISTRIBUTER).toLowerCase()) {
+                    return total
+                }
+
+                return total + Number(holder.balance_formatted)
+            }, 0).toString() || "0.0000000000"
+
 
             const userTotalEarnTokenRewardsReceived = userSnapshots.snapshots.reduce((total, snapshot) => {
                 if (snapshot.status === 3) {
@@ -144,15 +138,6 @@ export const dashboardRoute = {
                 }
                 return total
             }, 0).toFixed(10)
-
-            const earnUserTokenData = userToken.raw.filter(token => token.token_address.toLowerCase() === earnTokenAddress.toLocaleLowerCase())[0] as any
-            const earnBalance = earnUserTokenData && earnUserTokenData.balance
-            const earnDecimal = earnUserTokenData && earnUserTokenData.decimals
-
-            const formattedEarnBalance = getFormattedBalance({
-                balance: earnBalance,
-                decimal: earnDecimal
-            })
 
             const data = {
                 liquid_staking: {
@@ -163,11 +148,15 @@ export const dashboardRoute = {
                         status: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].status : 4,
                     },
                     wallet: userWallet.wallet,
+                    currentBalance,
                     current_save_balance: formattedSaveBalance,
+                    current_usdc_balance: formattedUsdcBalance,
                     global_stake: saveTokenGlobalStake,
                 },
                 grow_rewards: {
                     current_earn_balance: formattedEarnBalance,
+                    current_svn_balance: formattedSvnBalance,
+                    rewardsAccumulated,
                     upcoming_reward: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].reward : "0.0000000000",
                     total_reward_received: userTotalEarnTokenRewardsReceived
                 }

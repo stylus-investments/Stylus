@@ -14,16 +14,12 @@ interface TokenHolders {
 let isMoralisInitialized = false;
 
 const getMoralis = async () => {
-
     if (!isMoralisInitialized) {
-
         await Moralis.start({
             apiKey: process.env.MORALIS_API_KEY as string
         });
-
         isMoralisInitialized = true;
     }
-
 }
 
 const getTokenHolders = async () => {

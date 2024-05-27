@@ -34,9 +34,13 @@ const LiquidStaking = ({ initialData }: Props) => {
                             </div>
                         </CardHeader>
                         <CardContent className='flex flex-col'>
-                            <div className='font-black text-2xl'>
-                                16000 USD
-                            </div>
+                            <h1 className='font-black text-2xl'>
+                                {(Number(dashboardData.currentBalance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                                <span className='text-xs font-normal' >
+                                    .{(Number(dashboardData.currentBalance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                                </span>
+                                <span className='ml-2 text-lg'>USD</span>
+                            </h1>
                         </CardContent>
                     </Card>
                     <Card className='w-full sm:w-96 md:w-1/2 xl:w-full pt-6'>
@@ -44,20 +48,20 @@ const LiquidStaking = ({ initialData }: Props) => {
                             <div className='flex gap-3 items-center text-center w-full'>
                                 <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/save.webp'} />
                                 <h1 className='font-black text-lg'>
-                                    {(Number(initialData.liquid_staking.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                                    {(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
                                     <span className='text-xs font-normal' >
-                                        .{(Number(initialData.liquid_staking.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                                        .{(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                                     </span>
                                     <span className='ml-2 text-lg'>SAVE</span>
                                 </h1>
                             </div>
                             <Separator />
                             <div className='flex gap-3 items-center text-center w-full'>
-                                <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/usdc.svg'} />
+                                <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/usdc.png'} />
                                 <h1 className='font-black text-lg'>
-                                    {(Number(initialData.liquid_staking.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
+                                    {(Number(dashboardData.current_usdc_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[0]}
                                     <span className='text-xs font-normal' >
-                                        .{(Number(initialData.liquid_staking.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
+                                        .{(Number(initialData.liquid_staking.current_usdc_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                                     </span>
                                     <span className='ml-2 text-lg'>USDC</span>
                                 </h1>
@@ -102,7 +106,7 @@ const LiquidStaking = ({ initialData }: Props) => {
                                         <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        Total $GO tokens currently staked across all accounts.
+                                        Total SAVE tokens currently staked across all accounts.
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -112,7 +116,7 @@ const LiquidStaking = ({ initialData }: Props) => {
                             <span className='text-xs' >
                                 .{(Number(dashboardData.global_stake)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                             </span>
-                            <span className='ml-2'>$GO</span>
+                            <span className='ml-2'>SAVE</span>
                         </h1>
                     </div>
                     <div className='flex flex-col gap-3 p-5 border w-full'>
@@ -172,7 +176,7 @@ const LiquidStaking = ({ initialData }: Props) => {
                                         <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        Your active stake in $GO tokens as recorded in the last snapshot.
+                                        Your active stake in SAVE tokens as recorded in the last snapshot.
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -182,7 +186,7 @@ const LiquidStaking = ({ initialData }: Props) => {
                             <span className='text-xs' >
                                 .{(Number(dashboardData.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                             </span>
-                            <span className='ml-2'>$GO</span>
+                            <span className='ml-2'>SAVE</span>
                         </h1>
                         <small className='text-muted-foreground'>Last snapshot balance</small>
                     </div>
@@ -201,7 +205,7 @@ const LiquidStaking = ({ initialData }: Props) => {
                                         <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        Current amount of $GO tokens in your crypto wallet.
+                                        Current amount of SAVE tokens in your crypto wallet.
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -211,7 +215,7 @@ const LiquidStaking = ({ initialData }: Props) => {
                             <span className='text-xs' >
                                 .{(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 10, maximumFractionDigits: 10 }).split('.')[1]}
                             </span>
-                            <span className='ml-2'>$GO</span>
+                            <span className='ml-2'>SAVE</span>
                         </h1>
                         <small className='text-muted-foreground'>Crypto wallet holdings</small>
                     </div>
