@@ -14,28 +14,28 @@ datasource db {
 }
 
 model user {
-  id         Int                @id @default(autoincrement())
-  wallet     String             @unique
+  id         Int             @id @default(autoincrement())
+  wallet     String          @unique
   snapshots  user_snapshot[]
-  created_at DateTime           @default(now())
-  updated_at DateTime           @updatedAt
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
 }
 
 model admin {
   id         Int      @id @default(autoincrement())
-  username   String @unique
-  password   String @unique
+  username   String   @unique
+  password   String   @unique
   created_at DateTime @default(now())
 }
 
 model snapshot {
-  id         Int                @id @default(autoincrement())
-  start_date DateTime
-  end_date   DateTime
-  completed  Boolean            @default(false)
-  user_snapshot    user_snapshot[]
-  created_at DateTime           @default(now())
-  updated_at DateTime           @updatedAt
+  id            Int             @id @default(autoincrement())
+  start_date    DateTime
+  end_date      DateTime
+  completed     Boolean         @default(false)
+  user_snapshot user_snapshot[]
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
 }
 
 model user_snapshot {
@@ -49,4 +49,10 @@ model user_snapshot {
   snapshot    snapshot @relation(fields: [snapshot_id], references: [id])
   user_id     Int
   snapshot_id Int
+}
+
+model currency_conversion {
+  id              Int    @id @default(autoincrement())
+  currency        String @unique
+  conversion_rate String
 }

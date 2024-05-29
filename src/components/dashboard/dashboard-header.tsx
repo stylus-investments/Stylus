@@ -9,13 +9,8 @@ import ConnectWalletButton from './connect-wallet-button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select'
-import useBalanceStore from '@/state/balanceStore'
-
 
 const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
-
-    const { currency, setCurrency, availableCurrency, getConversionRate } = useBalanceStore()
 
     const mobileScreen = (
         <nav className='md:hidden flex items-center justify-between w-full'>

@@ -10,7 +10,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
 interface Props {
-    initialData: Awaited<ReturnType<(typeof caller['dashboard']['getLiquidStaking'])>>
+    initialData: Awaited<ReturnType<(typeof caller['dashboard']['getDashboardData'])>>
 }
 
 const Dashboard = ({ initialData }: Props) => {

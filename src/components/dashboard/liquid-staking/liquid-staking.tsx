@@ -12,18 +12,18 @@ import Image from 'next/image'
 import { Separator } from '@/components/ui/separator'
 import { caller } from '@/app/_trpc/server'
 import Link from 'next/link'
-import useBalanceStore from '@/state/balanceStore'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
+import useBalanceStore from '@/state/balanceStore'
+import { availableCurrencies } from '@/constant/availableCurrency'
 interface Props {
-    initialData: Awaited<ReturnType<(typeof caller['dashboard']['getLiquidStaking'])>>
+    initialData: Awaited<ReturnType<(typeof caller['dashboard']['getDashboardData'])>>
 }
 
 const LiquidStaking = ({ initialData }: Props) => {
 
-
     const dashboardData = initialData.liquid_staking
 
-    const { currency, getConvertedBalance, setCurrency, getConversionRate, availableCurrency } = useBalanceStore()
+    const { currency, setCurrency } = useBalanceStore()
 
     return (
         <div className='flex flex-col gap-10 w-full'>
@@ -34,17 +34,14 @@ const LiquidStaking = ({ initialData }: Props) => {
                             <div className='flex items-center w-full justify-between'>
                                 <div className='font-normal'>Current Balance</div>
                                 <div className='text-muted-foreground'>
-                                    <Select value={currency} onValueChange={(value) => {
-                                        setCurrency(value)
-                                        getConversionRate(value)
-                                    }}>
+                                    <Select value={currency} onValueChange={(value) => setCurrency(value)}>
                                         <SelectTrigger className='w-auto'>
-                                            <SelectValue placeholder={currency} />
+                                            <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectGroup>
                                                 <SelectLabel>Currency</SelectLabel>
-                                                {availableCurrency.map((obj, i) => (
+                                                {availableCurrencies.map((obj, i) => (
                                                     <SelectItem value={obj.currency} key={i} >
                                                         {obj.currency}
                                                         <FontAwesomeIcon icon={obj.icon} width={16} height={16} className='ml-2' />
@@ -57,13 +54,19 @@ const LiquidStaking = ({ initialData }: Props) => {
                             </div>
                         </CardHeader>
                         <CardContent className='flex flex-col'>
-                            <h1 className='font-black text-2xl'>
-                                {(Number(getConvertedBalance(dashboardData.currentBalance))).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
-                                <span className='text-xs font-normal' >
-                                    .{(Number(getConvertedBalance(dashboardData.currentBalance))).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
-                                </span>
-                                <span className='ml-2 text-lg'>{currency}</span>
-                            </h1>
+                            {dashboardData.currentBalances.map((obj, i) => {
+                                if (obj.currency === currency) {
+                                    return (
+                                        <div className='font-black text-2xl' key={i}>
+                                            {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
+                                            <span className='text-xs font-normal' >
+                                                .{(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
+                                            </span>
+                                            <span className='ml-2 text-lg'>{obj.currency}</span>
+                                        </div>
+                                    )
+                                }
+                            })}
                         </CardContent>
                     </Card>
                     <Card className='w-full sm:w-96 md:w-1/2 xl:w-full pt-6'>

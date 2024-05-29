@@ -6,6 +6,7 @@ import Moralis from "moralis";
 import { z } from "zod";
 import { getAuth } from "@/lib/nextAuth";
 import { getCurrentBalance, getFormattedBalance, getRewardsAccumulated, getTokenPrice } from "@/lib/prices";
+import { calculateBalanceArray } from "@/lib/balances";
 
 const saveTokenAddress = process.env.SAVE_ADDRESS as string
 const earnTokenAddress = process.env.EARN_ADDRESS as string
@@ -13,7 +14,7 @@ const usdcTokenAddress = process.env.USDC_ADDRESS as string
 const svnTokenAddress = process.env.SVN_ADDRESS as string
 
 export const dashboardRoute = {
-    getLiquidStaking: publicProcedure.query(async () => {
+    getDashboardData: publicProcedure.query(async () => {
         try {
 
             const session = await getAuth()
@@ -25,7 +26,7 @@ export const dashboardRoute = {
 
             await getMoralis()
 
-            const [userToken, saveTokenHolders, currentSnapshot, userWallet, userSnapshots] = await Promise.all([
+            const [userToken, saveTokenHolders, currentSnapshot, userWallet, userSnapshots, currencyExchangeRate] = await Promise.all([
                 Moralis.EvmApi.token.getWalletTokenBalances({
                     chain: process.env.CHAIN,
                     address: session.user.wallet
@@ -66,7 +67,8 @@ export const dashboardRoute = {
                             }
                         }
                     }
-                })
+                }),
+                db.currency_conversion.findMany()
             ])
             if (!userToken) throw new TRPCError({
                 code: 'BAD_REQUEST',
@@ -139,6 +141,11 @@ export const dashboardRoute = {
                 return total
             }, 0).toFixed(10)
 
+            //calculate the balances
+            const currentBalanceArray = calculateBalanceArray({ currencyExchangeRate, balance: currentBalance })
+            const rewardsAccumulatedBalanceArray = calculateBalanceArray({ currencyExchangeRate, balance: rewardsAccumulated })
+
+            //restructure the data
             const data = {
                 liquid_staking: {
                     snapshot: {
@@ -148,7 +155,7 @@ export const dashboardRoute = {
                         status: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].status : 4,
                     },
                     wallet: userWallet.wallet,
-                    currentBalance,
+                    currentBalances: currentBalanceArray,
                     current_save_balance: formattedSaveBalance,
                     current_usdc_balance: formattedUsdcBalance,
                     global_stake: saveTokenGlobalStake,
@@ -156,7 +163,7 @@ export const dashboardRoute = {
                 grow_rewards: {
                     current_earn_balance: formattedEarnBalance,
                     current_svn_balance: formattedSvnBalance,
-                    rewardsAccumulated,
+                    rewardsAccumulated: rewardsAccumulatedBalanceArray,
                     upcoming_reward: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].reward : "0.0000000000",
                     total_reward_received: userTotalEarnTokenRewardsReceived
                 }
