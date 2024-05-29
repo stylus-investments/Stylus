@@ -114,7 +114,7 @@ export const dashboardRoute = {
 
             const currentBalance = getCurrentBalance({
                 usdcPrice,
-                totalUsdc: formattedSaveBalance,
+                totalUsdc: formattedUsdcBalance,
                 totalSave: formattedSaveBalance
             })
 
