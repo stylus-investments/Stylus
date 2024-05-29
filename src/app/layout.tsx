@@ -9,7 +9,8 @@ import { footerTexts } from "@/constant/footerTexts";
 
 export const metadata: Metadata = {
   title: "Savern",
-  description: footerTexts.description
+  description: footerTexts.description,
+  icons: '/save.webp'
 };
 
 export default function RootLayout({
@@ -19,7 +20,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <link rel="icon" href="/go.webp" sizes="any" />
       <NextAuthSessionProvider>
         <TrpcProvider>
           <body>

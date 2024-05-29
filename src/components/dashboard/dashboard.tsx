@@ -25,7 +25,7 @@ const Dashboard = ({ initialData }: Props) => {
     })
 
     return (
-        <main className='flex flex-col items-center pt-32 pb-10 gap-10'>
+        <main className='flex flex-col items-center pt-20 pb-10 gap-10'>
 
             <Tabs defaultValue="balances" className="w-full">
                 <div className='flex items-center flex-col gap-5 md:gap-0 pb-10 md:flex-row md:justify-between w-full'>

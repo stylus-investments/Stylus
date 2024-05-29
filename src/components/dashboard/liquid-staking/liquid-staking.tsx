@@ -1,5 +1,5 @@
-import React from 'react'
-import { faLock, faFlag, faSackDollar, faCircleInfo, faHandHoldingDollar, faDollarSign } from '@fortawesome/free-solid-svg-icons'
+import React, { useEffect, useState } from 'react'
+import { faLock, faFlag, faSackDollar, faCircleInfo, faHandHoldingDollar, faDollarSign, faPesoSign } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '../../ui/button'
 import SnapshotTimer from './SnapshotTimer'
@@ -12,13 +12,18 @@ import Image from 'next/image'
 import { Separator } from '@/components/ui/separator'
 import { caller } from '@/app/_trpc/server'
 import Link from 'next/link'
+import useBalanceStore from '@/state/balanceStore'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 interface Props {
     initialData: Awaited<ReturnType<(typeof caller['dashboard']['getLiquidStaking'])>>
 }
 
 const LiquidStaking = ({ initialData }: Props) => {
 
+
     const dashboardData = initialData.liquid_staking
+
+    const { currency, getConvertedBalance, setCurrency, getConversionRate, availableCurrency } = useBalanceStore()
 
     return (
         <div className='flex flex-col gap-10 w-full'>
@@ -29,17 +34,35 @@ const LiquidStaking = ({ initialData }: Props) => {
                             <div className='flex items-center w-full justify-between'>
                                 <div className='font-normal'>Current Balance</div>
                                 <div className='text-muted-foreground'>
-                                    <FontAwesomeIcon icon={faDollarSign} width={16} height={16} />
+                                    <Select value={currency} onValueChange={(value) => {
+                                        setCurrency(value)
+                                        getConversionRate(value)
+                                    }}>
+                                        <SelectTrigger className='w-auto'>
+                                            <SelectValue placeholder={currency} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectLabel>Currency</SelectLabel>
+                                                {availableCurrency.map((obj, i) => (
+                                                    <SelectItem value={obj.currency} key={i} >
+                                                        {obj.currency}
+                                                        <FontAwesomeIcon icon={obj.icon} width={16} height={16} className='ml-2' />
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent className='flex flex-col'>
                             <h1 className='font-black text-2xl'>
-                                {(Number(dashboardData.currentBalance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[0]}
+                                {(Number(getConvertedBalance(dashboardData.currentBalance))).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                                 <span className='text-xs font-normal' >
-                                    .{(Number(dashboardData.currentBalance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[1]}
+                                    .{(Number(getConvertedBalance(dashboardData.currentBalance))).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                                 </span>
-                                <span className='ml-2 text-lg'>USD</span>
+                                <span className='ml-2 text-lg'>{currency}</span>
                             </h1>
                         </CardContent>
                     </Card>
@@ -48,9 +71,9 @@ const LiquidStaking = ({ initialData }: Props) => {
                             <div className='flex gap-3 items-center text-center w-full'>
                                 <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/save.webp'} />
                                 <h1 className='font-black text-lg'>
-                                    {(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[0]}
+                                    {(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                                     <span className='text-xs font-normal' >
-                                        .{(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[1]}
+                                        .{(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                                     </span>
                                     <span className='ml-2 text-lg'>SAVE</span>
                                 </h1>
@@ -59,9 +82,9 @@ const LiquidStaking = ({ initialData }: Props) => {
                             <div className='flex gap-3 items-center text-center w-full'>
                                 <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/usdc.png'} />
                                 <h1 className='font-black text-lg'>
-                                    {(Number(dashboardData.current_usdc_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[0]}
+                                    {(Number(dashboardData.current_usdc_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                                     <span className='text-xs font-normal' >
-                                        .{(Number(initialData.liquid_staking.current_usdc_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[1]}
+                                        .{(Number(initialData.liquid_staking.current_usdc_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                                     </span>
                                     <span className='ml-2 text-lg'>USDC</span>
                                 </h1>
@@ -112,9 +135,9 @@ const LiquidStaking = ({ initialData }: Props) => {
                             </TooltipProvider>
                         </div>
                         <h1 className='font-black md:text-lg '>
-                            {(Number(dashboardData.global_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[0]}
+                            {(Number(dashboardData.global_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                             <span className='text-xs' >
-                                .{(Number(dashboardData.global_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[1]}
+                                .{(Number(dashboardData.global_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>SAVE</span>
                         </h1>
@@ -182,9 +205,9 @@ const LiquidStaking = ({ initialData }: Props) => {
                             </TooltipProvider>
                         </div>
                         <h1 className='font-black md:text-lg '>
-                            {(Number(dashboardData.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[0]}
+                            {(Number(dashboardData.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                             <span className='text-xs' >
-                                .{(Number(dashboardData.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[1]}
+                                .{(Number(dashboardData.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>SAVE</span>
                         </h1>
@@ -211,9 +234,9 @@ const LiquidStaking = ({ initialData }: Props) => {
                             </TooltipProvider>
                         </div>
                         <h1 className='font-black md:text-lg '>
-                            {(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[0]}
+                            {(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                             <span className='text-xs' >
-                                .{(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[1]}
+                                .{(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                             </span>
                             <span className='ml-2'>SAVE</span>
                         </h1>
@@ -238,9 +261,9 @@ const LiquidStaking = ({ initialData }: Props) => {
                         </div>
                         <div className='w-full flex items-center justify-between'>
                             <h1 className='font-black md:text-lg '>
-                                {(Number(dashboardData.snapshot.reward)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[0]}
+                                {(Number(dashboardData.snapshot.reward)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                                 <span className='text-xs' >
-                                    .{(Number(dashboardData.snapshot.reward)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6}).split('.')[1]}
+                                    .{(Number(dashboardData.snapshot.reward)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                                 </span>
                                 <span className='ml-2'>$GROW</span>
                             </h1>

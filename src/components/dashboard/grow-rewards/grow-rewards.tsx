@@ -1,16 +1,17 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import SnapshotHistory from './snapshot-history';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Label } from '@/components/ui/label';
-import { faCircleInfo, faSackDollar, faHandHoldingDollar, faMoneyBillTrendUp, faCoins, faDollarSign } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faSackDollar, faHandHoldingDollar, faMoneyBillTrendUp, faCoins, faDollarSign, faPesoSign } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { caller } from '@/app/_trpc/server';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import useBalanceStore from '@/state/balanceStore';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 interface GrowRewardsProps {
     initialData: Awaited<ReturnType<(typeof caller['dashboard']['getLiquidStaking'])>>
 }
@@ -18,6 +19,8 @@ interface GrowRewardsProps {
 const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
 
     const dashboardData = initialData.grow_rewards
+
+    const { currency, getConvertedBalance, setCurrency, getConversionRate, availableCurrency } = useBalanceStore()
 
     return (
         <div className='flex flex-col gap-10'>
@@ -28,17 +31,35 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
                             <div className='flex items-center w-full justify-between'>
                                 <div className='font-normal'>Rewards Accumulated</div>
                                 <div className='text-muted-foreground'>
-                                    <FontAwesomeIcon icon={faDollarSign} width={16} height={16} />
+                                    <Select value={currency} onValueChange={(value) => {
+                                        setCurrency(value)
+                                        getConversionRate(value)
+                                    }}>
+                                        <SelectTrigger className='w-auto'>
+                                            <SelectValue placeholder={currency} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectLabel>Currency</SelectLabel>
+                                                {availableCurrency.map((obj, i) => (
+                                                    <SelectItem value={obj.currency} key={i} >
+                                                        {obj.currency}
+                                                        <FontAwesomeIcon icon={obj.icon} width={16} height={16} className='ml-2' />
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent className='flex flex-col'>
                             <h1 className='font-black text-2xl'>
-                                {(Number(initialData.grow_rewards.rewardsAccumulated)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
+                                {(Number(getConvertedBalance(dashboardData.rewardsAccumulated))).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                                 <span className='text-xs font-normal' >
-                                    .{(Number(initialData.grow_rewards.rewardsAccumulated)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
+                                    .{(Number(getConvertedBalance(dashboardData.rewardsAccumulated))).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                                 </span>
-                                <span className='ml-2 text-lg'>USD</span>
+                                <span className='ml-2 text-lg'>{currency}</span>
                             </h1>
                         </CardContent>
                     </Card>
