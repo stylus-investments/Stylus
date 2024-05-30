@@ -25,7 +25,7 @@ const Footer = () => {
                 <ul className='flex flex-col md:flex-row md:items-center gap-4 order-3'>
                     <li className='flex items-center gap-3'>
                         <FontAwesomeIcon icon={faEnvelope} className='w-4' />
-                        <p className='text-sm'>moore@savern.app</p>
+                        <p className='text-sm'>moore@savern.com</p>
                     </li>
                 </ul>
             </div>

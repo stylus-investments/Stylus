@@ -17,6 +17,7 @@ model user {
   id         Int             @id @default(autoincrement())
   wallet     String          @unique
   snapshots  user_snapshot[]
+  orders     user_order[]
   created_at DateTime        @default(now())
   updated_at DateTime        @updatedAt
 }
@@ -49,6 +50,13 @@ model user_snapshot {
   snapshot    snapshot @relation(fields: [snapshot_id], references: [id])
   user_id     Int
   snapshot_id Int
+}
+
+model user_order {
+  id      String @id @default(uuid())
+  amount  String
+  user    user   @relation(fields: [user_id], references: [id])
+  user_id Int
 }
 
 model currency_conversion {

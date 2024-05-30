@@ -15,6 +15,7 @@ import Link from 'next/link'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import useBalanceStore from '@/state/balanceStore'
 import { availableCurrencies } from '@/constant/availableCurrency'
+import TransferSave from './transfer-save'
 interface Props {
     initialData: Awaited<ReturnType<(typeof caller['dashboard']['getDashboardData'])>>
 }
@@ -35,7 +36,7 @@ const LiquidStaking = ({ initialData }: Props) => {
                                 <div className='font-normal'>Current Balance</div>
                                 <div className='text-muted-foreground'>
                                     <Select value={currency} onValueChange={(value) => setCurrency(value)}>
-                                        <SelectTrigger className='w-auto'>
+                                        <SelectTrigger className='w-20'>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -44,7 +45,6 @@ const LiquidStaking = ({ initialData }: Props) => {
                                                 {availableCurrencies.map((obj, i) => (
                                                     <SelectItem value={obj.currency} key={i} >
                                                         {obj.currency}
-                                                        <FontAwesomeIcon icon={obj.icon} width={16} height={16} className='ml-2' />
                                                     </SelectItem>
                                                 ))}
                                             </SelectGroup>
@@ -56,15 +56,22 @@ const LiquidStaking = ({ initialData }: Props) => {
                         <CardContent className='flex flex-col'>
                             {dashboardData.currentBalances.map((obj, i) => {
                                 if (obj.currency === currency) {
+                                    // Find the matching currency object
+                                    const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
                                     return (
-                                        <div className='font-black text-2xl' key={i}>
-                                            {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
-                                            <span className='text-xs font-normal' >
-                                                .{(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
-                                            </span>
-                                            <span className='ml-2 text-lg'>{obj.currency}</span>
+                                        <div className='font-black text-2xl flex items-center justify-between' key={i}>
+                                            <div>
+                                                {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
+                                                <span className='text-xs font-normal' >
+                                                    .{(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
+                                                </span>
+                                            </div>
+                                            {/* Render the icon if a matching currency is found */}
+                                            {matchingCurrency && (
+                                                <FontAwesomeIcon icon={matchingCurrency.icon} width={16} height={16} className='text-base text-muted-foreground' />
+                                            )}
                                         </div>
-                                    )
+                                    );
                                 }
                             })}
                         </CardContent>
@@ -98,18 +105,16 @@ const LiquidStaking = ({ initialData }: Props) => {
                 <ul className='flex flex-col sm:flex-row sm:gap-3 text-muted-foreground w-full md:w-auto lg:w-1/2 xl:items-end text-sm gap-3 order-1 md:order-2'>
                     <div className='flex items-center gap-3 w-full md:w-auto'>
                         <Button className='w-full h-9' variant={'ghost'}>
-                            Deposit USDC
+                            Save Now
                         </Button>
                         <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank' className='w-full'>
                             <Button className='w-full h-9' variant={'ghost'}>
-                                Buy SAVE
+                                Swap SAVE
                             </Button>
                         </Link>
                     </div>
                     <div className='flex items-center gap-3 w-full md:w-auto'>
-                        <Button className='w-full h-9' variant={'ghost'}>
-                            Transfer
-                        </Button>
+                        <TransferSave />
                         <Button className='w-full h-9' variant={'ghost'}>
                             Bond SAVE
                         </Button>
