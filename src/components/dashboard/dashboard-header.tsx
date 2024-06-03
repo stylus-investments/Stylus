@@ -9,8 +9,12 @@ import ConnectWalletButton from './connect-wallet-button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
+import useProfileStore from '@/state/profileStore'
+import { faUser } from '@fortawesome/free-solid-svg-icons'
 
 const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
+
+    const setOpen = useProfileStore(s => s.setOpen)
 
     const mobileScreen = (
         <nav className='md:hidden flex items-center justify-between w-full'>
@@ -30,6 +34,12 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
                         <DropdownMenuContent>
                             <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
                             <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => setOpen(true)}>
+                                <span>Profile</span>
+                                <DropdownMenuShortcut>
+                                    <FontAwesomeIcon icon={faUser} width={16} height={16} />
+                                </DropdownMenuShortcut>
+                            </DropdownMenuItem>
                             <DropdownMenuItem className='flex items-center gap-2'>
                                 <span>
                                     {`${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`}
@@ -73,6 +83,12 @@ const DashboardHeader = ({ walletAddress }: { walletAddress: string }) => {
                         <DropdownMenuContent>
                             <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
                             <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => setOpen(true)}>
+                                <span>Profile</span>
+                                <DropdownMenuShortcut>
+                                    <FontAwesomeIcon icon={faUser} width={16} height={16} />
+                                </DropdownMenuShortcut>
+                            </DropdownMenuItem>
                             <DropdownMenuItem className='flex items-center gap-2'
                                 onClick={() => signOut({
                                     redirect: false,

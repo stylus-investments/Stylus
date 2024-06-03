@@ -1,14 +1,14 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import usePaginationStore from '@/state/paginationStore';
 import React, { useEffect, useState } from 'react'
 import TablePagination from '../table-pagination';
 import { trpc } from '@/app/_trpc/client';
 import BalanceHistorySkeleton from './balance-history-skeleton';
 
-const BalanceHistory = ({ address }: { address: string }) => {
+const BalanceHistory = () => {
 
-    const { data, isLoading } = trpc.dashboard.getGoTokenBalanceHistory.useQuery(address, {
+    const { data, isLoading } = trpc.dashboard.getGoTokenBalanceHistory.useQuery(undefined, {
         refetchOnMount: false
     })
 

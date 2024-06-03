@@ -42,7 +42,7 @@ const SnapshotTimer = ({ nextSnapshot }: { nextSnapshot: string }) => {
     });
 
     return (
-        <div className='flex flex-col gap-3 p-5 border lg:rounded-tr-lg w-full'>
+        <div className='flex flex-col gap-3 p-5 border rounded-b-lg lg:rounded-t-lg lg:rounded-tl-none lg:rounded-bl-none w-full'>
             <div className='text-muted-foreground flex items-center justify-between gap-3'>
                 <div className="flex items-center gap-3">
                     <FontAwesomeIcon icon={faClock} width={18} height={18} />
@@ -61,7 +61,7 @@ const SnapshotTimer = ({ nextSnapshot }: { nextSnapshot: string }) => {
                     </Tooltip>
                 </TooltipProvider>
             </div>
-            <h1 className='font-black md:text-lg xl:text-xl'>
+            <h1 className='font-black md:text-lg'>
                 {timeLeft.days} days {timeLeft.hours} hours {timeLeft.minutes} minutes {timeLeft.seconds} seconds
             </h1>
         </div>

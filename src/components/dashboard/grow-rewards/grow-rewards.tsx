@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react'
-
+import React from 'react'
 import SnapshotHistory from './snapshot-history';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Label } from '@/components/ui/label';
@@ -41,7 +40,6 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
                                                 {availableCurrencies.map((obj, i) => (
                                                     <SelectItem value={obj.currency} key={i} >
                                                         {obj.currency}
-                                                        <FontAwesomeIcon icon={obj.icon} width={16} height={16} className='ml-2' />
                                                     </SelectItem>
                                                 ))}
                                             </SelectGroup>
@@ -53,15 +51,22 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
                         <CardContent className='flex flex-col'>
                             {dashboardData.rewardsAccumulated.map((obj, i) => {
                                 if (obj.currency === currency) {
+                                    // Find the matching currency object
+                                    const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
                                     return (
-                                        <div className='font-black text-2xl' key={i}>
-                                            {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
-                                            <span className='text-xs font-normal' >
-                                                .{(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
-                                            </span>
-                                            <span className='ml-2 text-lg'>{obj.currency}</span>
+                                        <div className='font-black text-2xl flex items-center justify-between' key={i}>
+                                            <div>
+                                                {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
+                                                <span className='text-xs font-normal' >
+                                                    .{(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
+                                                </span>
+                                            </div>
+                                            {/* Render the icon if a matching currency is found */}
+                                            {matchingCurrency && (
+                                                <FontAwesomeIcon icon={matchingCurrency.icon} width={16} height={16} className='text-base text-muted-foreground' />
+                                            )}
                                         </div>
-                                    )
+                                    );
                                 }
                             })}
                         </CardContent>
@@ -140,6 +145,7 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
                             <span className='ml-2'>EARN</span>
                         </h1>
                     </div>
+
                     <div className='flex flex-col gap-3 p-5 border w-full'>
                         <div className='text-muted-foreground flex items-center justify-between gap-3'>
                             <div className='flex items-center gap-3'>

@@ -14,12 +14,15 @@ datasource db {
 }
 
 model user {
-  id         Int             @id @default(autoincrement())
-  wallet     String          @unique
-  snapshots  user_snapshot[]
-  orders     user_order[]
-  created_at DateTime        @default(now())
-  updated_at DateTime        @updatedAt
+  id              Int             @id @default(autoincrement())
+  wallet          String          @unique
+  email           String?
+  phishing_code   String?
+  email_confirmed Boolean         @default(false)
+  snapshots       user_snapshot[]
+  orders          user_order[]
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
 }
 
 model admin {
@@ -53,10 +56,17 @@ model user_snapshot {
 }
 
 model user_order {
-  id      String @id @default(uuid())
-  amount  String
-  user    user   @relation(fields: [user_id], references: [id])
-  user_id Int
+  id             String   @id @default(uuid())
+  amount         String
+  price          String
+  status         String
+  method         String
+  currency       String
+  transaction_id String
+  user           user     @relation(fields: [user_id], references: [id])
+  user_id        Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 }
 
 model currency_conversion {

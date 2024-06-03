@@ -5,7 +5,7 @@ interface BalanceStoreProps {
     setCurrency: (currency: string) => void,
 }
 
-const useBalanceStore = create<BalanceStoreProps>((set, get) => ({
+const useBalanceStore = create<BalanceStoreProps>((set) => ({
     currency: "USD",
     setCurrency: (currency: string) => set({ currency }),
 }))

@@ -31,15 +31,12 @@ export const dashboardRoute = {
                     chain: process.env.CHAIN,
                     address: session.user.wallet
                 }),
-
                 getTokenHolders(),
-
                 db.snapshot.findMany({
                     where: {
                         completed: false
                     }
                 }),
-
                 db.user.findUnique({
                     where: { wallet: session.user.wallet },
                     select: {
@@ -53,7 +50,6 @@ export const dashboardRoute = {
                         }
                     }
                 }),
-
                 db.user.findUnique({
                     where: {
                         wallet: session.user.wallet
@@ -159,6 +155,7 @@ export const dashboardRoute = {
                     current_save_balance: formattedSaveBalance,
                     current_usdc_balance: formattedUsdcBalance,
                     global_stake: saveTokenGlobalStake,
+                    usdcPrice
                 },
                 grow_rewards: {
                     current_earn_balance: formattedEarnBalance,
@@ -181,18 +178,21 @@ export const dashboardRoute = {
             await db.$disconnect()
         }
     }),
-    getGoTokenBalanceHistory: publicProcedure.input(String).query(async (opts) => {
+    getGoTokenBalanceHistory: publicProcedure.query(async () => {
 
         try {
 
-            const walletAddress = opts.input
+            const session = await getAuth()
+            if (!session) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
 
             await getMoralis()
 
             const getGoTokenBalanceHistory = await Moralis.EvmApi.token.getWalletTokenTransfers({
                 chain: process.env.CHAIN,
                 order: "ASC",
-                address: walletAddress,
+                address: session.user.wallet,
                 contractAddresses: [process.env.SAVE_ADDRESS as string]
             })
 
@@ -205,7 +205,7 @@ export const dashboardRoute = {
                 .map((history, index) => ({
                     id: history.transactionHash,
                     date: history.blockTimestamp.toISOString(),
-                    type: history.toAddress.lowercase === walletAddress.toLowerCase() ? 'Deposit' : 'Withdrawal',
+                    type: history.toAddress.lowercase === session.user.wallet.toLowerCase() ? 'Deposit' : 'Withdrawal',
                     amount: (Number(history.value) / 10 ** 10).toString(),
                     number: index + 1
                 }))

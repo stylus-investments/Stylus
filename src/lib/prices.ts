@@ -15,8 +15,6 @@ const getTokenPrice = async (tokenAddress: string) => {
     return tokenPrice || "0.00"
 }
 
-
-
 const getCurrentBalance = ({ usdcPrice, totalUsdc, totalSave }: {
     usdcPrice: string
     totalUsdc: string

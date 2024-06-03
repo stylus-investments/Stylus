@@ -14,10 +14,6 @@ const guideTexts = [
     {
         title: "Timer",
         description: "This serves as a countdown to the next epoch, helping you track time until the next snapshot event."
-    },
-    {
-        title: "Upcoming Rewards",
-        description: "Displays the rewards you are projected to earn if you meet the staking requirements. Note that these rewards are considered 'on paper' and will be finalized only after the current epoch concludes."
     }
 ];
 
