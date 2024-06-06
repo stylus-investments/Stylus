@@ -15,7 +15,7 @@ interface Props {
 
 const LiquidStaking = ({ initialData }: Props) => {
 
-    const [balanceTable, setBalanceTable] = useState('1')
+    const [balanceTable, setBalanceTable] = useState('2')
 
     return (
         <div className='flex flex-col gap-10 w-full'>

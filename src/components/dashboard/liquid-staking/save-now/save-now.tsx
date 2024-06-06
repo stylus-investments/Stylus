@@ -67,8 +67,12 @@ const SaveNow = () => {
 
             }
 
-        } catch (error) {
-            console.log(error);
+        } catch (error: any) {
+            if (error.shape.message) {
+                setOpen(false)
+                setFormData({ amount: '', method: '', transaction_id: '', price: '', status: 1 })
+                return toast.error(error.shape.message)
+            }
             alert("Something went wrong")
         }
     }

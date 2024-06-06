@@ -2,6 +2,7 @@
 import { caller } from '@/app/_trpc/server'
 import TablePagination from '@/components/dashboard/table-pagination'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import useGlobalStore from '@/state/globalStore'
 import usePaginationStore from '@/state/paginationStore'
 import React, { useEffect, useState } from 'react'
 
@@ -11,6 +12,7 @@ interface SnapshotTableProps {
 
 const UsersTable: React.FC<SnapshotTableProps> = ({ userData }) => {
 
+    const { copyText } = useGlobalStore()
     const { getCurrentData, currentPage } = usePaginationStore()
     const [currentTable, setCurrentTable] = useState<{
         snapshots: undefined;
@@ -46,8 +48,9 @@ const UsersTable: React.FC<SnapshotTableProps> = ({ userData }) => {
                     {currentTable && currentTable.length > 0 ? currentTable.map(data => (
                         <TableRow key={data.id} className='text-muted-foreground hover:text-foreground'>
                             <TableCell className="font-medium">{data.id}</TableCell>
-                            <TableCell>{data.wallet}</TableCell>
-                            <TableCell>{data.total_snapshots}</TableCell>
+                            <TableCell className='cursor-pointer' onClick={() => copyText(data.wallet)}>
+                                {`${data.wallet.substring(0, 6)}...${data.wallet.substring(38)}`}
+                            </TableCell>                            <TableCell>{data.total_snapshots}</TableCell>
                             <TableCell>{data.forfiet_count}</TableCell>
                             < TableCell> {data.created_at.toLocaleString()}</TableCell>
                             <TableCell></TableCell>

@@ -7,6 +7,11 @@ import { currency_conversion } from '@prisma/client'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { PAYMENT_METHOD } from '@/constant/order'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Check, ChevronsUpDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const EnterAmount = (props: {
     formData: {
@@ -30,17 +35,17 @@ const EnterAmount = (props: {
 }) => {
 
     const { setFormData, formData, closeOrder, usdcPrice, currency, setCurrency } = props
-
-
     const { data: exchangeRates } = trpc.currency.get.useQuery()
-
+    const [open, setOpen] = useState(false)
     const [conversionRate, setConversionRate] = useState<number>(1);
-
 
     const confirmAmount = () => {
         const { amount, price, method } = formData
         if (!method) return toast.error("Payment method is required")
         if ((Number(amount) || Number(price)) <= 0) return toast.error("Amount should be positive number")
+        if (isNaN(Number(amount)) || isNaN(Number(price))) {
+            return toast.error("Amount and price should be valid numbers");
+        }
         setFormData(prev => ({ ...prev, status: 2 }))
     }
 
@@ -84,15 +89,63 @@ const EnterAmount = (props: {
             <h1 className='border-b pb-5 text-lg'>Order Form</h1>
             <div className='flex flex-col gap-2'>
                 <Label>Payment Method</Label>
-                <Select value={formData.method} onValueChange={(value) => setFormData(prev => ({ ...prev, method: value }))}>
-                    <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Method" />
+                {/* <Select value={formData.method} onValueChange={(value) => setFormData(prev => ({ ...prev, method: value }))}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Payment Method" />
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectLabel>Payment Method</SelectLabel>
+                                {Object.keys(PAYMENT_METHOD).map((method, i) => (
+                                    <SelectItem key={i} className='uppercase' value={method}>{method}</SelectItem>
+                                ))}
+                            </SelectGroup>
+                        </SelectContent>
                     </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="gcash">GCASH</SelectItem>
-                        <SelectItem value="bpi">BPI</SelectItem>
-                    </SelectContent>
-                </Select>
+                </Select> */}
+                <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={open}
+                            className="w-full justify-between uppercase"
+                        >
+                            {formData.method
+                                ? formData.method
+                                : "Select Payment Method"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                        <Command>
+                            <CommandInput placeholder="Search framework..." />
+                            <CommandList>
+                                <CommandEmpty>No method found.</CommandEmpty>
+                                <CommandGroup>
+                                    {Object.keys(PAYMENT_METHOD).map((method, i) => (
+                                        <CommandItem
+                                            key={i}
+                                            value={method}
+                                            onSelect={(currentValue) => {
+                                                setFormData(prev => ({ ...prev, method: currentValue }))
+                                                setOpen(false)
+                                            }}
+                                            className='uppercase'
+                                        >
+                                            <Check
+                                                className={cn(
+                                                    "mr-2 h-4 w-4",
+                                                    formData.method === method ? "opacity-100" : "opacity-0"
+                                                )}
+                                            />
+                                            {method}
+                                        </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                            </CommandList>
+                        </Command>
+                    </PopoverContent>
+                </Popover>
             </div>
             <div className='flex flex-col gap-2'>
                 <Label>Amount (SAVE)</Label>
