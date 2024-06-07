@@ -45,6 +45,7 @@ export const orderRoute = {
     createOrder: publicProcedure.input(z.object({
         data: z.object({
             amount: z.string(),
+            receipt: z.string(),
             method: z.string(),
             currency: z.string(),
             price: z.string(),

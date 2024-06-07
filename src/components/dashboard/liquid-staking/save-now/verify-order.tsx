@@ -2,15 +2,17 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faEyeSlash, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React from 'react'
+import Image from 'next/image';
+import React, { useState } from 'react'
 
 const VerifyOrder = (props: {
     formData: {
         amount: string;
         method: string;
         price: string;
+        receipt: string
         transaction_id: string;
         status: number;
     }
@@ -24,16 +26,30 @@ const VerifyOrder = (props: {
 
     const { formData, currency, formBack, confirmed, setConfirmed, confirmOrder, createOrderPending } = props
 
+    const [showReceipt, setShowReceipt] = useState(false)
+
     return (
         <div className='flex flex-col gap-5'>
             <h1 className='border-b pb-5 text-lg'>Summary</h1>
-            <div className='flex flex-col gap-2'>
-                <Label>Payment Method </Label>
-                <Input value={formData.method.toUpperCase()} />
-            </div>
-            <div className='flex flex-col gap-2'>
-                <Label>Amount (SAVE)</Label>
-                <Input value={formData.amount} />
+            {showReceipt && <div className='flex flex-col gap-2'>
+                <Label>Uploaded Recept:</Label>
+                <Image width={200} height={50} className='w-full h-auto' src={formData.receipt} alt='Receipt' />
+            </div>}
+            <Button
+                className='self-start flex items-center gap-3'
+                onClick={() => setShowReceipt(prev => !prev)} variant={'ghost'}>
+                {showReceipt ? "Hide Uploaded Receipt" : "Show Uploaded Receipt"}
+                <FontAwesomeIcon icon={showReceipt ? faEyeSlash : faEye} width={16} height={16} />
+            </Button>
+            <div className='flex w-full items-center gap-5'>
+                <div className='flex flex-col gap-2'>
+                    <Label>Payment Method </Label>
+                    <Input value={formData.method.toUpperCase()} />
+                </div>
+                <div className='flex flex-col gap-2'>
+                    <Label>Amount (SAVE)</Label>
+                    <Input value={formData.amount} />
+                </div>
             </div>
             <div className='flex flex-col gap-2'>
                 <Label>Price ({currency})</Label>

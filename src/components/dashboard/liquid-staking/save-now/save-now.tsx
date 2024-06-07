@@ -17,6 +17,7 @@ const SaveNow = () => {
         amount: '',
         method: '',
         price: '',
+        receipt: '',
         transaction_id: '',
         status: 1
     })
@@ -34,8 +35,13 @@ const SaveNow = () => {
 
     const createOrder = trpc.order.createOrder.useMutation()
 
+    const clearForm = () => {
+        setFormData({ amount: '', method: '', transaction_id: '', price: '', status: 1, receipt: '' })
+
+    }
+
     const closeOrder = () => {
-        setFormData({ amount: '', method: '', transaction_id: '', price: '', status: 1 })
+        clearForm()
         setOpen(false)
     }
 
@@ -52,16 +58,17 @@ const SaveNow = () => {
             const result = await createOrder.mutateAsync({
                 data: {
                     amount: formData.amount,
+                    receipt: formData.receipt,
                     price: formData.price,
                     transaction_id: formData.transaction_id,
                     method: formData.method,
-                    currency
+                    currency: 'PHP'
                 }
             })
 
             if (result) {
                 await getUserOrder.refetch()
-                setFormData({ amount: '', method: '', transaction_id: '', price: '', status: 1 })
+                clearForm()
                 toast.success("Success! order has been created.")
                 setOpen(false)
 
@@ -70,7 +77,7 @@ const SaveNow = () => {
         } catch (error: any) {
             if (error.shape.message) {
                 setOpen(false)
-                setFormData({ amount: '', method: '', transaction_id: '', price: '', status: 1 })
+                clearForm()
                 return toast.error(error.shape.message)
             }
             alert("Something went wrong")

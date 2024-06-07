@@ -39,18 +39,20 @@ const CompletedOrderDialog = ({ order }: { order: OrderProps }) => {
                     <FontAwesomeIcon icon={faCheck} width={16} height={16} className='text-green-500' />
                 </div>
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className='w-full max-w-96'>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you sure this order is completed?</AlertDialogTitle>
                 </AlertDialogHeader>
                 <div className='flex flex-col gap-5'>
-                    <div className='flex flex-col gap-2'>
-                        <Label>Payment Method </Label>
-                        <Input value={order.method.toUpperCase()} />
-                    </div>
-                    <div className='flex flex-col gap-2'>
-                        <Label>Amount (SAVE)</Label>
-                        <Input value={order.amount} />
+                    <div className='flex w-full items-center gap-5'>
+                        <div className='flex flex-col gap-2'>
+                            <Label>Payment Method </Label>
+                            <Input value={order.method.toUpperCase()} />
+                        </div>
+                        <div className='flex flex-col gap-2'>
+                            <Label>Amount (SAVE)</Label>
+                            <Input value={order.amount} />
+                        </div>
                     </div>
                     <div className='flex flex-col gap-2'>
                         <Label>Price ({order.currency})</Label>

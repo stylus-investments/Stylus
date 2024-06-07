@@ -6,6 +6,9 @@ import TablePagination from '../table-pagination';
 import { trpc } from '@/app/_trpc/client';
 import BalanceHistorySkeleton from './balance-history-skeleton';
 import { user_order } from '@prisma/client';
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
 const OrderHistory = () => {
 
@@ -37,6 +40,7 @@ const OrderHistory = () => {
                                     <TableHead className='min-w-32'>Price</TableHead>
                                     <TableHead className=' min-w-52'>Payment Method</TableHead>
                                     <TableHead className='min-w-32'>Transaction ID</TableHead>
+                                    <TableHead className='min-w-32'>Receipt</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -47,6 +51,21 @@ const OrderHistory = () => {
                                         <TableCell>{order.price} ({order.currency})</TableCell>
                                         <TableCell>{order.method.toUpperCase()}</TableCell>
                                         <TableCell>{order.transaction_id}</TableCell>
+                                        <TableCell>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button className='h-7'>View</Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent className='w-full max-w-96'>
+                                                    <Image src={order.receipt} alt='Order Receipt' width={200} height={50} className='w-full h-auto' />
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel className='w-full'>
+                                                            Close
+                                                        </AlertDialogCancel>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </TableCell>
                                     </TableRow>
                                 )) :
                                     <TableRow>

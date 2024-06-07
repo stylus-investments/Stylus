@@ -60,6 +60,7 @@ model user_order {
   amount         String
   price          String
   status         String
+  receipt        String //image
   method         String
   currency       String
   transaction_id String

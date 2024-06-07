@@ -18,12 +18,14 @@ const EnterAmount = (props: {
         amount: string;
         method: string;
         price: string
+        receipt: string
         transaction_id: string;
         status: number;
     }
     setFormData: React.Dispatch<React.SetStateAction<{
         amount: string;
         method: string;
+        receipt: string
         price: string
         transaction_id: string;
         status: number;
@@ -51,26 +53,38 @@ const EnterAmount = (props: {
 
     const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newAmount = parseFloat(event.target.value);
-        const newPriceInUsd = newAmount * Number(usdcPrice);
-        const newPrice = (currency === 'USD') ? newPriceInUsd : newPriceInUsd * conversionRate;
-        setFormData(prev => ({ ...prev, amount: newAmount.toString(), price: newPrice.toFixed(2) }));
-    };
+        let newPriceInUsd = newAmount * Number(usdcPrice);
+        let newPriceInPhp = newPriceInUsd * conversionRate;
 
+        if (newPriceInPhp > 50000) {
+            newPriceInPhp = 50000;
+            // Recalculate the amount based on the capped price in PHP
+            newPriceInUsd = newPriceInPhp / conversionRate;
+            const cappedAmount = newPriceInUsd / Number(usdcPrice);
+            setFormData(prev => ({ ...prev, amount: cappedAmount.toFixed(4), price: newPriceInPhp.toFixed(2) }));
+        } else {
+            setFormData(prev => ({ ...prev, amount: newAmount.toString(), price: newPriceInPhp.toFixed(2) }));
+        }
+    };
     const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newPrice = parseFloat(event.target.value);
+        let newPrice = parseFloat(event.target.value);
+        newPrice = Math.min(newPrice, 50000); // Ensure the price does not exceed 50000
+
         const newPriceInUsd = (currency === 'USD') ? newPrice : newPrice / conversionRate;
         const newAmount = newPriceInUsd / Number(usdcPrice);
         setFormData(prev => ({ ...prev, amount: newAmount.toFixed(4), price: newPrice.toString() }));
-    }
+    };
 
     useEffect(() => {
 
         if (exchangeRates) {
-            const rate = exchangeRates.find((rate: currency_conversion) => rate.currency === currency)?.conversion_rate;
+            setCurrency("PHP")
+            const rate = exchangeRates.find((rate: currency_conversion) => rate.currency === "PHP")?.conversion_rate;
             setConversionRate(rate ? parseFloat(rate) : 1);
         }
 
-    }, [exchangeRates, currency]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [exchangeRates]);
 
     useEffect(() => {
 
@@ -89,19 +103,6 @@ const EnterAmount = (props: {
             <h1 className='border-b pb-5 text-lg'>Order Form</h1>
             <div className='flex flex-col gap-2'>
                 <Label>Payment Method</Label>
-                {/* <Select value={formData.method} onValueChange={(value) => setFormData(prev => ({ ...prev, method: value }))}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Payment Method" />
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Payment Method</SelectLabel>
-                                {Object.keys(PAYMENT_METHOD).map((method, i) => (
-                                    <SelectItem key={i} className='uppercase' value={method}>{method}</SelectItem>
-                                ))}
-                            </SelectGroup>
-                        </SelectContent>
-                    </SelectTrigger>
-                </Select> */}
                 <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
                         <Button
@@ -155,7 +156,8 @@ const EnterAmount = (props: {
                 <Label>Price</Label>
                 <div className='flex items-center gap-3'>
                     <Input type="number" value={formData.price} onChange={handlePriceChange} />
-                    <Select value={currency} onValueChange={(value) => setCurrency(value)}>
+                    <Input value={'PHP'} readOnly className='w-20 text-center' />
+                    {/* <Select value={currency} onValueChange={(value) => setCurrency(value)}>
                         <SelectTrigger className='w-20'>
                             <SelectValue />
                         </SelectTrigger>
@@ -169,8 +171,9 @@ const EnterAmount = (props: {
                                 ))}
                             </SelectGroup>
                         </SelectContent>
-                    </Select>
+                    </Select> */}
                 </div>
+                <small className='text-muted-foreground'>Maximum ₱50,000 is the max limit per transaction. Reach out support email if the amount requested is beyond the maximum limit</small>
             </div>
             <div className='flex items-center justify-between w-full pt-5 border-t'>
                 <Button variant={'ghost'} className='w-32' type='button' onClick={closeOrder}>Close</Button>

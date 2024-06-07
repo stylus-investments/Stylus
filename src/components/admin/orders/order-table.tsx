@@ -7,7 +7,7 @@ import TablePagination from '@/components/dashboard/table-pagination'
 import useGlobalStore from '@/state/globalStore'
 import SearchOrder from './search-order'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheck, faEllipsis, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faEllipsis, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { user_order } from '@prisma/client'
 import CompletedOrderDialog from './completed-order-dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -16,6 +16,10 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { ORDERSTATUS } from '@/constant/order'
 import { trpc } from '@/app/_trpc/client'
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import Image from 'next/image'
+import { Button } from '@/components/ui/button'
+
 interface Props {
     orders: Awaited<ReturnType<(typeof caller['order']['getAll'])>>
 }
@@ -90,6 +94,7 @@ const OrderTable = ({ orders }: Props) => {
                         <TableHead>Wallet Address</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Date</TableHead>
+                        <TableHead>Receipt</TableHead>
                         <TableHead>Operation</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -105,6 +110,21 @@ const OrderTable = ({ orders }: Props) => {
                             </TableCell>
                             <TableCell>{data.status}</TableCell>
                             < TableCell> {data.created_at.toLocaleString()}</TableCell>
+                            <TableCell>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button className='h-7'>View</Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className='w-full max-w-96'>
+                                        <Image src={data.receipt} alt='Order Receipt' width={200} height={50} className='w-full h-auto' />
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel className='w-full'>
+                                                Close
+                                            </AlertDialogCancel>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </TableCell>
                             <TableCell>
                                 {data.status === ORDERSTATUS['processing'] && <DropdownMenu open={open && selectedOrder && selectedOrder.id === data.id ? true : false} onOpenChange={setOpen}>
                                     <DropdownMenuTrigger asChild onClick={() => setSelectedOrder(data)}>
