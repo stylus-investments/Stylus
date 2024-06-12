@@ -43,7 +43,7 @@ const ScanQr = (props: {
     }
 
     return (
-        <div className='flex flex-col gap-5'>
+        <div className='flex flex-col gap-5 max-h-[600px] overflow-y-auto'>
             <h1 className='border-b pb-5 text-lg'>Scan Qr To Pay</h1>
 
             {show && <Image src={'/qrpay.webp'} alt='Scan To Pay' width={350} height={250} className='h-auto w-full' />}
@@ -60,6 +60,13 @@ const ScanQr = (props: {
                 Please proceed with a purchase of {formData.amount} SAVE tokens, equivalent to {formData.price} {currency}. Payment should be made using ({formData.method.toUpperCase()}) option.
                 Scan the QR code above to complete your transaction.
             </div>
+            <div className='flex flex-col gap-2'>
+                <Label>Transaction  ID</Label>
+                <Input value={formData.transaction_id}
+                    onChange={(e) => setFormData(prev => ({ ...prev, transaction_id: e.target.value }))}
+                    placeholder='Enter Transaction ID'
+                />
+            </div>
             <div className='flex gap-5'>
                 <Label>Upload Receipt: </Label>
                 <UploadButton
@@ -73,15 +80,8 @@ const ScanQr = (props: {
                         toast.error(`ERROR! ${error.message}`);
                     }}
                     appearance={{
-                        button: 'bg-primary',
+                        button: 'bg-primary text-secondary',
                     }}
-                />
-            </div>
-            <div className='flex flex-col gap-2'>
-                <Label>Transaction  ID</Label>
-                <Input value={formData.transaction_id}
-                    onChange={(e) => setFormData(prev => ({ ...prev, transaction_id: e.target.value }))}
-                    placeholder='Enter Transaction ID'
                 />
             </div>
             <div className='flex items-center justify-between w-full pt-5 border-t'>

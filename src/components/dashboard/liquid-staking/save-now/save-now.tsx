@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import EnterAmount from './enter-amount'
 import ScanQr from './scan-qr'
 import VerifyOrder from './verify-order'
+import { HandCoins } from 'lucide-react'
 
 const SaveNow = () => {
 
@@ -87,8 +88,8 @@ const SaveNow = () => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button className='w-full h-9' variant={'ghost'}>
-                    Save Now
+                <Button className='w-full flex flex-col'>
+                    Buy Save
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className='max-w-96'>

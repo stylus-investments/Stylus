@@ -99,14 +99,14 @@ const BalancesHeader = ({ initialData }: {
                 <div className='flex items-center gap-3 w-full md:w-auto'>
                     <SaveNow />
                     <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank' className='w-full'>
-                        <Button className='w-full h-9' variant={'ghost'}>
+                        <Button className='w-full h-9'>
                             Swap SAVE
                         </Button>
                     </Link>
                 </div>
                 <div className='flex items-center gap-3 w-full md:w-auto'>
                     <TransferSave />
-                    <Button className='w-full h-9' variant={'ghost'}>
+                    <Button className='w-full h-9'>
                         Bond SAVE
                     </Button>
                 </div>

@@ -16,7 +16,7 @@ const TransferSave = () => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button className='w-full h-9' variant={'ghost'}>
+                <Button className='w-full h-9'>
                     Transfer
                 </Button>
             </AlertDialogTrigger>
