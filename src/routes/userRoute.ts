@@ -1,9 +1,12 @@
 import { publicProcedure } from "@/trpc/trpc";
 import db from "@/db/db";
 import { TRPCError } from "@trpc/server";
+import { rateLimiter } from "@/lib/ratelimiter";
 
 export const userRoute = {
     getAll: publicProcedure.query(async () => {
+
+        await rateLimiter.consume(1)
 
         try {
 

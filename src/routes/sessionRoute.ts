@@ -12,7 +12,6 @@ export const sessionRoute = {
     get: publicProcedure.query(async () => {
 
         const session = await getSession()
-
         return session.address
     }),
     post: publicProcedure.input(z.string()).mutation(async (opts) => {

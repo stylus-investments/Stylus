@@ -1,11 +1,15 @@
 import { ORDERSTATUS } from "@/constant/order";
 import db from "@/db/db";
 import { getAuth } from "@/lib/nextAuth";
+import { rateLimiter } from "@/lib/ratelimiter";
 import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+
 export const orderRoute = {
     getAll: publicProcedure.query(async () => {
+
+        await rateLimiter.consume(1)
 
         const session = await getAuth()
         if (!session) throw new TRPCError({
@@ -23,6 +27,8 @@ export const orderRoute = {
 
     }),
     getCurrentUserOrder: publicProcedure.query(async () => {
+
+        await rateLimiter.consume(1)
 
         const session = await getAuth()
         if (!session) throw new TRPCError({
@@ -52,6 +58,8 @@ export const orderRoute = {
             transaction_id: z.string(),
         })
     })).mutation(async (opts) => {
+
+        await rateLimiter.consume(1)
 
         const session = await getAuth()
         if (!session) throw new TRPCError({
@@ -111,6 +119,10 @@ export const orderRoute = {
         return true
     }),
     completeOrder: publicProcedure.input(z.string()).mutation(async (opts) => {
+
+        await rateLimiter.consume(1)
+
+
         const orderID = opts.input
         if (!orderID) throw new TRPCError({
             code: 'NOT_FOUND'
@@ -139,6 +151,9 @@ export const orderRoute = {
         return true
     }),
     invalidOrder: publicProcedure.input(z.string()).mutation(async (opts) => {
+
+        await rateLimiter.consume(1)
+
         const orderID = opts.input
         if (!orderID) throw new TRPCError({
             code: 'NOT_FOUND'

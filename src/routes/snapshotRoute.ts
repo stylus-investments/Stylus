@@ -4,20 +4,15 @@ import { okayRes } from "@/lib/apiResponse";
 import { getTokenHolders } from "@/lib/moralis";
 import { getAuth } from "@/lib/nextAuth";
 import { TRPCError } from "@trpc/server";
-import { RateLimiterMemory } from "rate-limiter-flexible";
 import { z } from 'zod'
-
-const opts = {
-    points: 1,
-    duration: 1,
-};
-
-const rateLimiter = new RateLimiterMemory(opts);
+import { rateLimiter } from "@/lib/ratelimiter";
 
 export const snapshotRoute = {
     getAllSnapshot: publicProcedure.query(async () => {
 
         try {
+
+            await rateLimiter.consume(1);
 
             const snapshots = await db.snapshot.findMany({
                 select: {
@@ -79,6 +74,8 @@ export const snapshotRoute = {
     getData: publicProcedure.input(z.number()).query(async (opts) => {
 
         try {
+
+            await rateLimiter.consume(1);
 
             const session = await getAuth()
             if (!session) throw new TRPCError({
@@ -360,6 +357,8 @@ export const snapshotRoute = {
         }
     }),
     updateUserSnapshot: publicProcedure.input(z.number()).mutation(async (opts) => {
+
+        await rateLimiter.consume(1);
 
         try {
 

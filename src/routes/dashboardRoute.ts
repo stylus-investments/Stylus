@@ -7,6 +7,7 @@ import { z } from "zod";
 import { getAuth } from "@/lib/nextAuth";
 import { getCurrentBalance, getFormattedBalance, getRewardsAccumulated, getTokenPrice } from "@/lib/prices";
 import { calculateBalanceArray } from "@/lib/balances";
+import { rateLimiter } from "@/lib/ratelimiter";
 
 const saveTokenAddress = process.env.SAVE_ADDRESS as string
 const earnTokenAddress = process.env.EARN_ADDRESS as string
@@ -16,6 +17,8 @@ const svnTokenAddress = process.env.SVN_ADDRESS as string
 export const dashboardRoute = {
     getDashboardData: publicProcedure.query(async () => {
         try {
+
+            await rateLimiter.consume(1)
 
             const session = await getAuth()
 
@@ -182,6 +185,8 @@ export const dashboardRoute = {
 
         try {
 
+            await rateLimiter.consume(1)
+
             const session = await getAuth()
             if (!session) throw new TRPCError({
                 code: "UNAUTHORIZED"
@@ -227,6 +232,9 @@ export const dashboardRoute = {
     getUserSnapshotHistory: publicProcedure.input(z.string()).query(async (opts) => {
 
         try {
+
+            await rateLimiter.consume(1)
+
             const walletAddress = opts.input
 
             const getUserSnapshotHistory = await db.user.findUnique({

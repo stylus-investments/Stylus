@@ -1,11 +1,14 @@
 import db from "@/db/db";
 import { getAuth } from "@/lib/nextAuth";
+import { rateLimiter } from "@/lib/ratelimiter";
 import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const profileRoute = {
     get: publicProcedure.query(async () => {
+
+        await rateLimiter.consume(1)
 
         const session = await getAuth()
         if (!session) throw new TRPCError({
@@ -24,6 +27,8 @@ export const profileRoute = {
             email: z.string(),
             phishing_code: z.string()
         })).mutation(async (opts) => {
+
+            await rateLimiter.consume(1)
 
             const newData = opts.input
 

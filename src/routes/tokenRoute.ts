@@ -7,6 +7,7 @@ import { z } from "zod";
 export const tokenRoute = {
 
     getTokenPrice: publicProcedure.input(z.string()).query(async (opts) => {
+        
 
         const session = await getAuth()
         if (!session) throw new TRPCError({
