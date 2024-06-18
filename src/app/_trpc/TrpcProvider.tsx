@@ -48,7 +48,7 @@ const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
                     <RainbowKitSiweNextAuthProvider
                         getSiweMessageOptions={getSiweMessageOptions}
                     >
-                        <RainbowKitProvider>
+                        <RainbowKitProvider modalSize="compact">
                             {children}
                         </RainbowKitProvider>
                     </RainbowKitSiweNextAuthProvider>

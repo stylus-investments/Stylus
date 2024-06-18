@@ -36,32 +36,31 @@ const VerifyOrder = (props: {
                 <Image width={200} height={50} className='w-full h-auto' src={formData.receipt} alt='Receipt' />
             </div>}
             <Button
-                className='self-start flex items-center gap-3'
-                onClick={() => setShowReceipt(prev => !prev)} variant={'ghost'}>
+                onClick={() => setShowReceipt(prev => !prev)} variant={'secondary'}>
                 {showReceipt ? "Hide Uploaded Receipt" : "Show Uploaded Receipt"}
                 <FontAwesomeIcon icon={showReceipt ? faEyeSlash : faEye} width={16} height={16} />
             </Button>
             <div className='flex w-full items-center gap-5'>
                 <div className='flex flex-col gap-2'>
                     <Label>Payment Method </Label>
-                    <Input value={formData.method.toUpperCase()} />
+                    <Input className='text-muted-foreground' value={formData.method.toUpperCase()} />
                 </div>
                 <div className='flex flex-col gap-2'>
                     <Label>Amount (SAVE)</Label>
-                    <Input value={formData.amount} />
+                    <Input className='text-muted-foreground' value={formData.amount} />
                 </div>
             </div>
             <div className='flex flex-col gap-2'>
                 <Label>Price ({currency})</Label>
-                <Input value={formData.price} />
+                <Input className='text-muted-foreground' value={formData.price} />
             </div>
             <div className='flex flex-col gap-2'>
                 <Label>Transaction  ID</Label>
-                <Input value={formData.transaction_id} />
+                <Input className='text-muted-foreground' value={formData.transaction_id} />
             </div>
             <div className='flex items-center gap-5'>
-                <Checkbox id='confirmed' checked={confirmed} onCheckedChange={() => setConfirmed(prev => !prev)} />
-                <Label htmlFor='confirmed' className='text-base font-normal'>
+                <Checkbox id='confirmed' className='h-6 w-6' checked={confirmed} onCheckedChange={() => setConfirmed(prev => !prev)} />
+                <Label htmlFor='confirmed' className='text-base font-normal text-muted-foreground'>
                     I confirm that the information provided is accurate and complete.
                 </Label>
             </div>

@@ -99,18 +99,18 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
                 </div>
                 <ul className='flex flex-col sm:flex-row sm:gap-3 text-muted-foreground w-full md:w-auto lg:w-1/2 xl:items-end text-sm gap-3 order-1 md:order-2'>
                     <div className='flex items-center gap-3 w-full md:w-auto'>
-                        <Button className='w-full h-9' variant={'ghost'}>
+                        <Button className='w-full h-9'>
                             USDC Out
                         </Button>
-                        <Button className='w-full h-9' variant={'ghost'}>
+                        <Button className='w-full h-9'>
                             Sell Earn
                         </Button>
                     </div>
                     <div className='flex items-center gap-3 w-full md:w-auto'>
-                        <Button className='w-full h-9' variant={'ghost'}>
+                        <Button className='w-full h-9'>
                             Incubate
                         </Button>
-                        <Button className='w-full h-9' variant={'ghost'}>
+                        <Button className='w-full h-9'>
                             IDO SVN
                         </Button>
                     </div>
@@ -118,7 +118,7 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
             </div>
             <div className='flex flex-col'>
                 <div className='flex flex-col lg:flex-row w-full'>
-                    <div className='flex flex-col gap-3 p-5 border rounded-t-lg rounded-b-lg lg:rounded-br-none lg:rounded-tr-none w-full'>
+                    <div className='flex flex-col gap-3 p-5 border rounded-t-lg lg:rounded-br-none lg:rounded-tr-none w-full'>
                         <div className='text-muted-foreground flex items-center justify-between gap-3'>
                             <div className='flex items-center gap-3'>
                                 <FontAwesomeIcon icon={faSackDollar} width={18} height={18} />
@@ -221,7 +221,7 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
                             </TooltipProvider>
                         </div>
                         <h1 className='font-black md:text-lg xl:text-xl'>
-                            0.5 %
+                            10% APY
                         </h1>
                     </div>
                 </div>

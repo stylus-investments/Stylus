@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { UploadButton } from '@/lib/utils';
+import { CircleCheck } from 'lucide-react';
 
 
 const ScanQr = (props: {
@@ -43,20 +44,20 @@ const ScanQr = (props: {
     }
 
     return (
-        <div className='flex flex-col gap-5 max-h-[600px] overflow-y-auto'>
+        <div className='flex flex-col w-full gap-5'>
             <h1 className='border-b pb-5 text-lg'>Scan Qr To Pay</h1>
 
             {show && <Image src={'/qrpay.webp'} alt='Scan To Pay' width={350} height={250} className='h-auto w-full' />}
             <div className='flex items-center gap-5'>
-                <Button onClick={() => setShow(prev => !prev)}>{show ? "Hide QR Code" : "Show QR Code"}</Button>
-                <a href="/qrpay.webp" download="savernpayqrcode.webp">
+                <Button variant={'secondary'} className='w-full' onClick={() => setShow(prev => !prev)}>{show ? "Hide QR Code" : "Show QR Code"}</Button>
+                <a href="/qrpay.webp" download="savernpayqrcode.webp" className='w-full'>
                     <Button className='flex items-center gap-3' variant={'link'}>
-                        Download QR Code
+                        Download QR
                         <FontAwesomeIcon icon={faDownload} width={16} height={16} />
                     </Button>
                 </a>
             </div>
-            <div>
+            <div className='text-muted-foreground text-sm'>
                 Please proceed with a purchase of {formData.amount} SAVE tokens, equivalent to {formData.price} {currency}. Payment should be made using ({formData.method.toUpperCase()}) option.
                 Scan the QR code above to complete your transaction.
             </div>
@@ -67,8 +68,8 @@ const ScanQr = (props: {
                     placeholder='Enter Transaction ID'
                 />
             </div>
-            <div className='flex gap-5'>
-                <Label>Upload Receipt: </Label>
+            <div className='flex gap-3 items-center justify-between'>
+                <Label className='text-base'>Upload Receipt:</Label>
                 <UploadButton
                     endpoint='orderReceiptUploader'
                     onClientUploadComplete={(res) => {
@@ -80,9 +81,11 @@ const ScanQr = (props: {
                         toast.error(`ERROR! ${error.message}`);
                     }}
                     appearance={{
-                        button: 'bg-primary text-secondary',
+                        button: 'bg-muted text-foreground',
+                        allowedContent: 'hidden'
                     }}
                 />
+                {formData.receipt && <CircleCheck size={25} className='text-primary' />}
             </div>
             <div className='flex items-center justify-between w-full pt-5 border-t'>
                 <Button variant={'ghost'} className='w-32' type='button' onClick={formBack}>Back</Button>

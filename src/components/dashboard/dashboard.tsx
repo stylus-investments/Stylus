@@ -31,10 +31,10 @@ const Dashboard = ({ initialData }: Props) => {
     return (
         <main className='flex flex-col items-center pt-20 pb-10 gap-10'>
             <Tabs defaultValue="balances" className="w-full">
-                <div className='flex items-center flex-col gap-5 md:gap-0 pb-10 md:flex-row md:justify-between w-full'>
+                <div className='flex items-center flex-col gap-5 md:gap-0 pb-2 md:flex-row md:justify-between w-full'>
                     <TabsList className="grid w-full md:w-96 lg:w-1/2 grid-cols-2 order-2 md:order-1">
                         <TabsTrigger value="balances">
-                            <div className='flex items-center gap-2'>
+                            <div className='flex items-center gap-2 sticky'>
                                 <FontAwesomeIcon icon={faDatabase} width={18} height={18} className='text-primary' />
                                 <div className='md:flex'>
                                     Balances
@@ -50,7 +50,6 @@ const Dashboard = ({ initialData }: Props) => {
                             </div>
                         </TabsTrigger>
                     </TabsList>
-
                 </div>
                 <TabsContent value="balances">
                     <LiquidStaking initialData={initialData} />

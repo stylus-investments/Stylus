@@ -56,6 +56,7 @@
     "rate-limiter-flexible": "^5.0.2",
     "react": "^18",
     "react-dom": "^18",
+    "react-google-recaptcha": "^3.1.0",
     "react-scroll": "^1.9.0",
     "sharp": "^0.33.3",
     "siwe": "^2.3.2",

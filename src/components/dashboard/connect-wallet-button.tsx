@@ -4,6 +4,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Button } from '../ui/button'
 
 const ConnectWalletButton = () => {
+
     return (
         <>
             <ConnectButton.Custom>
@@ -16,6 +17,7 @@ const ConnectWalletButton = () => {
                     authenticationStatus,
                     mounted,
                 }) => {
+
                     const ready = mounted && authenticationStatus !== 'loading';
                     const connected =
                         ready &&

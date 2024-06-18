@@ -23,6 +23,8 @@ const nextAuthOptions = {
 
             async authorize(credentials: any) {
 
+                console.log(credentials)
+
                 if (credentials.message) {
 
                     const wallet = JSON.parse(credentials.message).address;

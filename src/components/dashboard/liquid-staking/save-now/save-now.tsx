@@ -38,7 +38,6 @@ const SaveNow = () => {
 
     const clearForm = () => {
         setFormData({ amount: '', method: '', transaction_id: '', price: '', status: 1, receipt: '' })
-
     }
 
     const closeOrder = () => {
@@ -92,7 +91,7 @@ const SaveNow = () => {
                     Buy Save
                 </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className='max-w-96'>
+            <AlertDialogContent className='w-full max-w-96 max-h-[600px] overflow-y-auto'>
                 {formData.status === 1 && <EnterAmount
                     setFormData={setFormData}
                     currency={currency}
