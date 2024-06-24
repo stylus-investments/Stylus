@@ -7,6 +7,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import React, { FormEvent, useState } from 'react'
 import { toast } from 'sonner'
+import { ABI } from '@/lib/abi'
+import { useWriteContract } from 'wagmi'
+import { LoaderCircle } from 'lucide-react'
 
 const TransferSave = () => {
 
@@ -84,6 +87,8 @@ const TransferSaveForm = ({ setAcceptedTerms, setOpen }: {
         amount: ''
     })
 
+    const { writeContractAsync, isPending } = useWriteContract()
+
     const transferToken = async (e: FormEvent) => {
 
         e.preventDefault()
@@ -93,15 +98,27 @@ const TransferSaveForm = ({ setAcceptedTerms, setOpen }: {
         //check if the amount is positive number
         if (Number(transferData.amount) <= 0) return toast.error("Amount should be positive")
 
+        const totalAmount = Number(amount) * 10000000000
         try {
 
-            if(window.ethereum)
+            const data = await writeContractAsync({
+                abi: ABI,
+                address: '0xb70F970876638a33859600B9E64BEAd0fD22b065',
+                functionName: 'transfer',
+                args: [
+                    wallet,
+                    totalAmount
+                ],
+            })
 
-            toast.success("Successs!")
+            if (data) {
+                toast.success("Success! token has been transfered")
+                console.log("Transaction ID", data)
+            }
 
-        } catch (error) {
-            console.log(error);
-            toast.error("Something went wrong")
+        } catch (err) {
+            console.log(err);
+            toast.error("Make sure you have enough token to transfer")
         }
     }
 
@@ -124,7 +141,7 @@ const TransferSaveForm = ({ setAcceptedTerms, setOpen }: {
                         setOpen(false)
                         setAcceptedTerms(false)
                     }} variant={'ghost'}>Close</Button>
-                    <Button className='w-32'>Confirm</Button>
+                    <Button className='w-32'>{isPending ? <LoaderCircle size={16} className='animate-spin' /> : "Transfer"}</Button>
                 </div>
             </form>
         </AlertDialogContent>

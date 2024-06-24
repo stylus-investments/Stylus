@@ -56,8 +56,6 @@ const OrderTable = ({ orders }: Props) => {
         status: 'processing'
     })
 
-
-
     const filteredTable = orderData && orderData.length && orderData.filter(order => {
         const searchTransactionID = searchQuery.transaction_id.toUpperCase();
         const searchWalletAddress = searchQuery.wallet_address.toUpperCase();

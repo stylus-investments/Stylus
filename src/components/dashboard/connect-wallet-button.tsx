@@ -1,10 +1,8 @@
 'use client'
 import React from 'react'
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Button } from '../ui/button'
-
+import { Button } from '../ui/button';
 const ConnectWalletButton = () => {
-
     return (
         <>
             <ConnectButton.Custom>

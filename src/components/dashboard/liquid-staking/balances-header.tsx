@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import useBalanceStore from '@/state/balanceStore'
 import { caller } from '@/app/_trpc/server'
 import SaveNow from './save-now/save-now'
+import { useAccount } from 'wagmi'
 
 const BalancesHeader = ({ initialData }: {
     initialData: Awaited<ReturnType<(typeof caller['dashboard']['getDashboardData'])>>

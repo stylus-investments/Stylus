@@ -12,16 +12,17 @@ import { base } from 'wagmi/chains';
 import { trpc } from './client'
 
 const config = getDefaultConfig({
-    appName: 'Growpoint',
+    appName: 'Savern',
     projectId: process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string,
     chains: [base],
-    ssr: true, // If your dApp uses server side rendering (SSR)
+    ssr: true
 });
+
+export { config }
 import { RainbowKitSiweNextAuthProvider, GetSiweMessageOptions } from '@rainbow-me/rainbowkit-siwe-next-auth';
 
-
 const getSiweMessageOptions: GetSiweMessageOptions = () => ({
-    statement: 'Sign in to Growpoint',
+    statement: 'Sign in to Savern',
 });
 
 const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
