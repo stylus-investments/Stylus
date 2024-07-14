@@ -23,7 +23,7 @@ const HomePage = () => {
     <div className='overflow-x-hidden xl:overflow-visible'>
       <Header />
       <Main />
-      <Stats />
+      {/* <Stats /> */}
       <Partners />
       <Graphene />
       <Base />
