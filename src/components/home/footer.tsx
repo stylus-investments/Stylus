@@ -8,9 +8,9 @@ import Link from 'next/link';
 import { Label } from '../ui/label';
 const Footer = () => {
     return (
-        <footer className='md:px-0 gap-5 flex flex-col items-center text-muted-foreground py-10'>
+        <footer className='padding w-full gap-5 flex flex-col items-center text-muted-foreground py-10 mt-20 border-t'>
 
-            <div className='pt-10 w-full border-t flex flex-col gap-5 md:flex-row md:justify-between'>
+            <div className='w-full flex flex-col gap-5 md:flex-row md:justify-between'>
                 <div className='flex gap-4 items-center order-2 md:order-1 text-sm'>
                     © 2024, Savern
                     <Link href='#'>Terms</Link>

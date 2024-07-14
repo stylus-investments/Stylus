@@ -9,6 +9,7 @@ import TeamFinance from '@/components/home/team-finance'
 import React, { useEffect } from 'react'
 import 'aos/dist/aos.css';
 import Aos from 'aos'
+import Stats from '@/components/home/stats'
 
 const HomePage = () => {
 
@@ -19,9 +20,10 @@ const HomePage = () => {
   }, [])
 
   return (
-    <div className='padding xl:container overflow-x-hidden xl:overflow-visible'>
+    <div className='overflow-x-hidden xl:overflow-visible'>
       <Header />
       <Main />
+      <Stats />
       <Partners />
       <Graphene />
       <Base />

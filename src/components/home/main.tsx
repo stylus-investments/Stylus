@@ -5,7 +5,7 @@ import { Label } from '../ui/label'
 
 const Main = () => {
     return (
-        <div className='flex flex-col gap-10 md:gap-12 items-center w-full text-center h-screen justify-center pt-10 md:pt-0 md:pb-16'>
+        <div className='flex flex-col gap-10 md:gap-12 items-center w-full text-center h-screen justify-center pt-10 md:pt-0 md:pb-16 padding'>
             <div className='flex flex-col gap-5 sm:gap-6 md:gap-7 w-full items-center'>
                 <div className='flex flex-col border-b pb-10 items-center gap-4'>
                     <Label className='text-lg'>Live on pre mainet phase</Label>

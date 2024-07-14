@@ -3,7 +3,7 @@ import React from 'react'
 import Image from 'next/image'
 function Base() {
     return (
-        <div className='flex flex-col md:flex-row gap-10 items-center w-full text-center md:text-left lg:justify-center py-20'>
+        <div className='flex flex-col padding md:flex-row gap-10 items-center w-full text-center md:text-left lg:justify-center py-20 bg-muted lg:h-screen'>
             <div className='md:w-1/4 order-2'>
                 <div className="relative mx-auto border-gray-900 dark:border-gray-900 bg-gray-900 border-[14px] rounded-[2.5rem] w-[300px] shadow-2xl" data-aos="zoom-out-up">
                     <div className="h-[32px] w-[3px] bg-gray-900 dark:bg-gray-900 absolute -start-[17px] top-[72px] rounded-s-lg"></div>

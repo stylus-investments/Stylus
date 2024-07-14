@@ -23,6 +23,7 @@ model user {
   orders          user_order[]
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
+  bonded_save     bonded_save[]
 }
 
 model admin {
@@ -68,6 +69,16 @@ model user_order {
   user_id        Int
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
+}
+
+model bonded_save {
+  id         String   @id @default(uuid())
+  user       user     @relation(fields: [user_id], references: [id])
+  user_id    Int
+  amount     String
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model currency_conversion {

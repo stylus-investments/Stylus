@@ -2,7 +2,7 @@ import React from 'react'
 import Image from 'next/image'
 const TeamFinance = () => {
   return (
-    <div className='flex flex-col md:flex-row gap-10 items-center w-full text-center md:text-left md:justify-between py-20'>
+    <div className='flex flex-col md:flex-row gap-10 padding items-center w-full text-center md:text-left md:justify-between py-20 lg:h-screen'>
       <div className='md:w-1/4 order-2 md:order-1'>
         <div className="relative mx-auto border-gray-900 dark:border-gray-900 bg-gray-900 border-[14px] rounded-[2.5rem] w-[300px] shadow-2xl" data-aos="zoom-out">
           <div className="h-[32px] w-[3px] bg-gray-900 dark:bg-gray-900 absolute -start-[17px] top-[72px] rounded-s-lg"></div>

@@ -1,10 +1,8 @@
 import React from 'react'
 import Image from 'next/image'
-
-function Partners() {
-
+const Stats = () => {
     return (
-        <div className='flex flex-col padding md:flex-row gap-10 items-center w-full text-center md:text-left lg:justify-center py-20 lg:h-screen bg-muted'>
+        <div className='flex flex-col padding md:flex-row gap-10 items-center w-full text-center md:text-left lg:justify-center py-20 lg:h-screen'>
             <div className='flex flex-col gap-12 w-full md:w-1/2 lg:w-2/3 items-center  md:items-start'>
                 <h1 className='font-thin text-6xl' data-aos="fade-in">Making Finance Accessible</h1>
                 <div className='flex items-center gap-3'>
@@ -31,4 +29,4 @@ function Partners() {
     )
 }
 
-export default Partners
+export default Stats
