@@ -16,7 +16,6 @@ const ScanQr = (props: {
         method: string;
         price: string;
         receipt: string
-        transaction_id: string;
         status: number;
     }
     setFormData: React.Dispatch<React.SetStateAction<{
@@ -24,7 +23,6 @@ const ScanQr = (props: {
         method: string;
         receipt: string
         price: string;
-        transaction_id: string;
         status: number;
     }>>
     currency: string
@@ -37,9 +35,8 @@ const ScanQr = (props: {
     const [show, setShow] = useState(false)
 
     const confirmTransaction = () => {
-        const { transaction_id, receipt } = formData
+        const { receipt } = formData
         if (!receipt) return toast.error("Receipt is required.")
-        if (!transaction_id) return toast.error("Please enter transaction ID")
         setFormData(prev => ({ ...prev, status: 3 }))
     }
 
@@ -60,13 +57,6 @@ const ScanQr = (props: {
             <div className='text-muted-foreground text-sm'>
                 Please proceed with a purchase of {formData.amount} SAVE tokens, equivalent to {formData.price} {currency}. Payment should be made using ({formData.method.toUpperCase()}) option.
                 Scan the QR code above to complete your transaction.
-            </div>
-            <div className='flex flex-col gap-2'>
-                <Label>Transaction  ID</Label>
-                <Input value={formData.transaction_id}
-                    onChange={(e) => setFormData(prev => ({ ...prev, transaction_id: e.target.value }))}
-                    placeholder='Enter Transaction ID'
-                />
             </div>
             <div className='flex gap-3 items-center justify-between'>
                 <Label className='text-base'>Upload Receipt:</Label>

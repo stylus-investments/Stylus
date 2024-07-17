@@ -19,7 +19,6 @@ const SaveNow = () => {
         method: '',
         price: '',
         receipt: '',
-        transaction_id: '',
         status: 1
     })
     const [confirmed, setConfirmed] = useState(false)
@@ -37,7 +36,7 @@ const SaveNow = () => {
     const createOrder = trpc.order.createOrder.useMutation()
 
     const clearForm = () => {
-        setFormData({ amount: '', method: '', transaction_id: '', price: '', status: 1, receipt: '' })
+        setFormData({ amount: '', method: '', price: '', status: 1, receipt: '' })
     }
 
     const closeOrder = () => {
@@ -60,7 +59,6 @@ const SaveNow = () => {
                     amount: formData.amount,
                     receipt: formData.receipt,
                     price: formData.price,
-                    transaction_id: formData.transaction_id,
                     method: formData.method,
                     currency: 'PHP'
                 }

@@ -5,13 +5,11 @@ import React from 'react'
 
 const SearchOrder = ({ searchQuery, setSearchQuery }: {
     searchQuery: {
-        transaction_id: string;
         wallet_address: string;
         method: string
         status: string;
     }
     setSearchQuery: React.Dispatch<React.SetStateAction<{
-        transaction_id: string;
         wallet_address: string;
         status: string;
         method: string
@@ -21,7 +19,6 @@ const SearchOrder = ({ searchQuery, setSearchQuery }: {
     return (
         <div className='flex items-center gap-5 w-full md:w-1/2'>
             <Input placeholder='Transaction ID'
-                value={searchQuery.transaction_id}
                 onChange={(e) => setSearchQuery(prev => ({ ...prev, transaction_id: e.target.value }))}
             />
             <Input placeholder='Wallet Address'

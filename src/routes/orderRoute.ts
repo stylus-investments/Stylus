@@ -55,7 +55,6 @@ export const orderRoute = {
             method: z.string(),
             currency: z.string(),
             price: z.string(),
-            transaction_id: z.string(),
         })
     })).mutation(async (opts) => {
 

@@ -39,7 +39,6 @@ const OrderHistory = () => {
                                     <TableHead className='min-w-32'>Status</TableHead>
                                     <TableHead className='min-w-32'>Price</TableHead>
                                     <TableHead className=' min-w-52'>Payment Method</TableHead>
-                                    <TableHead className='min-w-32'>Transaction ID</TableHead>
                                     <TableHead className='min-w-32'>Receipt</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -50,7 +49,6 @@ const OrderHistory = () => {
                                         <TableCell>{order.status}</TableCell>
                                         <TableCell>{order.price} ({order.currency})</TableCell>
                                         <TableCell>{order.method.toUpperCase()}</TableCell>
-                                        <TableCell>{order.transaction_id}</TableCell>
                                         <TableCell>
                                             <AlertDialog>
                                                 <AlertDialogTrigger asChild>

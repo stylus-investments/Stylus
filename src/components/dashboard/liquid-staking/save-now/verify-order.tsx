@@ -13,7 +13,6 @@ const VerifyOrder = (props: {
         method: string;
         price: string;
         receipt: string
-        transaction_id: string;
         status: number;
     }
     currency: string
@@ -53,10 +52,6 @@ const VerifyOrder = (props: {
             <div className='flex flex-col gap-2'>
                 <Label>Price ({currency})</Label>
                 <Input className='text-muted-foreground' value={formData.price} />
-            </div>
-            <div className='flex flex-col gap-2'>
-                <Label>Transaction  ID</Label>
-                <Input className='text-muted-foreground' value={formData.transaction_id} />
             </div>
             <div className='flex items-center gap-5'>
                 <Checkbox id='confirmed' className='h-6 w-6' checked={confirmed} onCheckedChange={() => setConfirmed(prev => !prev)} />

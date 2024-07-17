@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { availableCurrencies } from '@/constant/availableCurrency'
 import { trpc } from '@/app/_trpc/client'
 import { toast } from 'sonner'
 import { currency_conversion } from '@prisma/client'
@@ -19,7 +17,6 @@ const EnterAmount = (props: {
         method: string;
         price: string
         receipt: string
-        transaction_id: string;
         status: number;
     }
     setFormData: React.Dispatch<React.SetStateAction<{
@@ -27,7 +24,6 @@ const EnterAmount = (props: {
         method: string;
         receipt: string
         price: string
-        transaction_id: string;
         status: number;
     }>>
     closeOrder: () => void

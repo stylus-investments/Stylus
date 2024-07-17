@@ -64,7 +64,6 @@ model user_order {
   receipt        String //image
   method         String
   currency       String
-  transaction_id String
   user           user     @relation(fields: [user_id], references: [id])
   user_id        Int
   created_at     DateTime @default(now())

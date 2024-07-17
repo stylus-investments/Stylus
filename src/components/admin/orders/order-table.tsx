@@ -50,19 +50,16 @@ const OrderTable = ({ orders }: Props) => {
     })
     const [currentTable, setCurrentTable] = useState<OrderProps[] | undefined>(orderData as any)
     const [searchQuery, setSearchQuery] = useState({
-        transaction_id: '',
         wallet_address: '',
         method: '',
         status: 'processing'
     })
 
     const filteredTable = orderData && orderData.length && orderData.filter(order => {
-        const searchTransactionID = searchQuery.transaction_id.toUpperCase();
         const searchWalletAddress = searchQuery.wallet_address.toUpperCase();
         const searchPaymentMethod = searchQuery.method.toUpperCase();
         const searchStatus = searchQuery.status.toUpperCase();
         return (
-            (searchTransactionID === '' || order.transaction_id.toUpperCase().includes(searchTransactionID)) &&
             (searchWalletAddress === '' || order.user.wallet.toUpperCase().includes(searchWalletAddress)) &&
             (searchPaymentMethod === '' || order.method.toUpperCase().includes(searchPaymentMethod)) &&
             (searchStatus === '' || order.status.toUpperCase().includes(searchStatus))
@@ -85,7 +82,6 @@ const OrderTable = ({ orders }: Props) => {
                 <TableCaption>Order List</TableCaption>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Transaction ID</TableHead>
                         <TableHead>Payment Method</TableHead>
                         <TableHead>Amount (SAVE)</TableHead>
                         <TableHead>Price</TableHead>
@@ -99,7 +95,6 @@ const OrderTable = ({ orders }: Props) => {
                 <TableBody>
                     {currentTable && currentTable.length > 0 ? currentTable.map(data => (
                         <TableRow key={data.id} className='text-muted-foreground hover:text-foreground'>
-                            <TableCell className='min-w-40 cursor-pointer' onClick={() => copyText(data.transaction_id)}>{data.transaction_id}</TableCell>
                             <TableCell className='uppercase'>{data.method}</TableCell>
                             <TableCell className='cursor-pointer' onClick={() => copyText(data.amount)}>{data.amount}</TableCell>
                             <TableCell>{data.price}</TableCell>

@@ -58,10 +58,6 @@ const CompletedOrderDialog = ({ order }: { order: OrderProps }) => {
                         <Label>Price ({order.currency})</Label>
                         <Input value={order.price} />
                     </div>
-                    <div className='flex flex-col gap-2'>
-                        <Label>Transaction  ID</Label>
-                        <Input value={order.transaction_id} />
-                    </div>
                     <div className='flex items-center gap-5'>
                         <Checkbox id='confirmed' checked={confirmed} onCheckedChange={() => setConfirmed(prev => !prev)} />
                         <Label htmlFor='confirmed' className='text-base font-normal'>
