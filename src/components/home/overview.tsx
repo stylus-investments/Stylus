@@ -6,7 +6,7 @@ const Overview = () => {
             <div className='flex flex-col gap-12 md:gap-20 w-full'>
                 <div className='w-full flex flex-col gap-10 lg:flex-row'>
                     <div className='w-full flex-col flex gap-5 md:w-2/3 lg:w-1/2'>
-                        <h1 className='font-thin text-6xl' data-aos="fade-in">Overview</h1>
+                        <h1 className='font-thin text-6xl'>Overview</h1>
                         <p className='text-muted-foreground'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse maxime explicabo laborum velit tempora placeat odio aliquam quae unde, veritatis quam libero cupiditate asperiores officia, minima magni ipsa voluptate repellendus.</p>
                     </div>
                     <div className='w-full h-72 bg-muted flex items-center justify-center border'>
