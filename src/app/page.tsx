@@ -23,9 +23,9 @@ const HomePage = () => {
     <div className='overflow-x-hidden xl:overflow-visible'>
       <Header />
       <Main />
-      <Overview />
       <Partners />
       <Graphene />
+      <Overview />
       <Base />
       <TeamFinance />
       <Footer />
