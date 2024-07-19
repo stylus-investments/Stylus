@@ -13,6 +13,7 @@ import useBalanceStore from '@/state/balanceStore'
 import { caller } from '@/app/_trpc/server'
 import SaveNow from './save-now/save-now'
 import { useAccount } from 'wagmi'
+import { FileClock, RefreshCcw } from 'lucide-react'
 
 const BalancesHeader = ({ initialData }: {
     initialData: Awaited<ReturnType<(typeof caller['dashboard']['getDashboardData'])>>
@@ -24,9 +25,9 @@ const BalancesHeader = ({ initialData }: {
     const { currency, setCurrency } = useBalanceStore()
 
     return (
-        <div className='flex flex-col gap-5 xl:gap-10 xl:flex-row'>
-            <div className='flex w-full gap-5 xl:w-1/2 flex-col md:flex-row'>
-                <Card className='w-full sm:w-96 md:w-1/2 xl:w-full'>
+        <div className='flex flex-col gap-5 xl:gap-10 xl:flex-row xl:items-end'>
+            <div className='flex w-full gap-5 xl:w-1/2 flex-col sm:flex-row'>
+                <Card className='w-full md:w-1/2 xl:w-full'>
                     <CardHeader>
                         <div className='flex items-center w-full justify-between'>
                             <div className='font-normal'>Current Balance</div>
@@ -72,7 +73,7 @@ const BalancesHeader = ({ initialData }: {
                         })}
                     </CardContent>
                 </Card>
-                <div className='w-full sm:w-96 md:w-1/2 xl:w-full p-6 rounded-md flex flex-col gap-3 justify-center border' >
+                <div className='w-full md:w-1/2 xl:w-full p-6 rounded-md flex flex-col gap-3 justify-center border' >
                     <div className='flex gap-3 items-center text-center w-full'>
                         <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/save.webp'} />
                         <h1 className='font-black text-lg'>
@@ -96,22 +97,20 @@ const BalancesHeader = ({ initialData }: {
                     </div>
                 </div>
             </div>
-            <ul className='flex flex-col sm:flex-row sm:gap-3 text-muted-foreground w-full md:w-auto lg:w-1/2 xl:items-end text-sm gap-3 order-1 md:order-2'>
-                <div className='flex items-center gap-3 w-full md:w-auto'>
-                    <SaveNow />
-                    <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank' className='w-full'>
-                        <Button className='w-full h-9'>
-                            Swap SAVE
-                        </Button>
-                    </Link>
-                </div>
-                <div className='flex items-center gap-3 w-full md:w-auto'>
-                    <TransferSave />
-                    <Button className='w-full h-9'>
-                        Bond SAVE
+            <div className='flex items-center justify-around sm:justify-center w-full xl:w-auto sm:gap-5 md:gap-10 xl:static xl:border-none fixed bottom-0 right-0 bg-card py-2 border-t z-10'>
+                <SaveNow />
+                <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank'>
+                    <Button className='flex flex-col rounded-full p-0 h-16 min-w-16' variant={'ghost'}>
+                        <RefreshCcw size={16} />
+                        Swap
                     </Button>
-                </div>
-            </ul>
+                </Link>
+                <TransferSave />
+                <Button className='flex flex-col rounded-full p-0 h-16 min-w-16' variant={'ghost'}>
+                    <FileClock size={16} />
+                    Bond
+                </Button>
+            </div>
         </div>
     )
 }

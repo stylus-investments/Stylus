@@ -18,8 +18,12 @@ const LiquidStaking = ({ initialData }: Props) => {
     const [balanceTable, setBalanceTable] = useState('2')
 
     return (
-        <div className='flex flex-col gap-10 w-full'>
+        <div className='flex flex-col gap-8 w-full'>
             <BalancesHeader initialData={initialData} />
+            <div className='relative'>
+                <Separator />
+                <Label className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-5 bg-card lg:text-base">LIQUID STAKING</Label>
+            </div>
             <StakingData initialData={initialData} />
             <div className='flex flex-col gap-5'>
                 <div className='flex items-center gap-3'>

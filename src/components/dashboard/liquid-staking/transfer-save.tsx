@@ -9,7 +9,7 @@ import React, { FormEvent, useState } from 'react'
 import { toast } from 'sonner'
 import { ABI } from '@/lib/abi'
 import { Config, useWriteContract } from 'wagmi'
-import { CircleCheck, LoaderCircle } from 'lucide-react'
+import { CircleCheck, LoaderCircle, Send } from 'lucide-react'
 import { WriteContractMutateAsync } from 'wagmi/query'
 
 const TransferSave = () => {
@@ -22,8 +22,9 @@ const TransferSave = () => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button className='w-full h-9'>
-                    Transfer
+                <Button className='flex flex-col rounded-full p-0 h-16 min-w-16' variant={'ghost'}>
+                    <Send size={16} />
+                    Send
                 </Button>
             </AlertDialogTrigger>
             {success ?

@@ -29,7 +29,7 @@ const Dashboard = ({ initialData }: Props) => {
     const { open } = useProfileStore()
 
     return (
-        <main className='flex flex-col items-center pt-20 pb-10 gap-10'>
+        <main className='flex flex-col items-center py-24 gap-10'>
             <Tabs defaultValue="balances" className="w-full">
                 <div className='flex items-center flex-col gap-5 md:gap-0 pb-2 md:flex-row md:justify-between w-full'>
                     <TabsList className="grid w-full md:w-96 lg:w-1/2 grid-cols-2 order-2 md:order-1">

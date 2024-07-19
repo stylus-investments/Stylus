@@ -63,10 +63,10 @@ const ProfilePage = () => {
                         <Label>Email</Label>
                         <Input type='email' required value={userProfile?.email || ''} name='email' onChange={handleChange} />
                     </div>
-                    <div className='flex flex-col gap-2'>
+                    {/* <div className='flex flex-col gap-2'>
                         <Label>Phishing Code</Label>
                         <Input required value={userProfile?.phishing_code || ''} name='phishing_code' onChange={handleChange} />
-                    </div>
+                    </div> */}
                     <div className='flex items-center w-full justify-between'>
                         <Button type='button' className='w-36' variant={'ghost'} onClick={() => setOpen(false)}>Close</Button>
                         <Button className='w-36'>

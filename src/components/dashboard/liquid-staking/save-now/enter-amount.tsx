@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { INFO } from '@/constant/info'
 
 const EnterAmount = (props: {
     formData: {
@@ -57,7 +58,10 @@ const EnterAmount = (props: {
             // Recalculate the amount based on the capped price in PHP
             newPriceInUsd = newPriceInPhp / conversionRate;
             const cappedAmount = newPriceInUsd / Number(usdcPrice);
-            setFormData(prev => ({ ...prev, amount: cappedAmount.toFixed(4), price: newPriceInPhp.toFixed(2) }));
+            if (Number(formData.price) !== 50000) {
+                setFormData(prev => ({ ...prev, amount: cappedAmount.toFixed(4), price: newPriceInPhp.toFixed(2) }));
+                toast.error("Token purchase limit exceeded. Please contact our support team if you wish to purchase beyond this limit.");
+            }
         } else {
             setFormData(prev => ({ ...prev, amount: newAmount.toString(), price: newPriceInPhp.toFixed(2) }));
         }
@@ -169,7 +173,12 @@ const EnterAmount = (props: {
                         </SelectContent>
                     </Select> */}
                 </div>
-                <small className='text-muted-foreground'>Maximum ₱50,000 is the max limit per transaction. Reach out support email if the amount requested is beyond the maximum limit</small>
+                <small className='text-muted-foreground'>Maximum ₱50,000 is the max limit per transaction. Reach out
+                    <span className='text-primary underline cursor-pointer px-1' onClick={() => {
+                        navigator.clipboard.writeText(INFO.email)
+                        toast.success("Support email has been copied.")
+                    }}>support email</span>
+                    if the amount requested is beyond the maximum limit</small>
             </div>
             <div className='flex items-center justify-between w-full pt-5 border-t'>
                 <Button variant={'ghost'} className='w-32' type='button' onClick={closeOrder}>Close</Button>
