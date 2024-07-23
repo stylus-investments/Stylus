@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { caller } from '../_trpc/server';
 import DashboardHeader from '@/components/dashboard/dashboard-header';
 import Dashboard from '@/components/dashboard/dashboard';
@@ -18,7 +19,8 @@ const DashboardPage = async () => {
     return (
         <div className='padding xl:container overflow-x-hidden xl:overflow-visible'>
             <DashboardHeader
-                walletAddress={session.user.wallet} />
+                currentPage='wallet'
+                 />
             <Dashboard initialData={dashboardData} />
         </div>
     )

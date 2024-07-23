@@ -1,3 +1,4 @@
+'use client'
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { faCircleInfo, faClock } from "@fortawesome/free-solid-svg-icons";

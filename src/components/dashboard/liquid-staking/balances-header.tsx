@@ -12,7 +12,6 @@ import { Separator } from '@/components/ui/separator'
 import useBalanceStore from '@/state/balanceStore'
 import { caller } from '@/app/_trpc/server'
 import SaveNow from './save-now/save-now'
-import { useAccount } from 'wagmi'
 import { FileClock, RefreshCcw } from 'lucide-react'
 
 const BalancesHeader = ({ initialData }: {
@@ -25,8 +24,22 @@ const BalancesHeader = ({ initialData }: {
     const { currency, setCurrency } = useBalanceStore()
 
     return (
-        <div className='flex flex-col gap-5 xl:gap-10 xl:flex-row xl:items-end'>
-            <div className='flex w-full gap-5 xl:w-1/2 flex-col sm:flex-row'>
+        <div className='flex flex-col gap-5 xl:gap-10 xl:flex-row xl:items-end lg:pt-10 padding'>
+            <div className='flex items-center justify-around sm:justify-center w-full xl:order-2 xl:w-80 2xl:w-auto sm:gap-5 md:gap-10 xl:static xl:border-none bg-card'>
+                <SaveNow />
+                <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank'>
+                    <Button className='flex flex-col rounded-full p-0 h-16 min-w-16' variant={'ghost'}>
+                        <RefreshCcw size={20} />
+                        Swap
+                    </Button>
+                </Link>
+                <TransferSave />
+                <Button className='flex flex-col rounded-full p-0 h-16 min-w-16' variant={'ghost'}>
+                    <FileClock size={20} />
+                    Bond
+                </Button>
+            </div>
+            <div className='flex w-full gap-5 xl:w-2/3 flex-col sm:flex-row xl:order-1'>
                 <Card className='w-full md:w-1/2 xl:w-full'>
                     <CardHeader>
                         <div className='flex items-center w-full justify-between'>
@@ -96,20 +109,6 @@ const BalancesHeader = ({ initialData }: {
                         </h1>
                     </div>
                 </div>
-            </div>
-            <div className='flex items-center justify-around sm:justify-center w-full xl:w-auto sm:gap-5 md:gap-10 xl:static xl:border-none fixed bottom-0 right-0 bg-card py-2 border-t z-10'>
-                <SaveNow />
-                <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank'>
-                    <Button className='flex flex-col rounded-full p-0 h-16 min-w-16' variant={'ghost'}>
-                        <RefreshCcw size={16} />
-                        Swap
-                    </Button>
-                </Link>
-                <TransferSave />
-                <Button className='flex flex-col rounded-full p-0 h-16 min-w-16' variant={'ghost'}>
-                    <FileClock size={16} />
-                    Bond
-                </Button>
             </div>
         </div>
     )

@@ -8,8 +8,6 @@ import LiquidStaking from './liquid-staking/liquid-staking'
 import { caller } from '@/app/_trpc/server'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import useProfileStore from '@/state/profileStore'
-import ProfilePage from './profile-page'
 
 interface Props {
     initialData: Awaited<ReturnType<(typeof caller['dashboard']['getDashboardData'])>>
@@ -25,8 +23,6 @@ const Dashboard = ({ initialData }: Props) => {
             router.push('/connect')
         },
     })
-
-    const { open } = useProfileStore()
 
     return (
         <main className='flex flex-col items-center py-24 gap-10'>
@@ -58,7 +54,6 @@ const Dashboard = ({ initialData }: Props) => {
                     <GrowRewards initialData={initialData} />
                 </TabsContent>
             </Tabs>
-            {open && <ProfilePage />}
         </main>
     )
 }

@@ -4,7 +4,7 @@ import ConnectWalletButton from './connect-wallet-button'
 import DashboardSkeleton from './dashboard-skeleton'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 
 const ConnectWalletFirst = () => {
 
@@ -13,10 +13,9 @@ const ConnectWalletFirst = () => {
     useEffect(() => {
 
         if (session.status === 'authenticated') {
-            window.location.href = '/dashboard'
+            redirect('/dashboard/wallet')
         }
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session])
 
     return (

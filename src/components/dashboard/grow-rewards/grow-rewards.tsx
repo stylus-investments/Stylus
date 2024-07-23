@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 import SnapshotHistory from './snapshot-history';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -22,7 +23,7 @@ const GrowRewards: React.FC<GrowRewardsProps> = ({ initialData }) => {
     const { currency, setCurrency } = useBalanceStore()
 
     return (
-        <div className='flex flex-col gap-10'>
+        <div className='flex flex-col gap-10 padding'>
             <div className='flex flex-col gap-5 xl:gap-10 xl:flex-row'>
                 <div className='flex w-full gap-5 xl:w-1/2 flex-col md:flex-row'>
                     <Card className='w-full sm:w-96 md:w-1/2 xl:w-full'>

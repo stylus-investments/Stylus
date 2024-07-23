@@ -36,12 +36,11 @@ const ProfilePage = () => {
         try {
             e.preventDefault()
 
-            const { email, phishing_code } = userProfile!
+            const { email } = userProfile!
 
             if (!email) return toast.error("Email is required")
-            if (!phishing_code) return toast.error("Phishing code is required")
 
-            const result = await updateProfile.mutateAsync({ email, phishing_code })
+            const result = await updateProfile.mutateAsync({ email })
             if (result) {
                 toast.success("Success profile info updated.")
             }

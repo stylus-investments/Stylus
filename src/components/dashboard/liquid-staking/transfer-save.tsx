@@ -23,7 +23,7 @@ const TransferSave = () => {
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
                 <Button className='flex flex-col rounded-full p-0 h-16 min-w-16' variant={'ghost'}>
-                    <Send size={16} />
+                    <Send size={20} />
                     Send
                 </Button>
             </AlertDialogTrigger>

@@ -25,7 +25,6 @@ export const profileRoute = {
     update: publicProcedure
         .input(z.object({
             email: z.string(),
-            phishing_code: z.string()
         })).mutation(async (opts) => {
 
             await rateLimiter.consume(1)

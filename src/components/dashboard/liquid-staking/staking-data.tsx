@@ -15,7 +15,7 @@ const StakingData = ({ initialData }: {
     const dashboardData = initialData.liquid_staking
 
     return (
-        <div className='flex flex-col'>
+        <div className='flex flex-col padding'>
             <div className='flex flex-col lg:flex-row w-full'>
                 <div className='flex flex-col gap-3 p-5 border rounded-t-lg rounded-b-lg lg:rounded-br-none lg:rounded-tr-none w-full'>
                     <div className='text-muted-foreground flex items-center justify-between gap-3'>
