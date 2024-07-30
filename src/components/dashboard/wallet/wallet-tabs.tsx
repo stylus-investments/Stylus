@@ -1,11 +1,14 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import GuideAccordions from '../liquid-staking/guide-accordions'
 import OrderHistory from '../liquid-staking/order-history'
 import SnapshotHistory from '../grow-rewards/snapshot-history'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import Image from 'next/image'
+
+const tabList = ['Assets', 'Snapshots', 'Orders', 'Guides']
+
 const WalletTabs = ({ wallet, tokens }: {
     wallet: string
     tokens: {
@@ -14,13 +17,19 @@ const WalletTabs = ({ wallet, tokens }: {
         icon: string
     }[]
 }) => {
+
+
+    const [currentTab, setCurrentTab] = useState('assets')
+
     return (
-        <Tabs defaultValue="assets" className="w-full flex flex-col gap-5 items-center padding">
+        <Tabs defaultValue="assets" value={currentTab} onValueChange={(val) => setCurrentTab(val)} className="w-full flex flex-col gap-5 items-center padding">
             <TabsList className='bg-card w-full lg:w-2/3 xl:w-1/2'>
-                <TabsTrigger className='w-full' value="assets">Assets</TabsTrigger>
-                <TabsTrigger className='w-full' value="snapshots">Snapshots</TabsTrigger>
-                <TabsTrigger className='w-full' value="orders">Orders</TabsTrigger>
-                <TabsTrigger className='w-full' value="guides">Guides</TabsTrigger>
+                {tabList.map(tab => (
+                    <TabsTrigger className='w-full flex flex-col gap-1' value={tab.toLocaleLowerCase()} key={tab}>
+                        <div>{tab}</div>
+                        <div className={`h-0.5 w-4 ${currentTab === tab.toLocaleLowerCase() && "bg-foreground"}`}></div>
+                    </TabsTrigger>
+                ))}
             </TabsList>
             <TabsContent value="assets" className='w-full xl:w-3/4'>
                 <Table>

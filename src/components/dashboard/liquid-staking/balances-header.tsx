@@ -71,7 +71,7 @@ const BalancesHeader = ({ initialData }: {
             <div className='flex items-center self-center w-full xl:w-80 sm:gap-5 gap-5'>
                <SaveNow />
                 <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank' className='w-full'>
-                    <Button className='w-full'>
+                    <Button className='w-full' variant={'secondary'}>
                         Swap
                     </Button>
                 </Link>

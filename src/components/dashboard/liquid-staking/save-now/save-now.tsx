@@ -85,7 +85,7 @@ const SaveNow = () => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button className='w-full'>
+                <Button className='w-full' variant={'secondary'}>
                     Deposit
                 </Button>
             </AlertDialogTrigger>
