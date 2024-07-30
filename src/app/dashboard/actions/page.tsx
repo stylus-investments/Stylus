@@ -2,13 +2,13 @@ import DashboardHeader from '@/components/dashboard/dashboard-header'
 import DashboardLinksFooter from '@/components/dashboard/dashboard-links-footer'
 import React from 'react'
 
-const BondPage = () => {
+const ActionsPage = () => {
   return (
     <div>
-      <DashboardHeader currentPage='bond' />
-      <DashboardLinksFooter currentPage='bond' />
+      <DashboardHeader currentPage='actions' />
+      <DashboardLinksFooter currentPage='actions' />
     </div>
   )
 }
 
-export default BondPage
+export default ActionsPage

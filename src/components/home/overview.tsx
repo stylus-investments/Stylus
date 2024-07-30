@@ -13,9 +13,9 @@ const Overview = () => {
                             Images Here
                     </div>
                 </div>
-                <div className='flex w-full items-center gap-10 flex-wrap'>
+                <div className='flex w-full items-center gap-10 flex-wrap justify-center'>
                     {Array.from({ length: 4 }).map((_, i) => (
-                        <Card key={i} className='w-full sm:max-w-64'>
+                        <Card key={i} className='w-full sm:max-w-56'>
                             <CardContent className='w-full py-8 flex items-center justify-center flex-col gap-8'>
                                 <h1 className='text-2xl font-black'>120K</h1>
                                 <h2 className='text-muted-foreground'>random text here</h2>

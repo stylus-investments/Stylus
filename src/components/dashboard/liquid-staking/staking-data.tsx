@@ -17,7 +17,7 @@ const StakingData = ({ initialData }: {
     return (
         <div className='flex flex-col padding'>
             <div className='flex flex-col lg:flex-row w-full'>
-                <div className='flex flex-col gap-3 p-5 border rounded-t-lg rounded-b-lg lg:rounded-br-none lg:rounded-tr-none w-full'>
+                <div className='flex flex-col gap-3 p-5 border rounded-t-lg lg:rounded-br-none lg:rounded-tr-none w-full'>
                     <div className='text-muted-foreground flex items-center justify-between gap-3'>
                         <div className='flex items-center gap-3'>
                             <FontAwesomeIcon icon={faLock} width={18} height={18} />

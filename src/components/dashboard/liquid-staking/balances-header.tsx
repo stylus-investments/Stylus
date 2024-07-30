@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { availableCurrencies } from '@/constant/availableCurrency'
 import TransferSave from './transfer-save'
@@ -11,106 +11,73 @@ import Image from 'next/image'
 import { Separator } from '@/components/ui/separator'
 import useBalanceStore from '@/state/balanceStore'
 import { caller } from '@/app/_trpc/server'
-import SaveNow from './save-now/save-now'
-import { FileClock, RefreshCcw } from 'lucide-react'
+import { Eye, EyeOff, FileClock, RefreshCcw } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { signOut, useSession } from 'next-auth/react'
+
 
 const BalancesHeader = ({ initialData }: {
     initialData: Awaited<ReturnType<(typeof caller['dashboard']['getDashboardData'])>>
 
 }) => {
 
+    const session = useSession({
+        required: true,
+        onUnauthenticated: () => {
+            signOut({
+                redirect: true,
+                callbackUrl: '/connect'
+            })
+        }
+    })
+
     const dashboardData = initialData.liquid_staking
+
+    const [showBalance, setShowBalance] = useState(true)
 
     const { currency, setCurrency } = useBalanceStore()
 
     return (
-        <div className='flex flex-col gap-5 xl:gap-10 xl:flex-row xl:items-end lg:pt-10 padding'>
-            <div className='flex items-center justify-around sm:justify-center w-full xl:order-2 xl:w-80 2xl:w-auto sm:gap-5 md:gap-10 xl:static xl:border-none bg-card'>
-                <SaveNow />
-                <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank'>
-                    <Button className='flex flex-col rounded-full p-0 h-16 min-w-16' variant={'ghost'}>
-                        <RefreshCcw size={20} />
+        <div className='flex flex-col gap-5 lg:pt-10 padding'>
+            <div className='flex flex-col items-center w-full gap-2'>
+                <div className='flex items-center text-muted-foreground gap-3'>
+                    <Label className='font-normal'>
+                        Total Balance
+                    </Label>
+                    <div className='cursor-pointer' onClick={() => setShowBalance(prev => !prev)}>
+                        {showBalance ? <Eye size={18} /> : <EyeOff size={18} />}
+                    </div>
+                </div>
+                {dashboardData.currentBalances.map((obj, i) => {
+                    if (obj.currency === currency) {
+                        // Find the matching currency object
+                        const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
+                        return (
+                            <div className='font-medium text-4xl flex items-center justify-between' key={i}>
+                                {showBalance ? <div className='flex items-center'>
+                                    {matchingCurrency && (
+                                        <FontAwesomeIcon icon={matchingCurrency.icon} width={30} height={30} />
+                                    )}
+                                    <div>
+                                        {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </div>
+                                </div> : <div>********</div>}
+                            </div>
+                        );
+                    }
+                })}
+            </div>
+            <div className='flex items-center self-center w-full xl:w-80 sm:gap-5 gap-5'>
+                <Button className='w-full'>
+                    Deposit
+                </Button>
+                <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank' className='w-full'>
+                    <Button className='w-full'>
                         Swap
                     </Button>
                 </Link>
-                <TransferSave />
-                <Button className='flex flex-col rounded-full p-0 h-16 min-w-16' variant={'ghost'}>
-                    <FileClock size={20} />
-                    Bond
-                </Button>
             </div>
-            <div className='flex w-full gap-5 xl:w-2/3 flex-col sm:flex-row xl:order-1'>
-                <Card className='w-full md:w-1/2 xl:w-full'>
-                    <CardHeader>
-                        <div className='flex items-center w-full justify-between'>
-                            <div className='font-normal'>Current Balance</div>
-                            <div className='text-muted-foreground'>
-                                <Select value={currency} onValueChange={(value) => setCurrency(value)}>
-                                    <SelectTrigger className='w-20'>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Currency</SelectLabel>
-                                            {availableCurrencies.map((obj, i) => (
-                                                <SelectItem value={obj.currency} key={i} >
-                                                    {obj.currency}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent className='flex flex-col'>
-                        {dashboardData.currentBalances.map((obj, i) => {
-                            if (obj.currency === currency) {
-                                // Find the matching currency object
-                                const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
-                                return (
-                                    <div className='font-black text-2xl flex items-center justify-between' key={i}>
-                                        <div>
-                                            {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
-                                            <span className='text-xs font-normal' >
-                                                .{(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
-                                            </span>
-                                        </div>
-                                        {/* Render the icon if a matching currency is found */}
-                                        {matchingCurrency && (
-                                            <FontAwesomeIcon icon={matchingCurrency.icon} width={16} height={16} className='text-base text-muted-foreground' />
-                                        )}
-                                    </div>
-                                );
-                            }
-                        })}
-                    </CardContent>
-                </Card>
-                <div className='w-full md:w-1/2 xl:w-full p-6 rounded-md flex flex-col gap-3 justify-center border' >
-                    <div className='flex gap-3 items-center text-center w-full'>
-                        <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/save.webp'} />
-                        <h1 className='font-black text-lg'>
-                            {(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
-                            <span className='text-xs font-normal' >
-                                .{(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
-                            </span>
-                            <span className='ml-2 text-lg'>SAVE</span>
-                        </h1>
-                    </div>
-                    <Separator />
-                    <div className='flex gap-3 items-center text-center w-full'>
-                        <Image width={25} height={25} className='h-auto rounded-full' alt='Go' src={'/usdc.png'} />
-                        <h1 className='font-black text-lg'>
-                            {(Number(dashboardData.current_usdc_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
-                            <span className='text-xs font-normal' >
-                                .{(Number(initialData.liquid_staking.current_usdc_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
-                            </span>
-                            <span className='ml-2 text-lg'>USDC</span>
-                        </h1>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </div >
     )
 }
 

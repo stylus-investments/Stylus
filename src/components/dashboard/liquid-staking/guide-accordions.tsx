@@ -5,7 +5,7 @@ import React from 'react'
 const GuideAccordions = () => {
 
     return (
-        <Accordion type="single" collapsible className="w-full padding">
+        <Accordion type="single" collapsible className="w-full">
             {guideTexts.map((guide, i) => (
                 <AccordionItem value={guide.title} key={i}>
                     <AccordionTrigger>{guide.title}</AccordionTrigger>

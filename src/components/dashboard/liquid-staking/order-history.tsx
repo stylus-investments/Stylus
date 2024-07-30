@@ -26,7 +26,6 @@ const OrderHistory = () => {
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, currentPage])
-
     return (
         <>
             {isLoading ? <BalanceHistorySkeleton /> :

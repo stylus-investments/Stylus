@@ -1,0 +1,59 @@
+'use client'
+import React from 'react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import GuideAccordions from '../liquid-staking/guide-accordions'
+import OrderHistory from '../liquid-staking/order-history'
+import SnapshotHistory from '../grow-rewards/snapshot-history'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import Image from 'next/image'
+const WalletTabs = ({ wallet, tokens }: {
+    wallet: string
+    tokens: {
+        name: string
+        amount: string
+        icon: string
+    }[]
+}) => {
+    return (
+        <Tabs defaultValue="assets" className="w-full flex flex-col gap-5 items-center padding">
+            <TabsList className='bg-card w-full lg:w-2/3 xl:w-1/2'>
+                <TabsTrigger className='w-full' value="assets">Assets</TabsTrigger>
+                <TabsTrigger className='w-full' value="snapshots">Snapshots</TabsTrigger>
+                <TabsTrigger className='w-full' value="orders">Orders</TabsTrigger>
+                <TabsTrigger className='w-full' value="guides">Guides</TabsTrigger>
+            </TabsList>
+            <TabsContent value="assets" className='w-full xl:w-3/4'>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead className='text-right'>Amount</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {tokens.map((token, i) => (
+                            <TableRow key={i}>
+                                <TableCell className='flex items-center gap-2'>
+                                    <Image src={token.icon} width={20} height={20} alt='Token Icon' className='rounded-full' />
+                                    {token.name}
+                                </TableCell>
+                                <TableCell className='text-right'>{token.amount}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TabsContent>
+            <TabsContent value="snapshots" className='w-full'>
+                <SnapshotHistory wallet={wallet} />
+            </TabsContent>
+            <TabsContent value="orders" className='w-full'>
+                <OrderHistory />
+            </TabsContent>
+            <TabsContent value="guides" className='w-full'>
+                <GuideAccordions />
+            </TabsContent>
+        </Tabs>
+    )
+}
+
+export default WalletTabs
