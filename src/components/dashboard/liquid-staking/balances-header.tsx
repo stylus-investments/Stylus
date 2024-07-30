@@ -14,6 +14,7 @@ import { caller } from '@/app/_trpc/server'
 import { Eye, EyeOff, FileClock, RefreshCcw } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { signOut, useSession } from 'next-auth/react'
+import SaveNow from './save-now/save-now'
 
 
 const BalancesHeader = ({ initialData }: {
@@ -68,9 +69,7 @@ const BalancesHeader = ({ initialData }: {
                 })}
             </div>
             <div className='flex items-center self-center w-full xl:w-80 sm:gap-5 gap-5'>
-                <Button className='w-full'>
-                    Deposit
-                </Button>
+               <SaveNow />
                 <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank' className='w-full'>
                     <Button className='w-full'>
                         Swap

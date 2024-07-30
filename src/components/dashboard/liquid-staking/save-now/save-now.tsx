@@ -85,9 +85,8 @@ const SaveNow = () => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-            <Button className='flex flex-col rounded-full p-0 h-16 min-w-16' variant={'ghost'}>
-            <HandCoins size={20} />
-                    Buy
+                <Button className='w-full'>
+                    Deposit
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className='w-full max-w-96 max-h-[600px] overflow-y-auto'>
