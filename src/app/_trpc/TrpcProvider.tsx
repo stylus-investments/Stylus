@@ -4,6 +4,7 @@ import { httpBatchLink } from "@trpc/client"
 import React, { useState } from 'react'
 import '@rainbow-me/rainbowkit/styles.css';
 import {
+    darkTheme,
     getDefaultConfig,
     RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
@@ -20,6 +21,7 @@ const config = getDefaultConfig({
 
 export { config }
 import { RainbowKitSiweNextAuthProvider, GetSiweMessageOptions } from '@rainbow-me/rainbowkit-siwe-next-auth';
+import { useTheme } from "next-themes";
 
 const getSiweMessageOptions: GetSiweMessageOptions = () => ({
     statement: 'Sign in to Savern',
@@ -49,7 +51,12 @@ const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
                     <RainbowKitSiweNextAuthProvider
                         getSiweMessageOptions={getSiweMessageOptions}
                     >
-                        <RainbowKitProvider modalSize="compact">
+                        <RainbowKitProvider
+                            theme={darkTheme({
+                                accentColor: "#fff",
+                                accentColorForeground: "#000",
+                                borderRadius: "small"
+                            })}>
                             {children}
                         </RainbowKitProvider>
                     </RainbowKitSiweNextAuthProvider>
