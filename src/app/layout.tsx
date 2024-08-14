@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import '@rainbow-me/rainbowkit/styles.css'
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Toaster } from "@/components/ui/sonner"
 import TrpcProvider from "./_trpc/TrpcProvider";
-import NextAuthSessionProvider from "@/components/auth/NextAuthSessionProvider";
 import { footerTexts } from "@/constant/footerTexts";
+import Privy from "@/components/providers/privy-provider";
 
 export const metadata: Metadata = {
   title: "Savern",
@@ -20,21 +19,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <NextAuthSessionProvider>
-        <TrpcProvider>
-          <body>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              {children}
-              <Toaster />
-            </ThemeProvider>
-          </body>
-        </TrpcProvider>
-      </NextAuthSessionProvider>
+      <Privy>
+          <TrpcProvider>
+            <body>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                {children}
+                <Toaster />
+              </ThemeProvider>
+            </body>
+          </TrpcProvider>
+      </Privy>
     </html>
   );
 }

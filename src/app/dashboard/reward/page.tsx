@@ -1,28 +1,41 @@
-import { caller } from '@/app/_trpc/server'
+'use client'
+import { trpc } from '@/app/_trpc/client'
 import DashboardHeader from '@/components/dashboard/dashboard-header'
 import DashboardLinksFooter from '@/components/dashboard/dashboard-links-footer'
 import GrowRewards from '@/components/dashboard/grow-rewards/grow-rewards'
-import { getAuth } from '@/lib/nextAuth'
-import { cookies } from 'next/headers'
+import { usePrivy } from '@privy-io/react-auth'
+import { Loader } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
-const RewardPage = async () => {
+const RewardPage = () => {
 
-  cookies()
-  const session = await getAuth()
-  if (!session) {
-    redirect('/connect')
-  }
-  const initialData = await caller.dashboard.getDashboardData()
+  const { user, ready, authenticated } = usePrivy()
 
-  return (
-    <div className='flex flex-col gap-8 w-full py-24'>
-      <DashboardHeader currentPage='reward' />
-      <GrowRewards initialData={initialData} />
-      <DashboardLinksFooter currentPage='reward' />
+  if (!ready) return <div className='h-screen grid place-items-center'>
+    <Loader size={50} className='animate-spin text-primary' />
+  </div>
+
+  if (ready && !authenticated) redirect('/connect')
+
+  if (ready && user?.wallet && user) {
+
+    const { data, isLoading } = trpc.dashboard.getRewardData.useQuery({
+      walet_address: user.wallet?.address
+    })
+
+    if (!data) return <div className='h-screen grid place-items-center'>
+      <Loader size={50} className='animate-spin text-primary' />
     </div>
-  )
+
+    return (
+      <div className='flex flex-col gap-8 w-full py-24'>
+        <DashboardHeader currentPage='reward' />
+        <GrowRewards data={data} />
+        <DashboardLinksFooter currentPage='reward' />
+      </div>
+    )
+  }
 }
 
 export default RewardPage

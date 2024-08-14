@@ -1,6 +1,6 @@
 import { availableCurrencies } from "@/constant/availableCurrency";
 import db from "@/db/db";
-import { getAuth } from "@/lib/nextAuth";
+import { getUserId } from "@/lib/privy";
 import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import axios from "axios";
@@ -18,9 +18,11 @@ const rateLimiter = new RateLimiterMemory(opts);
 export const currencyRoute = {
     get: publicProcedure.query(async () => {
 
-        const session = await getAuth()
-        if (!session) throw new TRPCError({
-            code: 'UNAUTHORIZED'
+        const userID = await getUserId()
+
+        if (!userID) throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Login First"
         })
 
         return await db.currency_conversion.findMany()

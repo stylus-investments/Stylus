@@ -22,13 +22,16 @@ const HomePage = () => {
   return (
     <div className='overflow-x-hidden xl:overflow-visible'>
       <Header />
-      <Main />
+      <div className='grid place-items-center text-2xl pt-52'>
+        Under Development
+      </div>
+      {/* <Main />
       <Partners />
       <Graphene />
       <Overview />
       <Base />
       <TeamFinance />
-      <Footer />
+      <Footer /> */}
     </div>
   )
 }

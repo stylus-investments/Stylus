@@ -1,4 +1,3 @@
-import { caller } from '@/app/_trpc/server'
 import { Label } from '@/components/ui/label'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { faLock, faFlag, faSackDollar, faCircleInfo, faHandHoldingDollar, faDollarSign, faPesoSign } from '@fortawesome/free-solid-svg-icons'
@@ -7,12 +6,17 @@ import React from 'react'
 import SnapshotTimer from './SnapshotTimer'
 import { Button } from '@/components/ui/button'
 
-const StakingData = ({ initialData }: {
-    initialData: Awaited<ReturnType<(typeof caller['dashboard']['getDashboardData'])>>
-
+const StakingData = ({ snapshot, saveBalance }: {
+    snapshot: {
+        status: number;
+        current_stake: string;
+        next_snapshot: string;
+        reward: string;
+    }
+    saveBalance: string
 }) => {
 
-    const dashboardData = initialData.liquid_staking
+    if (!snapshot || !saveBalance) return null
 
     return (
         <div className='flex flex-col padding'>
@@ -24,11 +28,11 @@ const StakingData = ({ initialData }: {
                             <Label>
                                 Your stake
                             </Label>
-                            {dashboardData.snapshot.status === 1 && < Button className='h-6 bg-green-500 hover:bg-green-500 '>
+                            {snapshot.status === 1 && < Button className='h-6 bg-green-500 hover:bg-green-500 '>
                                 Active
                             </Button>
                             }
-                            {!dashboardData.snapshot.status && <Button variant={'destructive'} className='h-6 '>
+                            {!snapshot.status && <Button variant={'destructive'} className='h-6 '>
                                 Forfeited
                             </Button>}
                         </div>
@@ -44,9 +48,9 @@ const StakingData = ({ initialData }: {
                         </TooltipProvider>
                     </div>
                     <h1 className='font-black md:text-lg '>
-                        {(Number(dashboardData.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
+                        {(Number(snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                         <span className='text-xs' >
-                            .{(Number(dashboardData.snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
+                            .{(Number(snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                         </span>
                         <span className='ml-2'>SAVE</span>
                     </h1>
@@ -60,7 +64,7 @@ const StakingData = ({ initialData }: {
                             <Label>
                                 Bonded Balance
                             </Label>
-                            {Number(dashboardData.current_save_balance) > 0 && <Button className=' h-6 bg-orange-400  hover:bg-orange-400 text-white'>Holding</Button>}
+                            {Number(saveBalance) > 0 && <Button className=' h-6 bg-orange-400  hover:bg-orange-400 text-white'>Holding</Button>}
                         </div>
                         <TooltipProvider>
                             <Tooltip>
@@ -74,9 +78,9 @@ const StakingData = ({ initialData }: {
                         </TooltipProvider>
                     </div>
                     <h1 className='font-black md:text-lg '>
-                        {(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
+                        {(Number(saveBalance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[0]}
                         <span className='text-xs' >
-                            .{(Number(dashboardData.current_save_balance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
+                            .{(Number(saveBalance)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                         </span>
                         <span className='ml-2'>SAVE</span>
                     </h1>
@@ -103,7 +107,7 @@ const StakingData = ({ initialData }: {
                     </div>
                     <h1 className='font-black md:text-lg'>
                         {
-                            new Date(dashboardData.snapshot.next_snapshot).toLocaleString('en-US', {
+                            new Date(snapshot.next_snapshot).toLocaleString('en-US', {
                                 timeZone: 'UTC',
                                 weekday: 'short',
                                 day: '2-digit',
@@ -116,7 +120,7 @@ const StakingData = ({ initialData }: {
                     </h1>
                 </div>
 
-                <SnapshotTimer nextSnapshot={dashboardData.snapshot.next_snapshot} />
+                <SnapshotTimer nextSnapshot={snapshot.next_snapshot} />
 
             </div>
         </div>

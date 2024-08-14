@@ -9,15 +9,13 @@ import Image from 'next/image'
 
 const tabList = ['Assets', 'Snapshots', 'Orders', 'Guides']
 
-const WalletTabs = ({ wallet, tokens }: {
-    wallet: string
+const WalletTabs = ({ tokens }: {
     tokens: {
         name: string
         amount: string
         icon: string
     }[]
 }) => {
-
 
     const [currentTab, setCurrentTab] = useState('assets')
 
@@ -27,11 +25,11 @@ const WalletTabs = ({ wallet, tokens }: {
                 {tabList.map(tab => (
                     <TabsTrigger className='w-full flex flex-col gap-1' value={tab.toLocaleLowerCase()} key={tab}>
                         <div>{tab}</div>
-                        <div className={`h-0.5 w-4 ${currentTab === tab.toLocaleLowerCase() && "bg-foreground"}`}></div>
+                        <div className={`h-0.5 w-4 ${currentTab === tab.toLocaleLowerCase() && "bg-primary"}`}></div>
                     </TabsTrigger>
                 ))}
             </TabsList>
-            <TabsContent value="assets" className='w-full xl:w-3/4'>
+            <TabsContent value="assets" className='w-full'>
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -53,7 +51,7 @@ const WalletTabs = ({ wallet, tokens }: {
                 </Table>
             </TabsContent>
             <TabsContent value="snapshots" className='w-full'>
-                <SnapshotHistory wallet={wallet} />
+                <SnapshotHistory />
             </TabsContent>
             <TabsContent value="orders" className='w-full'>
                 <OrderHistory />

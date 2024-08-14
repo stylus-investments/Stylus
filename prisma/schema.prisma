@@ -13,19 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model user {
-  id              Int             @id @default(autoincrement())
-  wallet          String          @unique
-  email           String?
-  phishing_code   String?
-  email_confirmed Boolean         @default(false)
-  snapshots       user_snapshot[]
-  orders          user_order[]
-  created_at      DateTime        @default(now())
-  updated_at      DateTime        @updatedAt
-  bonded_save     bonded_save[]
-}
-
 model admin {
   id         Int      @id @default(autoincrement())
   username   String   @unique
@@ -50,32 +37,20 @@ model user_snapshot {
   status      Int
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
-  user        user     @relation(fields: [user_id], references: [id])
   snapshot    snapshot @relation(fields: [snapshot_id], references: [id])
-  user_id     Int
+  user_id     String
   snapshot_id Int
 }
 
 model user_order {
-  id             String   @id @default(uuid())
-  amount         String
-  price          String
-  status         String
-  receipt        String //image
-  method         String
-  currency       String
-  user           user     @relation(fields: [user_id], references: [id])
-  user_id        Int
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
-}
-
-model bonded_save {
   id         String   @id @default(uuid())
-  user       user     @relation(fields: [user_id], references: [id])
-  user_id    Int
   amount     String
-  
+  price      String
+  status     String
+  receipt    String //image
+  method     String
+  currency   String
+  user_id    String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }

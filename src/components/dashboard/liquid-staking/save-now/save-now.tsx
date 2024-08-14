@@ -8,9 +8,8 @@ import { toast } from 'sonner'
 import EnterAmount from './enter-amount'
 import ScanQr from './scan-qr'
 import VerifyOrder from './verify-order'
-import { HandCoins } from 'lucide-react'
 
-const SaveNow = () => {
+const DepositSave = () => {
 
     const [open, setOpen] = useState(false)
 
@@ -31,6 +30,7 @@ const SaveNow = () => {
 
     const getUserOrder = trpc.order.getCurrentUserOrder.useQuery(undefined, {
         refetchOnMount: false,
+        enabled: false
     })
 
     const createOrder = trpc.order.createOrder.useMutation()
@@ -85,7 +85,7 @@ const SaveNow = () => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button className='w-full' variant={'secondary'}>
+                <Button className='w-full'>
                     Deposit
                 </Button>
             </AlertDialogTrigger>
@@ -120,4 +120,4 @@ const SaveNow = () => {
 
 
 
-export default SaveNow
+export default DepositSave

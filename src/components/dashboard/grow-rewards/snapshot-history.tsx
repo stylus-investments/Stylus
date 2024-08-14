@@ -8,11 +8,9 @@ import TablePagination from '../table-pagination';
 import { trpc } from '@/app/_trpc/client';
 import SnapshotHistorySkeleton from './snapshot-history-skeleton';
 
-const SnapshotHistory = ({ wallet }: {
-    wallet: string
-}) => {
+const SnapshotHistory = () => {
 
-    const { data, isLoading } = trpc.dashboard.getUserSnapshotHistory.useQuery(wallet, {
+    const { data, isLoading } = trpc.dashboard.getUserSnapshotHistory.useQuery(undefined, {
         refetchOnMount: false
     })
 
@@ -27,6 +25,7 @@ const SnapshotHistory = ({ wallet }: {
         status: number;
         month: number;
     }[] | undefined | undefined>(undefined)
+
     const { getCurrentData, currentPage } = usePaginationStore()
 
     useEffect(() => {

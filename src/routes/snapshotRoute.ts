@@ -2,360 +2,238 @@ import { publicProcedure } from "@/trpc/trpc";
 import db from "@/db/db";
 import { okayRes } from "@/lib/apiResponse";
 import { getTokenHolders } from "@/lib/moralis";
-import { getAuth } from "@/lib/nextAuth";
 import { TRPCError } from "@trpc/server";
 import { z } from 'zod'
 import { rateLimiter } from "@/lib/ratelimiter";
 
 export const snapshotRoute = {
-    getAllSnapshot: publicProcedure.query(async () => {
+    // reset: publicProcedure.mutation(async () => {
 
-        try {
+    //     try {
 
-            await rateLimiter.consume(1);
+    //         await rateLimiter.consume(1);
 
-            const snapshots = await db.snapshot.findMany({
-                select: {
-                    start_date: true,
-                    id: true,
-                    end_date: true,
-                    completed: true,
-                    user_snapshot: {
-                        select: {
-                            id: true,
-                            status: true
-                        }
-                    }
-                },
-                orderBy: {
-                    created_at: 'desc'
-                }
-            },)
-            if (!snapshots) throw new TRPCError({
-                code: 'BAD_REQUEST',
-                message: "Failed to get all snapshots"
-            })
+    //         //retrieve previou snapshot
+    //         const previousSnapshots = await db.snapshot.findMany({
+    //             where: {
+    //                 completed: false
+    //             },
+    //             orderBy: {
+    //                 created_at: 'desc'
+    //             }
+    //         })
 
-            const modifySnapshotData = snapshots.map(snap => {
+    //         if (previousSnapshots.length > 1) {
+    //             // Delete all snapshots except the first one
+    //             const snapshotsToDelete = previousSnapshots.slice(1);
 
-                const unpaidRemaining = snap.user_snapshot.reduce((total, snap) => {
-                    return snap.status === 2 ? total + 1 : total
-                }, 0)
+    //             await Promise.all(snapshotsToDelete.map(async (snapshot) => {
 
-                return {
-                    ...snap,
-                    start_date: snap.start_date.toISOString(),
-                    end_date: snap.end_date.toISOString(),
-                    user_snapshot: undefined,
-                    total_holders: snap.user_snapshot.length || 0,
-                    total_unpaid_holders: unpaidRemaining
-                }
-            }) as {
-                total_holders: number;
-                total_unpaid_holders: number;
-                id: number;
-                start_date: string;
-                end_date: string;
-                completed: boolean;
-            }[]
+    //                 await db.user_snapshot.deleteMany({
+    //                     where: {
+    //                         snapshot_id: snapshot.id
+    //                     }
+    //                 });
 
-            return modifySnapshotData
+    //                 await db.snapshot.delete({
+    //                     where: {
+    //                         id: snapshot.id
+    //                     }
+    //                 });
+    //             }));
+    //         }
 
-        } catch (error: any) {
-            console.log(error);
-            throw new TRPCError({
-                code: error.code,
-                message: error.message
-            })
-        } finally {
-            await db.$disconnect()
-        }
-    }),
-    getData: publicProcedure.input(z.number()).query(async (opts) => {
+    //         //retrieve token holders and users
+    //         const [tokenHolders, users] = await Promise.all([
+    //             getTokenHolders(),
+    //             db.user.findMany()
+    //         ])
 
-        try {
+    //         if (!tokenHolders) throw new TRPCError({
+    //             code: 'NOT_FOUND',
+    //             message: "Failed to retrieve token holders"
+    //         })
+    //         if (!users) throw new TRPCError({
+    //             code: "NOT_FOUND",
+    //             message: "Faild to retrieve users"
+    //         })
 
-            await rateLimiter.consume(1);
+    //         const now = new Date()
 
-            const session = await getAuth()
-            if (!session) throw new TRPCError({
-                code: "UNAUTHORIZED"
-            })
+    //         if (previousSnapshots.length > 0) {
 
-            const snapshotID = opts.input
-            if (!snapshotID) throw new TRPCError({
-                code: 'NOT_FOUND',
-                message: "Snapshot ID not found"
-            })
+    //             const end_date = new Date(previousSnapshots[0].end_date)
+    //             end_date.setUTCDate(end_date.getUTCDate() + 1)
 
+    //             const previousSnapshotEndDate = new Date(previousSnapshots[0].end_date);
 
-            const snapshot = await db.snapshot.findUnique({
-                where: { id: snapshotID }, select: {
-                    user_snapshot: {
-                        select: {
-                            id: true,
-                            reward: true,
-                            stake: true,
-                            status: true,
-                            user: {
-                                select: {
-                                    wallet: true
-                                }
-                            }
-                        }
-                    }
-                }
-            })
-            if (!snapshot) throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Snapshot not found"
-            })
+    //             if (previousSnapshotEndDate <= now) {
 
-            const modifySnapshotData = snapshot.user_snapshot.map(user_snapshot => ({
-                ...user_snapshot,
-                user: undefined,
-                wallet: user_snapshot.user.wallet
-            }))
+    //                 //if this is true meaning the snapshot is completed
+    //                 const updateSnapshot = await db.snapshot.update({
+    //                     where: {
+    //                         id: previousSnapshots[0].id
+    //                     }, data: {
+    //                         completed: true
+    //                     },
+    //                     include: {
+    //                         user_snapshot: {
+    //                             include: {
+    //                                 user: true
+    //                             }
+    //                         }
+    //                     }
+    //                 })
 
-            return modifySnapshotData
+    //                 //retrieve all snapshot user
+    //                 const user_snapshots = updateSnapshot.user_snapshot
 
-        } catch (error: any) {
-            console.log(error);
-            throw new TRPCError({
-                code: error.code,
-                message: error.message
-            })
-        } finally {
-            await db.$disconnect()
-        }
-    }),
-    reset: publicProcedure.mutation(async () => {
+    //                 //update all snapshot check if the user is forfiet or not
+    //                 await Promise.all(user_snapshots.map(async (usrSnapshot) => {
 
-        try {
+    //                     const tokenHolder = tokenHolders.find(holder => holder.owner_address === usrSnapshot.user.wallet && usrSnapshot.status === 1);
 
-            await rateLimiter.consume(1);
+    //                     if (tokenHolder) {
 
-            //retrieve previou snapshot
-            const previousSnapshots = await db.snapshot.findMany({
-                where: {
-                    completed: false
-                },
-                orderBy: {
-                    created_at: 'desc'
-                }
-            })
+    //                         if ((Number(tokenHolder.balance_formatted) < Number(usrSnapshot.stake)) && usrSnapshot.status) {
+    //                             //this mean user is disqualified
+    //                             const updateUserSnapshot = await db.user_snapshot.update({
+    //                                 where: { id: usrSnapshot.id }, data: { reward: '0.0000000000', status: 0 }
+    //                             })
+    //                             if (!updateUserSnapshot) throw new TRPCError({
+    //                                 code: "BAD_REQUEST",
+    //                                 message: "Failed to update user snapshot"
+    //                             })
 
-            if (previousSnapshots.length > 1) {
-                // Delete all snapshots except the first one
-                const snapshotsToDelete = previousSnapshots.slice(1);
+    //                         } else {
+    //                             //update the snapshot status into 2 means = "pending reward"
+    //                             const updateUserSnapshot = await db.user_snapshot.update({
+    //                                 where: { id: usrSnapshot.id }, data: { status: 2 }
+    //                             })
+    //                             if (!updateUserSnapshot) throw new TRPCError({
+    //                                 code: "BAD_REQUEST",
+    //                                 message: "Failed to update user snapshot"
+    //                             })
 
-                await Promise.all(snapshotsToDelete.map(async (snapshot) => {
+    //                         }
+    //                     }
 
-                    await db.user_snapshot.deleteMany({
-                        where: {
-                            snapshot_id: snapshot.id
-                        }
-                    });
+    //                 }))
 
-                    await db.snapshot.delete({
-                        where: {
-                            id: snapshot.id
-                        }
-                    });
-                }));
-            }
+    //                 //create another snapshot
+    //                 const newSnapshot = await db.snapshot.create({
+    //                     data: { start_date: previousSnapshots[0].end_date, end_date }
+    //                 })
+    //                 if (!newSnapshot) throw new TRPCError({
+    //                     code: 'CLIENT_CLOSED_REQUEST',
+    //                     message: "Failed to create new snapshot"
+    //                 })
 
-            //retrieve token holders and users
-            const [tokenHolders, users] = await Promise.all([
-                getTokenHolders(),
-                db.user.findMany()
-            ])
+    //                 //connect all users in current snapshot if they have go balance
+    //                 await Promise.all(tokenHolders.map(async (holder) => {
 
-            if (!tokenHolders) throw new TRPCError({
-                code: 'NOT_FOUND',
-                message: "Failed to retrieve token holders"
-            })
-            if (!users) throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Faild to retrieve users"
-            })
+    //                     const user = users.find(user => user.wallet === holder.owner_address);
 
-            const now = new Date()
+    //                     if (user) {
 
-            if (previousSnapshots.length > 0) {
+    //                         const reward = Number(holder.balance_formatted) * (0.5 / 100)
 
-                const end_date = new Date(previousSnapshots[0].end_date)
-                end_date.setUTCDate(end_date.getUTCDate() + 1)
+    //                         //create the user_snapshot and connect it to snapshots
+    //                         const createUserSnapshot = await db.user_snapshot.create({
+    //                             data: {
+    //                                 stake: Number(holder.balance_formatted).toString(),
+    //                                 reward: reward.toFixed(10),
+    //                                 status: 1,
+    //                                 user: {
+    //                                     connect: {
+    //                                         id: user.id
+    //                                     }
+    //                                 },
+    //                                 snapshot: {
+    //                                     connect: {
+    //                                         id: newSnapshot.id
+    //                                     }
+    //                                 }
+    //                             }
+    //                         })
+    //                         if (!createUserSnapshot) throw new TRPCError({
+    //                             code: 'BAD_REQUEST',
+    //                             message: "Failed to create user snapshot"
+    //                         })
+    //                     }
+    //                 }))
 
-                const previousSnapshotEndDate = new Date(previousSnapshots[0].end_date);
+    //                 return okayRes()
 
-                if (previousSnapshotEndDate <= now) {
+    //             } else {
+    //                 throw new TRPCError({
+    //                     code: 'BAD_REQUEST',
+    //                     message: 'Snapshot still ongoing',
+    //                 });
+    //             }
 
-                    //if this is true meaning the snapshot is completed
-                    const updateSnapshot = await db.snapshot.update({
-                        where: {
-                            id: previousSnapshots[0].id
-                        }, data: {
-                            completed: true
-                        },
-                        include: {
-                            user_snapshot: {
-                                include: {
-                                    user: true
-                                }
-                            }
-                        }
-                    })
+    //         } else {
 
-                    //retrieve all snapshot user
-                    const user_snapshots = updateSnapshot.user_snapshot
+    //             now.setUTCHours(16, 0, 0, 0); // Set now to 4:00 PM UTC
+    //             const end_date = new Date(now)
+    //             end_date.setUTCDate(now.getUTCDate() + 1); // Add a day to now
+    //             end_date.setUTCHours(16, 0, 0, 0);
 
-                    //update all snapshot check if the user is forfiet or not
-                    await Promise.all(user_snapshots.map(async (usrSnapshot) => {
+    //             const newSnapshot = await db.snapshot.create({
+    //                 data: { start_date: now, end_date }
+    //             })
 
-                        const tokenHolder = tokenHolders.find(holder => holder.owner_address === usrSnapshot.user.wallet && usrSnapshot.status === 1);
+    //             if (!newSnapshot) throw new TRPCError({
+    //                 code: 'BAD_REQUEST',
+    //                 message: "Failed to create new Snapshot"
+    //             })
 
-                        if (tokenHolder) {
+    //             await Promise.all(tokenHolders.map(async (holder) => {
 
-                            if ((Number(tokenHolder.balance_formatted) < Number(usrSnapshot.stake)) && usrSnapshot.status) {
-                                //this mean user is disqualified
-                                const updateUserSnapshot = await db.user_snapshot.update({
-                                    where: { id: usrSnapshot.id }, data: { reward: '0.0000000000', status: 0 }
-                                })
-                                if (!updateUserSnapshot) throw new TRPCError({
-                                    code: "BAD_REQUEST",
-                                    message: "Failed to update user snapshot"
-                                })
+    //                 const user = users.find(user => user.wallet === holder.owner_address);
 
-                            } else {
-                                //update the snapshot status into 2 means = "pending reward"
-                                const updateUserSnapshot = await db.user_snapshot.update({
-                                    where: { id: usrSnapshot.id }, data: { status: 2 }
-                                })
-                                if (!updateUserSnapshot) throw new TRPCError({
-                                    code: "BAD_REQUEST",
-                                    message: "Failed to update user snapshot"
-                                })
+    //                 if (user) {
 
-                            }
-                        }
+    //                     //the reward will be 1.66% each snapshot
+    //                     const reward = Number(holder.balance_formatted) * (0.5 / 100);
 
-                    }))
+    //                     //create userSnapshot and connect it to snapshots
+    //                     const createUserSnapshot = await db.user_snapshot.create({
+    //                         data: {
+    //                             stake: Number(holder.balance_formatted).toString(),
+    //                             reward: reward.toFixed(10),
+    //                             status: 1,
+    //                             user: {
+    //                                 connect: {
+    //                                     id: user.id
+    //                                 }
+    //                             },
+    //                             snapshot: {
+    //                                 connect: {
+    //                                     id: newSnapshot.id
+    //                                 }
+    //                             }
+    //                         }
+    //                     })
+    //                     if (!createUserSnapshot) throw new TRPCError({
+    //                         code: 'BAD_REQUEST',
+    //                         message: "Failed to create user snapshot"
+    //                     })
+    //                 }
+    //             }))
+    //             return okayRes()
+    //         }
 
-                    //create another snapshot
-                    const newSnapshot = await db.snapshot.create({
-                        data: { start_date: previousSnapshots[0].end_date, end_date }
-                    })
-                    if (!newSnapshot) throw new TRPCError({
-                        code: 'CLIENT_CLOSED_REQUEST',
-                        message: "Failed to create new snapshot"
-                    })
-
-                    //connect all users in current snapshot if they have go balance
-                    await Promise.all(tokenHolders.map(async (holder) => {
-
-                        const user = users.find(user => user.wallet === holder.owner_address);
-
-                        if (user) {
-
-                            const reward = Number(holder.balance_formatted) * (0.5 / 100)
-
-                            //create the user_snapshot and connect it to snapshots
-                            const createUserSnapshot = await db.user_snapshot.create({
-                                data: {
-                                    stake: Number(holder.balance_formatted).toString(),
-                                    reward: reward.toFixed(10),
-                                    status: 1,
-                                    user: {
-                                        connect: {
-                                            id: user.id
-                                        }
-                                    },
-                                    snapshot: {
-                                        connect: {
-                                            id: newSnapshot.id
-                                        }
-                                    }
-                                }
-                            })
-                            if (!createUserSnapshot) throw new TRPCError({
-                                code: 'BAD_REQUEST',
-                                message: "Failed to create user snapshot"
-                            })
-                        }
-                    }))
-
-                    return okayRes()
-
-                } else {
-                    throw new TRPCError({
-                        code: 'BAD_REQUEST',
-                        message: 'Snapshot still ongoing',
-                    });
-                }
-
-            } else {
-
-                now.setUTCHours(16, 0, 0, 0); // Set now to 4:00 PM UTC
-                const end_date = new Date(now)
-                end_date.setUTCDate(now.getUTCDate() + 1); // Add a day to now
-                end_date.setUTCHours(16, 0, 0, 0);
-
-                const newSnapshot = await db.snapshot.create({
-                    data: { start_date: now, end_date }
-                })
-
-                if (!newSnapshot) throw new TRPCError({
-                    code: 'BAD_REQUEST',
-                    message: "Failed to create new Snapshot"
-                })
-
-                await Promise.all(tokenHolders.map(async (holder) => {
-
-                    const user = users.find(user => user.wallet === holder.owner_address);
-
-                    if (user) {
-
-                        //the reward will be 1.66% each snapshot
-                        const reward = Number(holder.balance_formatted) * (0.5 / 100);
-
-                        //create userSnapshot and connect it to snapshots
-                        const createUserSnapshot = await db.user_snapshot.create({
-                            data: {
-                                stake: Number(holder.balance_formatted).toString(),
-                                reward: reward.toFixed(10),
-                                status: 1,
-                                user: {
-                                    connect: {
-                                        id: user.id
-                                    }
-                                },
-                                snapshot: {
-                                    connect: {
-                                        id: newSnapshot.id
-                                    }
-                                }
-                            }
-                        })
-                        if (!createUserSnapshot) throw new TRPCError({
-                            code: 'BAD_REQUEST',
-                            message: "Failed to create user snapshot"
-                        })
-                    }
-                }))
-                return okayRes()
-            }
-
-        } catch (error: any) {
-            console.log(error);
-            throw new TRPCError({
-                code: error.code,
-                message: error.message
-            })
-        } finally {
-            await db.$disconnect()
-        }
-    }),
+    //     } catch (error: any) {
+    //         console.log(error);
+    //         throw new TRPCError({
+    //             code: error.code,
+    //             message: error.message
+    //         })
+    //     } finally {
+    //         await db.$disconnect()
+    //     }
+    // }),
     updateUserSnapshot: publicProcedure.input(z.number()).mutation(async (opts) => {
 
         await rateLimiter.consume(1);
@@ -363,11 +241,6 @@ export const snapshotRoute = {
         try {
 
             const snapshotID = opts.input
-
-            const session = await getAuth()
-            if (!session) throw new TRPCError({
-                code: 'UNAUTHORIZED'
-            })
 
             const snapshot = await db.snapshot.findUnique({
                 where: { id: snapshotID },

@@ -1,4 +1,4 @@
-import { getAuth } from "@/lib/nextAuth";
+import { getUserId } from "@/lib/privy";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 
@@ -11,19 +11,19 @@ export const ourFileRouter = {
         // Set permissions and file types for this FileRoute
         .middleware(async () => {
             // This code runs on your server before upload
-            const user = await getAuth();
+            const user = await getUserId();
 
             // If you throw, the user will not be able to upload
             if (!user) throw new UploadThingError("Unauthorized");
 
             // Whatever is returned here is accessible in onUploadComplete as `metadata`
-            return { userWallet: user.user.wallet };
+            return { ok: true };
         })
-        .onUploadComplete(async ({ metadata }) => {
+        .onUploadComplete(async () => {
 
             // This code RUNS ON YOUR SERVER after upload
             // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
-            return { uploadedBy: metadata.userWallet };
+            return { ok: true };
         }),
 } satisfies FileRouter;
 

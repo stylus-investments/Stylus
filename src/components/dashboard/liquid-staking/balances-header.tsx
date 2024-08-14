@@ -1,42 +1,25 @@
 'use client'
 import React, { useState } from 'react'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { availableCurrencies } from '@/constant/availableCurrency'
-import TransferSave from './transfer-save'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '../../ui/button'
 import Link from 'next/link'
-import Image from 'next/image'
-import { Separator } from '@/components/ui/separator'
 import useBalanceStore from '@/state/balanceStore'
-import { caller } from '@/app/_trpc/server'
-import { Eye, EyeOff, FileClock, RefreshCcw } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { Label } from '@/components/ui/label'
-import { signOut, useSession } from 'next-auth/react'
-import SaveNow from './save-now/save-now'
+import DepositSave from './save-now/save-now'
 
 
-const BalancesHeader = ({ initialData }: {
-    initialData: Awaited<ReturnType<(typeof caller['dashboard']['getDashboardData'])>>
-
+const BalancesHeader = ({ balances }: {
+    balances: {
+        currency: string;
+        amount: string;
+    }[] | undefined
 }) => {
-
-    const session = useSession({
-        required: true,
-        onUnauthenticated: () => {
-            signOut({
-                redirect: true,
-                callbackUrl: '/connect'
-            })
-        }
-    })
-
-    const dashboardData = initialData.liquid_staking
 
     const [showBalance, setShowBalance] = useState(true)
 
-    const { currency, setCurrency } = useBalanceStore()
+    const { currency } = useBalanceStore()
 
     return (
         <div className='flex flex-col gap-5 lg:pt-10 padding'>
@@ -49,7 +32,7 @@ const BalancesHeader = ({ initialData }: {
                         {showBalance ? <Eye size={18} /> : <EyeOff size={18} />}
                     </div>
                 </div>
-                {dashboardData.currentBalances.map((obj, i) => {
+                {balances && balances.map((obj, i) => {
                     if (obj.currency === currency) {
                         // Find the matching currency object
                         const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
@@ -69,7 +52,7 @@ const BalancesHeader = ({ initialData }: {
                 })}
             </div>
             <div className='flex items-center self-center w-full xl:w-80 sm:gap-5 gap-5'>
-               <SaveNow />
+                <DepositSave />
                 <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank' className='w-full'>
                     <Button className='w-full' variant={'secondary'}>
                         Swap

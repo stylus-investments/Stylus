@@ -1,13 +1,9 @@
 'use client'
 import { dashboardLinks } from '@/constant/dashboardLinks'
-import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import React from 'react'
 
 const DashboardLinksHeader = ({ currentPage }: { currentPage: string }) => {
-
-    const session = useSession()
-    if (session.status !== 'authenticated') return null
 
     return (
         <>

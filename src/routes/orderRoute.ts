@@ -1,51 +1,26 @@
+
 import { ORDERSTATUS } from "@/constant/order";
 import db from "@/db/db";
-import { getAuth } from "@/lib/nextAuth";
+import { getUserId } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const orderRoute = {
-    getAll: publicProcedure.query(async () => {
-
-        await rateLimiter.consume(1)
-
-        const session = await getAuth()
-        if (!session) throw new TRPCError({
-            code: 'UNAUTHORIZED'
-        })
-
-        return await db.user_order.findMany({
-            include: {
-                user: true
-            },
-            orderBy: {
-                created_at: "desc"
-            }
-        })
-
-    }),
     getCurrentUserOrder: publicProcedure.query(async () => {
 
         await rateLimiter.consume(1)
 
-        const session = await getAuth()
-        if (!session) throw new TRPCError({
-            code: 'UNAUTHORIZED'
-        })
+        const user = await getUserId()
 
-        const user = await db.user.findUnique({
-            where: { wallet: session.user.wallet }, select: {
-                orders: true
-            }
-        })
         if (!user) throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: "User Not Found"
+            code: "UNAUTHORIZED"
         })
 
-        return user.orders
+        return await db.user_order.findMany({
+            where: { user_id: user }
+        })
 
     }),
     createOrder: publicProcedure.input(z.object({
@@ -60,20 +35,14 @@ export const orderRoute = {
 
         await rateLimiter.consume(1)
 
-        const session = await getAuth()
-        if (!session) throw new TRPCError({
+        const user = await getUserId()
+        if (!user) throw new TRPCError({
             code: 'UNAUTHORIZED'
         })
 
-        const userWallet = session.user.wallet
-
-        const user = await db.user.findUnique({
-            where: { wallet: userWallet }, include: {
-                orders: {
-                    select: {
-                        status: true
-                    }
-                }
+        const userOrders = await db.user_order.findMany({
+            where: {
+                user_id: user
             }
         })
 
@@ -85,14 +54,14 @@ export const orderRoute = {
         const { data } = opts.input
 
         //if user has pending order don't allow to create one
-        const hasProcessingOrder = user.orders.some(order => order.status === ORDERSTATUS['processing']);
+        const hasProcessingOrder = userOrders.some(order => order.status === ORDERSTATUS['processing']);
         if (hasProcessingOrder) throw new TRPCError({
             code: 'BAD_REQUEST',
             message: "You cannot perform this action because you have a processing order."
         });
 
         //check if user is a dumbass
-        const invalidOrdersCount = user.orders.filter(order => order.status === ORDERSTATUS['invalid']).length
+        const invalidOrdersCount = userOrders.filter(order => order.status === ORDERSTATUS['invalid']).length
         if (invalidOrdersCount >= 5) throw new TRPCError({
             code: 'BAD_REQUEST',
             message: "You have reached the maximum number of invalid orders."
@@ -102,11 +71,7 @@ export const orderRoute = {
             data: {
                 ...data,
                 status: ORDERSTATUS['processing'],
-                user: {
-                    connect: {
-                        id: user.id
-                    }
-                }
+                user_id: user
             }
         })
 
