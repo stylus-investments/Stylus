@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/sonner"
 import TrpcProvider from "./_trpc/TrpcProvider";
 import { footerTexts } from "@/constant/footerTexts";
 import Privy from "@/components/providers/privy-provider";
+import { Analytics } from "@vercel/analytics/react"
+
 
 export const metadata: Metadata = {
   title: "Savern",
@@ -20,20 +22,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Privy>
-          <TrpcProvider>
-            <body>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
-                {children}
-                <Toaster />
-              </ThemeProvider>
-            </body>
-          </TrpcProvider>
+        <TrpcProvider>
+          <body>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+              <Toaster />
+            </ThemeProvider>
+          </body>
+        </TrpcProvider>
       </Privy>
+      <Analytics />
     </html>
   );
 }
