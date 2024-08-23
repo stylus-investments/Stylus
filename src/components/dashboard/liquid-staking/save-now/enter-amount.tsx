@@ -53,12 +53,12 @@ const EnterAmount = (props: {
         let newPriceInUsd = newAmount * Number(usdcPrice);
         let newPriceInPhp = newPriceInUsd * conversionRate;
 
-        if (newPriceInPhp > 50000) {
-            newPriceInPhp = 50000;
+        if (newPriceInPhp > 500000) {
+            newPriceInPhp = 500000;
             // Recalculate the amount based on the capped price in PHP
             newPriceInUsd = newPriceInPhp / conversionRate;
             const cappedAmount = newPriceInUsd / Number(usdcPrice);
-            if (Number(formData.price) !== 50000) {
+            if (Number(formData.price) !== 5000000) {
                 setFormData(prev => ({ ...prev, amount: cappedAmount.toFixed(4), price: newPriceInPhp.toFixed(2) }));
                 toast.error("Token purchase limit exceeded. Please contact our support team if you wish to purchase beyond this limit.");
             }
@@ -68,7 +68,7 @@ const EnterAmount = (props: {
     };
     const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         let newPrice = parseFloat(event.target.value);
-        newPrice = Math.min(newPrice, 50000); // Ensure the price does not exceed 50000
+        newPrice = Math.min(newPrice, 500000); // Ensure the price does not exceed 500000
 
         const newPriceInUsd = (currency === 'USD') ? newPrice : newPrice / conversionRate;
         const newAmount = newPriceInUsd / Number(usdcPrice);
@@ -84,7 +84,7 @@ const EnterAmount = (props: {
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [exchangeRates]);
+    }, [exchangeRates])
 
     useEffect(() => {
 
@@ -96,7 +96,7 @@ const EnterAmount = (props: {
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [conversionRate, usdcPrice]);
+    }, [conversionRate, usdcPrice])
 
     return (
         <div className='flex flex-col gap-5'>
@@ -119,7 +119,7 @@ const EnterAmount = (props: {
                     </PopoverTrigger>
                     <PopoverContent className="w-full p-0">
                         <Command>
-                            <CommandInput placeholder="Search framework..." />
+                            <CommandInput placeholder="Search Payment Method" />
                             <CommandList>
                                 <CommandEmpty>No method found.</CommandEmpty>
                                 <CommandGroup>
@@ -157,28 +157,7 @@ const EnterAmount = (props: {
                 <div className='flex items-center gap-3'>
                     <Input type="number" value={formData.price} onChange={handlePriceChange} />
                     <Input value={'PHP'} readOnly className='w-20 text-center' />
-                    {/* <Select value={currency} onValueChange={(value) => setCurrency(value)}>
-                        <SelectTrigger className='w-20'>
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Currency</SelectLabel>
-                                {availableCurrencies.map((obj, i) => (
-                                    <SelectItem value={obj.currency} key={i} >
-                                        {obj.currency}
-                                    </SelectItem>
-                                ))}
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select> */}
                 </div>
-                <small className='text-muted-foreground'>Maximum ₱50,000 is the max limit per transaction. Reach out
-                    <span className='text-primary underline cursor-pointer px-1' onClick={() => {
-                        navigator.clipboard.writeText(INFO.email)
-                        toast.success("Support email has been copied.")
-                    }}>support email</span>
-                    if the amount requested is beyond the maximum limit</small>
             </div>
             <div className='flex items-center justify-between w-full pt-5 border-t'>
                 <Button variant={'ghost'} className='w-32' type='button' onClick={closeOrder}>Close</Button>

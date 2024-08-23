@@ -5,20 +5,17 @@ import { ToggleTheme } from '../ui/toggle-theme'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBarsStaggered, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '../ui/dropdown-menu'
-import { faUser } from '@fortawesome/free-solid-svg-icons'
 import DashboardLinksHeader from './dashboard-links-header'
-import { CircleUserRound, Download, LogOut } from 'lucide-react'
+import { Download, LogOut } from 'lucide-react'
 import useBalanceStore from '@/state/balanceStore'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select'
 import { availableCurrencies } from '@/constant/availableCurrency'
 import { usePrivy } from '@privy-io/react-auth'
 import { toast } from 'sonner'
 
-
 const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
     const { user, logout, exportWallet } = usePrivy()
-
 
     const { currency, setCurrency } = useBalanceStore()
 

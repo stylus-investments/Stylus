@@ -9,7 +9,7 @@ import { Analytics } from "@vercel/analytics/react"
 
 
 export const metadata: Metadata = {
-  title: "Savern",
+  title: "Stylus",
   description: footerTexts.description,
   icons: '/save.webp'
 };

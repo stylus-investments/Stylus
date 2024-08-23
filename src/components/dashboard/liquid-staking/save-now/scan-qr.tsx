@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { UploadButton } from '@/lib/utils';
 import { CircleCheck } from 'lucide-react';
+import axios from 'axios';
 
 
 const ScanQr = (props: {
