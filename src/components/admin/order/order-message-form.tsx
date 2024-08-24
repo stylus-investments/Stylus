@@ -39,7 +39,7 @@ const OrderMessageForm = ({ initialData, sender }: {
             pusherClient.unsubscribe(initialData.id)
         }
 
-    }, [])
+    }, [initialData.id])
 
     return (
         <div className='padding pt-24 w-full flex justify-center'>
