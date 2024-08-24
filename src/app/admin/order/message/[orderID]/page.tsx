@@ -21,7 +21,7 @@ const OrderMessagePage = async ({ params }: Props) => {
     return (
         <>
             <AdminHeader />
-            <OrderMessageForm initialData={order} />
+            <OrderMessageForm initialData={order} sender='admin' />
         </>
     )
 }
