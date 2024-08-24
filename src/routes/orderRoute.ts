@@ -169,8 +169,7 @@ export const orderRoute = {
             where: {
                 status: ORDERSTATUS['processing'],
                 created_at: {
-                    gte: sixtyMinutesAgo,
-                    lte: now // Optional: to ensure you're updating up to the current time
+                    lte: new Date(now.getTime() - 60 * 60 * 1000) // Orders created at least 1 hour ago
                 }
             },
             data: {
