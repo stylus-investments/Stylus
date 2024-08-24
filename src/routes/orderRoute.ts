@@ -1,6 +1,7 @@
 
 import { ORDERSTATUS } from "@/constant/order";
 import db from "@/db/db";
+import { getAuth } from "@/lib/nextAuth";
 import { getUserId } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { publicProcedure } from "@/trpc/trpc";
@@ -8,6 +9,16 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const orderRoute = {
+    getAllOrder: publicProcedure.query(async () => {
+
+        const auth = await getAuth()
+        if (!auth) throw new TRPCError({
+            code: 'UNAUTHORIZED'
+        })
+
+        return await db.user_order.findMany()
+
+    }),
     getCurrentUserOrder: publicProcedure.query(async () => {
 
         await rateLimiter.consume(1)

@@ -58,5 +58,8 @@ export const currencyRoute = {
         ));
 
         return true
+    }),
+    test: publicProcedure.query(async () => {
+        return true
     })
 }

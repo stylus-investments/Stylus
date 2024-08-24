@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,8 +9,10 @@ datasource db {
 
 model admin {
   id         Int      @id @default(autoincrement())
+  name       String
   username   String   @unique
   password   String   @unique
+  root_admin Boolean  @default(false)
   created_at DateTime @default(now())
 }
 
@@ -25,9 +21,9 @@ model snapshot {
   start_date    DateTime
   end_date      DateTime
   completed     Boolean         @default(false)
-  user_snapshot user_snapshot[]
   created_at    DateTime        @default(now())
   updated_at    DateTime        @updatedAt
+  user_snapshot user_snapshot[]
 }
 
 model user_snapshot {
@@ -37,26 +33,53 @@ model user_snapshot {
   status      Int
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
-  snapshot    snapshot @relation(fields: [snapshot_id], references: [id])
   user_id     String
   snapshot_id Int
+  snapshot    snapshot @relation(fields: [snapshot_id], references: [id])
+
+  @@index([snapshot_id], map: "user_snapshot_snapshot_id_fkey")
 }
 
 model user_order {
-  id         String   @id @default(uuid())
-  amount     String
-  price      String
-  status     String
-  receipt    String //image
-  method     String
-  currency   String
-  user_id    String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id            String          @id @default(uuid())
+  amount        String
+  price         String
+  status        String
+  receipt       String
+  method        String
+  currency      String
+  user_id       String
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  order_message order_message[]
 }
 
 model currency_conversion {
   id              Int    @id @default(autoincrement())
   currency        String @unique
   conversion_rate String
+}
+
+model order_message {
+  id         Int        @id @default(autoincrement())
+  order_id   String
+  sender     String
+  content    String
+  is_image   Boolean
+  seen       Boolean    @default(false)
+  created_at DateTime   @default(now())
+  user_order user_order @relation(fields: [order_id], references: [id])
+
+  @@index([order_id], map: "order_message_order_id_fkey")
+}
+
+model user_info {
+  user_id    String   @unique
+  first_name String
+  last_name  String
+  email      String
+  age        Int
+  birth_date String
+  created_at DateTime @default(now())
+  updated_at DateTime
 }
