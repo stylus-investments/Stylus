@@ -89,7 +89,7 @@ const SnapshotsTable: React.FC<SnapshotTableProps> = ({ snapshotData }) => {
                             <TableCell>{data.total_unpaid_holders}</TableCell>
                             <TableCell>
                                 <Link
-                                    href={`/admin/snapshots/users/${data.id}?start_date=${new Date(data.start_date).toLocaleString('en-US', {
+                                    href={`/admin/snapshot/users/${data.id}?start_date=${new Date(data.start_date).toLocaleString('en-US', {
                                         timeZone: 'UTC',
                                         weekday: 'short',
                                         day: '2-digit',

@@ -7,7 +7,7 @@ const UserSnapshotBreadCrumb = () => {
         <Breadcrumb>
             <BreadcrumbList>
                 <BreadcrumbItem>
-                    <Link href={'/admin/snapshots'} className='hover:text-foreground'>Snapshots</Link>
+                    <Link href={'/admin/snapshot'} className='hover:text-foreground'>Snapshots</Link>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>

@@ -91,7 +91,7 @@ const UserSnapshotTable: React.FC<SnapshotTableProps> = ({ snapshotData, snapsho
     }, [data, currentPage])
 
     return (
-        <div className='container pt-10 flex flex-col gap-8'>
+        <div className='padding pt-28 flex flex-col gap-8'>
             <header className='flex w-full items-center justify-between'>
                 <UserSnapshotBreadCrumb />
                 <div className='text-sm'>
