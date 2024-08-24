@@ -6,6 +6,7 @@ import { tokenRoute } from '@/routes/tokenRoute';
 import { orderRoute } from '@/routes/orderRoute';
 import { adminRoute } from '@/routes/adminRoute';
 import { orderMessageRoute } from '@/routes/orderMessageRoute';
+import { userRoute } from '@/routes/userRoute';
 
 export const appRouter = router({
     dashboard: dashboardRoute,
@@ -14,7 +15,8 @@ export const appRouter = router({
     token: tokenRoute,
     order: orderRoute,
     admin: adminRoute,
-    message: orderMessageRoute
+    message: orderMessageRoute,
+    user: userRoute
 })
 
 export type AppRouter = typeof appRouter;

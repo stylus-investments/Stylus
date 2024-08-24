@@ -78,8 +78,9 @@ model user_info {
   first_name String
   last_name  String
   email      String
-  age        Int
-  birth_date String
+  mobile     String
+  age        String
+  birth_date DateTime
   created_at DateTime @default(now())
-  updated_at DateTime
+  updated_at DateTime @updatedAt
 }

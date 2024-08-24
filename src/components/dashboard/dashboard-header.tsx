@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { availableCurrencies } from '@/constant/availableCurrency'
 import { usePrivy } from '@privy-io/react-auth'
 import { toast } from 'sonner'
+import UserProfile from './user-profile'
 
 const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
@@ -22,6 +23,7 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
     const mobileScreen = (
         <nav className='lg:hidden flex items-center justify-between w-full'>
             <div className='flex items-center gap-3'>
+                <UserProfile />
                 <Select value={currency} onValueChange={(value) => setCurrency(value)}>
                     <SelectTrigger className='w-20'>
                         <SelectValue />
@@ -103,6 +105,7 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                         </SelectGroup>
                     </SelectContent>
                 </Select>
+                <UserProfile />
             </div>
             <div className='flex items-center gap-5 justify-end w-full'>
                 <DashboardLinksHeader currentPage={currentPage} />
