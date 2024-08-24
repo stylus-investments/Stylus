@@ -162,23 +162,70 @@ export const orderRoute = {
         await rateLimiter.consume(1)
 
         const now = new Date();
-        const sixtyMinutesAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
         // Fetch orders created exactly 60 minutes ago or later
-        await db.user_order.updateMany({
-            where: {
-                status: ORDERSTATUS['processing'],
-                created_at: {
-                    lte: new Date(now.getTime() - 60 * 60 * 1000) // Orders created at least 1 hour ago
+        await Promise.all([
+            db.user_order.updateMany({
+                where: {
+                    status: ORDERSTATUS['processing'],
+                    created_at: {
+                        lte: new Date(now.getTime() - 60 * 60 * 1000) // Orders created at least 1 hour ago
+                    }
+                },
+                data: {
+                    status: ORDERSTATUS['invalid'],
                 }
-            },
-            data: {
-                status: ORDERSTATUS['invalid']
-            }
-        });
+            }),
+            db.user_order.updateMany({
+                where: {
+                    status: ORDERSTATUS['invalid'],
+                    created_at: {
+                        lte: new Date(now.getTime() - 24 * 60 * 60 * 1000) // Orders created at least 1 day ago
+                    }
+                },
+                data: {
+                    closed: true
+                }
+            })
+        ])
 
         await db.$disconnect()
         return true
+    }),
+    toggleOrderConversation: publicProcedure.input(z.string()).mutation(async (opts) => {
+
+        try {
+
+            const auth = await getAuth()
+            if (!auth) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+
+            const order = await db.user_order.findUnique({ where: { id: opts.input } })
+            if (!order) throw new TRPCError({
+                code: "NOT_FOUND"
+            })
+
+            const updateOrder = await db.user_order.update({
+                where: { id: order.id }, data: {
+                    closed: !order.closed
+                }
+            })
+            if (!updateOrder) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to toggle order conversation"
+            })
+
+            return true
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code || "INTERNAL_SERVER_ERROR"
+            })
+        } finally {
+            await db.$disconnect()
+        }
 
     })
 }

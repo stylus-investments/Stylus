@@ -47,6 +47,7 @@ model user_order {
   price         String
   status        String
   receipt       String
+  closed     Boolean    @default(false)
   method        String
   currency      String
   user_id       String

@@ -21,6 +21,8 @@ export const orderMessageRoute = {
             code: "NOT_FOUND"
         })
 
+        await db.$disconnect()
+
         return order
 
     }),
@@ -45,6 +47,15 @@ export const orderMessageRoute = {
             })
         }
 
+        const order = await db.user_order.findUnique({ where: { id: orderID } })
+        if (!order) throw new TRPCError({
+            code: "NOT_FOUND"
+        })
+        if (order.closed) throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "This conversation is closed."
+        })
+
         pusherServer.trigger(orderID, 'incoming-message', {
             content,
             is_image,
@@ -65,6 +76,8 @@ export const orderMessageRoute = {
             code: "BAD_REQUEST",
             message: "Failed to send message"
         })
+
+        await db.$disconnect()
 
         return true
     })
