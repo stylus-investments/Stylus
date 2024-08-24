@@ -107,7 +107,7 @@ export const snapshotRoute = {
                 message: "Snapshot not found"
             })
 
-            return snapshot
+            return snapshot.user_snapshot
 
         } catch (error: any) {
             console.log(error);
