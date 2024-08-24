@@ -271,22 +271,30 @@ export const snapshotRoute = {
                         data: { start_date: previousSnapshot.end_date, end_date }
                     });
 
-                    const userSnapshots = tokenHolders.map(holder => {
+                    const userSnapshots = tokenHolders.reduce((acc, holder) => {
                         const user = userWalletMap.get(holder.owner_address.toLowerCase());
-                        if (user) {
+                        if (user && user.wallet?.address) {
                             const reward = (Number(holder.balance_formatted) * 0.005).toFixed(8); // 0.5% reward
-                            return {
+                            acc.push({
                                 stake: Number(holder.balance_formatted).toString(),
                                 reward,
                                 status: 1,
+                                wallet: user.wallet.address,
                                 user_id: user.id,
-                                wallet: user.wallet?.address || '',
                                 snapshot_id: newSnapshot.id
-                            };
+                            });
                         }
-                        return null;
-                    }).filter(snapshot => snapshot !== null)
+                        return acc;
+                    }, [] as {
+                        stake: string
+                        reward: string
+                        status: number
+                        wallet: string
+                        user_id: string
+                        snapshot_id: number
+                    }[]);
 
+                    
                     // Insert all user snapshots in one go
                     if (userSnapshots.length > 0) {
                         await db.user_snapshot.createMany({
@@ -308,21 +316,28 @@ export const snapshotRoute = {
                     data: { start_date: now, end_date }
                 });
 
-                const userSnapshots = tokenHolders.map(holder => {
+                const userSnapshots = tokenHolders.reduce((acc, holder) => {
                     const user = userWalletMap.get(holder.owner_address.toLowerCase());
-                    if (user) {
+                    if (user && user.wallet?.address) {
                         const reward = (Number(holder.balance_formatted) * 0.005).toFixed(8); // 0.5% reward
-                        return {
+                        acc.push({
                             stake: Number(holder.balance_formatted).toString(),
                             reward,
                             status: 1,
+                            wallet: user.wallet.address,
                             user_id: user.id,
-                            wallet: user.wallet?.address || '',
                             snapshot_id: newSnapshot.id
-                        };
+                        });
                     }
-                    return null;
-                }).filter(snapshot => snapshot !== null)
+                    return acc;
+                }, [] as {
+                    stake: string
+                    reward: string
+                    status: number
+                    wallet: string
+                    user_id: string
+                    snapshot_id: number
+                }[]);
 
                 // Insert all user snapshots in one go
                 if (userSnapshots.length > 0) {
