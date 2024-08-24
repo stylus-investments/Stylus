@@ -156,5 +156,30 @@ export const orderRoute = {
 
         return true
 
+    }),
+    updateOrder: publicProcedure.mutation(async () => {
+
+        await rateLimiter.consume(1)
+
+        const now = new Date();
+        const sixtyMinutesAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+        // Fetch orders created exactly 60 minutes ago or later
+        await db.user_order.updateMany({
+            where: {
+                status: ORDERSTATUS['processing'],
+                created_at: {
+                    gte: sixtyMinutesAgo,
+                    lte: now // Optional: to ensure you're updating up to the current time
+                }
+            },
+            data: {
+                status: ORDERSTATUS['invalid']
+            }
+        });
+
+        await db.$disconnect()
+        return true
+
     })
 }
