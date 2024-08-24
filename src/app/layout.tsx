@@ -6,7 +6,7 @@ import TrpcProvider from "./_trpc/TrpcProvider";
 import { footerTexts } from "@/constant/footerTexts";
 import Privy from "@/components/providers/privy-provider";
 import { Analytics } from "@vercel/analytics/react"
-
+import SessionProviders from "@/components/providers/session-provider";
 
 export const metadata: Metadata = {
   title: "Stylus",
@@ -21,22 +21,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Privy>
-        <TrpcProvider>
-          <body>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              {children}
-              <Toaster />
-            </ThemeProvider>
-          </body>
-        </TrpcProvider>
-      </Privy>
-      <Analytics />
+      <SessionProviders>
+        <Privy>
+          <TrpcProvider>
+            <body>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                {children}
+                <Toaster />
+              </ThemeProvider>
+            </body>
+          </TrpcProvider>
+        </Privy>
+        <Analytics />
+      </SessionProviders>
     </html>
   );
 }

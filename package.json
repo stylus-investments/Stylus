@@ -39,6 +39,7 @@
     "@vercel/analytics": "^1.3.1",
     "aos": "^2.3.4",
     "axios": "^1.6.8",
+    "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
@@ -49,6 +50,7 @@
     "lucide-react": "^0.368.0",
     "moralis": "^2.25.4",
     "next": "14.2.1",
+    "next-auth": "^4.24.7",
     "next-themes": "^0.3.0",
     "pino-pretty": "^11.0.0",
     "rate-limiter-flexible": "^5.0.2",
@@ -68,6 +70,7 @@
   },
   "devDependencies": {
     "@types/aos": "^3.0.7",
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
