@@ -5,10 +5,175 @@ import { getTokenHolders } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { privy } from "@/lib/privy";
+import { getAuth } from "@/lib/nextAuth";
+import { z } from "zod";
 
 export const snapshotRoute = {
-    getAll: publicProcedure.query(async () => {
+    getAllSnapshot: publicProcedure.query(async () => {
 
+        try {
+
+            await rateLimiter.consume(1);
+
+            const snapshots = await db.snapshot.findMany({
+                select: {
+                    start_date: true,
+                    id: true,
+                    end_date: true,
+                    completed: true,
+                    user_snapshot: {
+                        select: {
+                            id: true,
+                            status: true
+                        }
+                    }
+                },
+                orderBy: {
+                    created_at: 'desc'
+                }
+            },)
+            if (!snapshots) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "Failed to get all snapshots"
+            })
+
+            const modifySnapshotData = snapshots.map(snap => {
+
+                const unpaidRemaining = snap.user_snapshot.reduce((total, snap) => {
+                    return snap.status === 2 ? total + 1 : total
+                }, 0)
+
+                return {
+                    ...snap,
+                    start_date: snap.start_date.toISOString(),
+                    end_date: snap.end_date.toISOString(),
+                    user_snapshot: undefined,
+                    total_holders: snap.user_snapshot.length || 0,
+                    total_unpaid_holders: unpaidRemaining
+                }
+            }) as {
+                total_holders: number;
+                total_unpaid_holders: number;
+                id: number;
+                start_date: string;
+                end_date: string;
+                completed: boolean;
+            }[]
+
+            return modifySnapshotData
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
+        }
+    }),
+    getSnapshotData: publicProcedure.input(z.number()).query(async (opts) => {
+
+        try {
+
+            await rateLimiter.consume(1);
+
+            const session = await getAuth()
+            if (!session) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+
+            const snapshotID = opts.input
+            if (!snapshotID) throw new TRPCError({
+                code: 'NOT_FOUND',
+                message: "Snapshot ID not found"
+            })
+
+            const snapshot = await db.snapshot.findUnique({
+                where: { id: snapshotID }, select: {
+                    user_snapshot: {
+                        select: {
+                            id: true,
+                            reward: true,
+                            stake: true,
+                            status: true,
+                            wallet: true
+                        }
+                    }
+                }
+            })
+            if (!snapshot) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Snapshot not found"
+            })
+
+            return snapshot
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
+        }
+    }),
+    updateUserSnapshots: publicProcedure.input(z.number()).mutation(async (opts) => {
+
+        await rateLimiter.consume(1);
+
+        try {
+
+            const snapshotID = opts.input
+
+            const session = await getAuth()
+            if (!session) throw new TRPCError({
+                code: 'UNAUTHORIZED'
+            })
+
+            const snapshot = await db.snapshot.findUnique({
+                where: { id: snapshotID },
+                include: {
+                    user_snapshot: {
+                        select: {
+                            id: true
+                        }
+                    }
+                }
+            })
+            if (!snapshot) throw new TRPCError({
+                code: 'NOT_FOUND'
+            })
+            if (!snapshot.completed) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "Snapshot is not completed"
+            })
+
+            const updateUserSnapshots = await db.user_snapshot.updateMany({
+                where: {
+                    snapshot_id: snapshot.id,
+                    status: 2
+                }, data: {
+                    status: 3
+                }
+            })
+            if (!updateUserSnapshots) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to update user snapshots"
+            })
+
+            return okayRes()
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
+        }
     }),
     reset: publicProcedure.query(async () => {
         try {
@@ -115,6 +280,7 @@ export const snapshotRoute = {
                                 reward,
                                 status: 1,
                                 user_id: user.id,
+                                wallet: user.wallet?.address || '',
                                 snapshot_id: newSnapshot.id
                             };
                         }
@@ -151,6 +317,7 @@ export const snapshotRoute = {
                             reward,
                             status: 1,
                             user_id: user.id,
+                            wallet: user.wallet?.address || '',
                             snapshot_id: newSnapshot.id
                         };
                     }

@@ -31,6 +31,7 @@ model user_snapshot {
   stake       String
   reward      String
   status      Int
+  wallet      String
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
   user_id     String
