@@ -10,6 +10,7 @@ import { user_order } from '@prisma/client';
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const OrderHistory = () => {
 
@@ -41,6 +42,7 @@ const OrderHistory = () => {
                                     <TableHead className='min-w-32'>Price</TableHead>
                                     <TableHead className=' min-w-52'>Payment Method</TableHead>
                                     <TableHead className='min-w-32'>Receipt</TableHead>
+                                    <TableHead className='min-w-32'>Messages</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -53,7 +55,7 @@ const OrderHistory = () => {
                                         <TableCell>
                                             <AlertDialog>
                                                 <AlertDialogTrigger asChild>
-                                                    <Button className='h-7'>View</Button>
+                                                    <Button className='h-7' variant={'secondary'}>View</Button>
                                                 </AlertDialogTrigger>
                                                 <AlertDialogContent className='w-full max-w-96'>
                                                     <Image src={order.receipt} alt='Order Receipt' width={200} height={50} className='w-full h-auto' />
@@ -64,6 +66,11 @@ const OrderHistory = () => {
                                                     </AlertDialogFooter>
                                                 </AlertDialogContent>
                                             </AlertDialog>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button className='h-7'>
+                                                <Link href={`/dashboard/wallet/order-message/${order.id}`}>Chat</Link>
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 )) :

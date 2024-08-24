@@ -49,7 +49,7 @@ const AdminHeader = () => {
         </Sheet>
     )
     return (
-        <div className='sticky top-0 left-0 w-full padding h-16 border-b flex items-center justify-between'>
+        <div className='fixed top-0 left-0 w-full padding h-16 border-b flex items-center justify-between'>
             <h1 className='font-[1000] text-2xl'>STYLUS</h1>
             {largeScreen}
             <div className='flex items-center gap-4 lg:hidden'>

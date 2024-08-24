@@ -1,3 +1,4 @@
+import TablePagination from '@/components/dashboard/table-pagination'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
@@ -10,7 +11,7 @@ const OrderTable = ({ orders }: {
     orders: user_order[]
 }) => {
     return (
-        <div className='padding pt-20'>
+        <div className='padding pt-28 flex flex-col gap-10'>
             <Table >
                 <TableCaption>A list of orders.</TableCaption>
                 <TableHeader>
@@ -47,13 +48,14 @@ const OrderTable = ({ orders }: {
                             </TableCell>
                             <TableCell>
                                 <Button className="h-7">
-                                    <Link href={`/admin/order/message/${order.id}`}>Message</Link>
+                                    <Link href={`/admin/order/message/${order.id}`}>Chat</Link>
                                 </Button>
                             </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
+            <TablePagination data={orders} />
         </div>
     )
 }
