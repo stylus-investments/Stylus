@@ -4,7 +4,7 @@ import { getMoralis, getTokenHolders } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import Moralis from "moralis";
 import { z } from "zod";
-import { getCurrentBalance, getFormattedBalance, getRewardsAccumulated, getTokenPrice } from "@/lib/prices";
+import { getCurrentBalance, getRewardsAccumulated, getUserTokenData } from "@/lib/prices";
 import { calculateBalanceArray } from "@/lib/balances";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { getUserId } from "@/lib/privy";
@@ -29,7 +29,7 @@ export const dashboardRoute = {
             message: "Login First."
         })
 
-        const [nextSnapshot, currentSnapshot, userToken, usdcPrice, currencyExchangeRate] = await Promise.all([
+        const [nextSnapshot, currentSnapshot, usdcPrice, currencyExchangeRate] = await Promise.all([
             db.snapshot.findMany({
                 where: {
                     completed: false
@@ -40,37 +40,20 @@ export const dashboardRoute = {
                     created_at: "desc"
                 }
             }),
-            Moralis.EvmApi.token.getWalletTokenBalances({
-                chain: process.env.CHAIN,
-                address: userWalletAddress
-            }),
-            getTokenPrice(usdcTokenAddress),
+            getUserTokenData(usdcTokenAddress, userWalletAddress, "USDC"),
             db.currency_conversion.findMany()
         ])
 
-        // Function to get formatted balance
-        const getFormattedTokenBalance = (tokenAddress: string) => {
-            const tokenData: any = getTokenData(tokenAddress);
-            const balance = tokenData.balance || 0;
-            const decimals = tokenData.decimals || 0;
-            return getFormattedBalance({
-                balance: balance,
-                decimal: decimals
-            });
-        };
-
-        const getTokenData = (tokenAddress: string) => {
-            return userToken.raw.find((token: any) => token.token_address.toLowerCase() === tokenAddress.toLowerCase()) || {};
-        };
-        const formattedSaveBalance = getFormattedTokenBalance(saveTokenAddress);
-        const formattedUsdcBalance = getFormattedTokenBalance(usdcTokenAddress);
-        const formattedEarnBalance = getFormattedTokenBalance(earnTokenAddress);
-        const formattedSvnBalance = getFormattedTokenBalance(svnTokenAddress);
-
+        const assets = await Promise.all([
+            getUserTokenData(saveTokenAddress, userWalletAddress, "SAVE"),
+            getUserTokenData(usdcTokenAddress, userWalletAddress, "USDC"),
+            getUserTokenData(earnTokenAddress, userWalletAddress, "EARN"),
+            getUserTokenData(svnTokenAddress, userWalletAddress, "SVN"),
+        ])
         const currentBalance = getCurrentBalance({
-            usdcPrice,
-            totalUsdc: formattedUsdcBalance,
-            totalSave: formattedSaveBalance
+            usdcPrice: usdcPrice.price,
+            totalUsdc: assets.find(asset => asset.symbol === 'USDC')?.amount as string,
+            totalSave: assets.find(asset => asset.symbol === 'SAVE')?.amount as string
         })
 
         const currentBalanceArray = calculateBalanceArray({ currencyExchangeRate, balance: currentBalance })
@@ -94,10 +77,8 @@ export const dashboardRoute = {
                 status: currentSnapshot ? currentSnapshot.status : 4,
             },
             balances: {
-                current_save_balance: formattedSaveBalance,
-                current_usdc_balance: formattedUsdcBalance,
-                current_earn_balance: formattedEarnBalance,
-                current_svn_balance: formattedSvnBalance,
+                assets,
+                current_save_balance: assets.find(asset => asset.symbol === 'SAVE')?.amount as string,
                 usdc_price: usdcPrice,
                 currentBalances: currentBalanceArray
             }
@@ -105,18 +86,6 @@ export const dashboardRoute = {
 
         return dashboardWalletData
 
-        // liquid_staking: {
-        //     snapshot: {
-        //         next_snapshot: currentSnapshot[0].end_date.toString(),
-        //         current_stake: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].stake && userWallet.snapshots[0].stake : "0.0000000000",
-        //         reward: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].reward : "0.0000000000",
-        //         status: userWallet.snapshots.length > 0 ? userWallet.snapshots[0].status : 4,
-        //     },
-        //     currentBalances: currentBalanceArray,
-        //     current_save_balance: formattedSaveBalance,
-        //     current_usdc_balance: formattedUsdcBalance,
-        //     usdcPrice
-        // },
     }),
     getRewardData: publicProcedure.input(z.object({
         walet_address: z.string()
@@ -136,7 +105,7 @@ export const dashboardRoute = {
                 address: userWalletAddress
             }),
             db.currency_conversion.findMany(),
-            getTokenPrice(usdcTokenAddress),
+            getUserTokenData(usdcTokenAddress, userWalletAddress, "USDC"),
             db.user_snapshot.findMany({
                 where: { user_id: user },
                 orderBy: {
@@ -145,30 +114,15 @@ export const dashboardRoute = {
             })
         ])
 
-        // Function to get formatted balance
-        const getFormattedTokenBalance = (tokenAddress: string) => {
-            const tokenData: any = getTokenData(tokenAddress);
-            const balance = tokenData.balance || 0;
-            const decimals = tokenData.decimals || 0;
-            return getFormattedBalance({
-                balance: balance,
-                decimal: decimals
-            });
-        };
-
-        const getTokenData = (tokenAddress: string) => {
-            return userToken.raw.find((token: any) => token.token_address.toLowerCase() === tokenAddress.toLowerCase()) || {};
-        };
-
-
-        const formattedEarnBalance = getFormattedTokenBalance(earnTokenAddress);
-        const formattedSvnBalance = getFormattedTokenBalance(svnTokenAddress);
-
+        const [earn, svn] = await Promise.all([
+            getUserTokenData(earnTokenAddress, userWalletAddress, "EARN"),
+            getUserTokenData(svnTokenAddress, userWalletAddress, "SVN"),
+        ])
 
         const rewardsAccumulated = getRewardsAccumulated({
-            usdcPrice,
-            totalEarn: formattedEarnBalance,
-            totalSvn: formattedSvnBalance
+            usdcPrice: usdcPrice.price,
+            totalEarn: earn.amount,
+            totalSvn: svn.amount
         })
 
         const rewardsAccumulatedBalanceArray = calculateBalanceArray({ currencyExchangeRate, balance: rewardsAccumulated })
@@ -183,8 +137,8 @@ export const dashboardRoute = {
 
         const dashboardRewardData = {
             balances: {
-                current_earn_balance: formattedEarnBalance,
-                current_svn_balance: formattedSvnBalance
+                current_earn_balance: earn.amount,
+                current_svn_balance: svn.amount
             },
             rewardsAccumulated: rewardsAccumulatedBalanceArray,
             total_reward_received: userTotalEarnTokenRewardsReceived,

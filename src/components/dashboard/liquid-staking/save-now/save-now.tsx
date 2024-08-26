@@ -21,10 +21,9 @@ const DepositSave = () => {
         status: 1
     })
     const [confirmed, setConfirmed] = useState(false)
-
     const { currency, setCurrency } = useBalanceStore()
 
-    const usdcPrice = trpc.token.getTokenPrice.useQuery(process.env.NEXT_PUBLIC_USDC_ADDRESS as string, {
+    const usdcPrice = trpc.token.getTokenPrice.useQuery({ tokenAddress: process.env.NEXT_PUBLIC_USDC_ADDRESS as string, tokenName: "USDC" }, {
         refetchInterval: formData.status === 1 && open ? 5000 : false
     })
 

@@ -36,28 +36,7 @@ const WalletPage = () => {
                 <DashboardLinksFooter currentPage='wallet' />
                 <BalancesHeader balances={data.balances.currentBalances} />
                 <WalletTabs
-                    tokens={[
-                        {
-                            name: "SAVE",
-                            icon: '/save.webp',
-                            amount: data.balances.current_save_balance
-                        },
-                        {
-                            name: "USDC",
-                            icon: "/usdc.png",
-                            amount: data.balances.current_usdc_balance
-                        },
-                        {
-                            name: "EARN",
-                            icon: '/save.webp',
-                            amount: data.balances.current_earn_balance
-                        },
-                        {
-                            name: "SVN",
-                            icon: '/save.webp',
-                            amount: data.balances.current_svn_balance
-                        },
-                    ]}
+                 assets={data.balances.assets}
                 />
                 <div className='relative padding py-5'>
                     <Separator />
