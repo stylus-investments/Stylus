@@ -47,13 +47,41 @@ model user_order {
   price         String
   status        String
   receipt       String
-  closed     Boolean    @default(false)
   method        String
   currency      String
   user_id       String
+  package       Boolean         @default(false)
+  investment_plan_id       String?
+  closed        Boolean         @default(false)
   created_at    DateTime        @default(now())
   updated_at    DateTime        @updatedAt
   order_message order_message[]
+}
+
+model user_investment_plan {
+  id                  String        @id @default(uuid())
+  user_id             String
+  name                String
+  completed           Boolean       @default(false)
+  package             order_package @relation(fields: [order_package_id], references: [id])
+  order_package_id    String
+  payment_count       Int
+  next_order_creation DateTime
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model order_package {
+  id                   String                 @id @default(uuid())
+  name                 String
+  perks                String
+  duration                 Int
+  monthly_payment      Int
+  currency             String
+  created_at           DateTime               @default(now())
+  updated_at           DateTime               @updatedAt
+  user_investment_plan user_investment_plan[]
 }
 
 model currency_conversion {
