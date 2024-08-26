@@ -56,12 +56,6 @@ export const orderMessageRoute = {
             message: "This conversation is closed."
         })
 
-        pusherServer.trigger(orderID, 'incoming-message', {
-            content,
-            is_image,
-            sender
-        })
-
         const sendMessage = await db.order_message.create({
             data: {
                 content, is_image, sender,

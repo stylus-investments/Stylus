@@ -19,7 +19,7 @@ const AssetsData = ({ assets }: {
   const smallScreen = (
     <div className='flex flex-col w-full md:hidden'>
       {assets.map((asset, i) => (
-        <div className='flex items-center justify-between p-3 border-b w-full' key={i}>
+        <div className='flex items-center justify-between px-3 py-4 border-b w-full' key={i}>
           <div className='flex iems-start gap-3'>
             <Image src={asset.logo} width={20} height={20} alt={asset.name} className='rounded-full max-h-[20px] max-w-[20px]' />
             <div className='flex flex-col gap-3'>
