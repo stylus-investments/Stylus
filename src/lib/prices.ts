@@ -23,12 +23,17 @@ const getUserTokenData = async (tokenAddress: string, walletAddress: string, tok
         const tokenPrice = tokenData.raw.usdPriceFormatted || "0.0000"
         const totalTokenValue = Number(tokenPrice) * Number(userTokenData.balance) || 0;
 
-        const formatBalance = Number(userTokenData.balance || 0) / (10 ** userTokenData.decimals || 0)
-        const formatTokenValue = totalTokenValue / (10 ** userTokenData.decimals || 0)
+        const balance = Number(userTokenData?.balance ?? 0);
+        const decimals = userTokenData?.decimals ?? 0;
+        const formatBalance = decimals > 0 ? balance / (10 ** decimals) : 0;
+       const amount = isNaN(formatBalance) ? "0.0000" : formatBalance.toFixed(6);
+
+        const formatTokenValue = decimals > 0 ? totalTokenValue / (10 ** decimals) : 0;
+        const formattedValue = formatTokenValue.toFixed(6) || "0.000000";
 
         return {
-            amount: formatBalance.toString() || "0.00",
-            value: formatTokenValue.toFixed(6),
+            amount,
+            value: formattedValue,
             price: tokenPrice,
             name: tokenData.raw.tokenName || "",
             logo: tokenData.raw.tokenLogo || "/save.webp",
@@ -45,11 +50,14 @@ const getUserTokenData = async (tokenAddress: string, walletAddress: string, tok
 
         const userTokenData: any = userToken.raw.find((token: any) => token.token_address.toLowerCase() === tokenAddress.toLowerCase()) || {};
 
-        const formatBalance = Number(userTokenData.balance || 0) / (10 ** userTokenData.decimals || 0)
+        const balance = Number(userTokenData?.balance ?? 0);
+        const decimals = userTokenData?.decimals ?? 0;
+        const formatBalance = decimals > 0 ? balance / (10 ** decimals) : 0;
+       const amount = isNaN(formatBalance) ? "0.0000" : formatBalance.toFixed(6);
 
         return {
-            amount: formatBalance.toString() || "0.00",
-            value: "0.0000",
+            amount,
+            value: "0.000000",
             name: tokenName,
             price: "0.0000",
             logo: "/save.webp",
