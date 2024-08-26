@@ -1,7 +1,6 @@
 import db from "@/db/db";
 import { getAuth } from "@/lib/nextAuth";
 import { getUserId } from "@/lib/privy";
-import { pusherServer } from "@/lib/pusher";
 import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";

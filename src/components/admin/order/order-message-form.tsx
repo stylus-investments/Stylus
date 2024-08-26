@@ -13,7 +13,6 @@ import { toast } from 'sonner'
 import OrderTimer from './order-timer'
 import io from 'socket.io-client';
 
-
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001"); // Replace with your server URL if needed
 
 const OrderMessageForm = ({ initialData, sender }: {
