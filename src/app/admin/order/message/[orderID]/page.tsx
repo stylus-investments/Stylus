@@ -21,7 +21,7 @@ const OrderMessagePage = async ({ params }: Props) => {
 
     const { orderID } = params
 
-    const order = await caller.message.getOrderMessages(orderID)
+    const order = await caller.message.getOrderMessages({ orderID, sender: 'admin' })
     if (!order) redirect('/admin/order')
 
     return (

@@ -15,7 +15,8 @@ import Link from 'next/link';
 const OrderHistory = () => {
 
     const { data, isLoading } = trpc.order.getCurrentUserOrder.useQuery(undefined, {
-        refetchOnMount: false
+        refetchOnMount: false,
+        refetchInterval: 10000
     })
 
     const [currentTable, setCurrentTable] = useState<user_order[] | undefined>(undefined)
@@ -68,9 +69,15 @@ const OrderHistory = () => {
                                             </AlertDialog>
                                         </TableCell>
                                         <TableCell>
-                                            <Button className='h-7'>
-                                                <Link href={`/dashboard/wallet/order-message/${order.id}`}>Chat</Link>
-                                            </Button>
+                                            <Link href={`/dashboard/wallet/order-message/${order.id}`} className='w-full relative h-7'>
+                                                <Button className='h-full w-full'>
+                                                    Chat
+                                                </Button>
+                                                {order.user_unread_messages ?
+                                                    <div className=' absolute bg-destructive text-white px-2 py-1 shadow-2xl text-xs rounded-br-full rounded-t-full -right-4 -top-4'>{order.user_unread_messages}</div>
+                                                    : null
+                                                }
+                                            </Link>
                                         </TableCell>
                                     </TableRow>
                                 )) :

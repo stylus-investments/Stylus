@@ -23,8 +23,8 @@ const DepositSave = () => {
     const [confirmed, setConfirmed] = useState(false)
     const { currency, setCurrency } = useBalanceStore()
 
-    const usdcPrice = trpc.token.getTokenPrice.useQuery({ tokenAddress: process.env.NEXT_PUBLIC_USDC_ADDRESS as string, tokenName: "USDC" }, {
-        refetchInterval: formData.status === 1 && open ? 5000 : false
+    const { data } = trpc.token.getIndexPrice.useQuery(undefined, {
+        refetchInterval: formData.status === 1 && open ? 30000 : false
     })
 
     const getUserOrder = trpc.order.getCurrentUserOrder.useQuery(undefined, {
@@ -95,7 +95,7 @@ const DepositSave = () => {
                     setCurrency={setCurrency}
                     formData={formData}
                     closeOrder={closeOrder}
-                    usdcPrice={usdcPrice.data as string}
+                    indexPrice={data}
                 />}
                 {formData.status === 2 && <ScanQr
                     setFormData={setFormData}

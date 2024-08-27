@@ -20,7 +20,7 @@ const ClientOrderMesages = async ({ params }: Props) => {
     const user = await getUserId()
     if (!user) redirect('/connect')
 
-    const order = await caller.message.getOrderMessages(orderID)
+    const order = await caller.message.getOrderMessages({ orderID, sender: 'user' })
     if (!order) redirect('/dashboard/wallet')
 
     return (

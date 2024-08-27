@@ -33,8 +33,10 @@ const OrderMessageForm = ({ initialData, sender }: {
             toast.error(err.message)
         }
     })
+
     const sendMessage = ({ content, is_image }: { content: string, is_image: boolean }) => {
         setMessages(prev => [...prev, { content, is_image, sender }])
+        console.log("Emitting message")
         socket.emit("message", { orderID: initialData.id, sender, content, is_image })
         saveMessage.mutate({
             content,
@@ -60,7 +62,8 @@ const OrderMessageForm = ({ initialData, sender }: {
             socket.off('message');
             socket.disconnect()
         };
-    }, [initialData.id]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <form className='w-full flex justify-center' onSubmit={

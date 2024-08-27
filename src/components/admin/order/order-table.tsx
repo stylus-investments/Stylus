@@ -1,15 +1,35 @@
+'use client'
+import { trpc } from '@/app/_trpc/client'
 import TablePagination from '@/components/dashboard/table-pagination'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
+import usePaginationStore from '@/state/paginationStore'
 import { user_order } from '@prisma/client'
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 const OrderTable = ({ orders }: {
     orders: user_order[]
 }) => {
+
+    const { data, isLoading } = trpc.order.getAllOrder.useQuery(undefined, {
+        initialData: orders as any,
+        refetchOnMount: false,
+        refetchInterval: 10000
+    })
+
+    const [currentTable, setCurrentTable] = useState<user_order[] | undefined>(undefined)
+
+    const { getCurrentData, currentPage } = usePaginationStore()
+
+    useEffect(() => {
+
+        setCurrentTable(getCurrentData(data))
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data, currentPage])
     return (
         <div className='padding pt-28 flex flex-col gap-10'>
             <Table >
@@ -25,7 +45,7 @@ const OrderTable = ({ orders }: {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {orders.map(order => (
+                    {currentTable && currentTable.map(order => (
                         <TableRow key={order.id}>
                             <TableCell>{order.status}</TableCell>
                             <TableCell>{order.method}</TableCell>
@@ -47,15 +67,21 @@ const OrderTable = ({ orders }: {
                                 </AlertDialog>
                             </TableCell>
                             <TableCell>
-                                <Button className="h-7">
-                                    <Link href={`/admin/order/message/${order.id}`}>Chat</Link>
-                                </Button>
+                                <Link href={`/admin/order/message/${order.id}`} className='w-full relative h-7'>
+                                    <Button className='h-full w-full'>
+                                        Chat
+                                    </Button>
+                                    {order.admin_unread_messages ?
+                                        <div className=' absolute bg-destructive text-white px-2 py-1 shadow-2xl text-xs rounded-br-full rounded-t-full -right-4 -top-4'>{order.admin_unread_messages}</div>
+                                        : null
+                                    }
+                                </Link>
                             </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
-            <TablePagination data={orders} />
+            <TablePagination data={data || []} />
         </div>
     )
 }

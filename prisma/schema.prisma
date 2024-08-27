@@ -42,20 +42,22 @@ model user_snapshot {
 }
 
 model user_order {
-  id            String          @id @default(uuid())
-  amount        String
-  price         String
-  status        String
-  receipt       String
-  method        String
-  currency      String
-  user_id       String
-  package       Boolean         @default(false)
-  investment_plan_id       String?
-  closed        Boolean         @default(false)
-  created_at    DateTime        @default(now())
-  updated_at    DateTime        @updatedAt
-  order_message order_message[]
+  id                    String          @id @default(uuid())
+  amount                String
+  price                 String
+  status                String
+  receipt               String
+  method                String
+  currency              String
+  user_id               String
+  user_unread_messages  Int             @default(0)
+  admin_unread_messages Int             @default(0)
+  package               Boolean         @default(false)
+  investment_plan_id    String?
+  closed                Boolean         @default(false)
+  created_at            DateTime        @default(now())
+  updated_at            DateTime        @updatedAt
+  order_message         order_message[]
 }
 
 model user_investment_plan {
@@ -76,7 +78,7 @@ model order_package {
   id                   String                 @id @default(uuid())
   name                 String
   perks                String
-  duration                 Int
+  duration             Int
   monthly_payment      Int
   currency             String
   created_at           DateTime               @default(now())
