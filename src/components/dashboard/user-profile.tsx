@@ -42,7 +42,7 @@ const UserProfile = () => {
 
             e.preventDefault()
 
-            const { first_name, last_name, email, mobile, age, birth_date } = formData
+            const { first_name, last_name, email, mobile, birth_date } = formData
 
             if (!first_name || first_name.length < 2) return toast.error("First name is invalid")
             if (!last_name || last_name.length < 2) return toast.error("Last name is invalid")

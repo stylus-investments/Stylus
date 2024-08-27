@@ -38,7 +38,7 @@ export const investmentPlanRoute = {
             data: {
                 user_id: user, name,
                 payment_count: (orderPackage.duration * 12),
-                next_order_creation: nextMonth,
+                next_payment: nextMonth,
                 package: {
                     connect: {
                         id: orderPackage.id

@@ -1,5 +1,5 @@
 import db from "@/db/db";
-import { getUserId } from "@/lib/privy";
+import { getUserId, privy } from "@/lib/privy";
 import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -29,7 +29,7 @@ export const userRoute = {
         email: z.string(),
         mobile: z.string(),
         age: z.string(),
-        birth_date: z.string()
+        birth_date: z.string(),
     })).mutation(async (opts) => {
 
         const data = opts.input
@@ -39,6 +39,8 @@ export const userRoute = {
             code: "UNAUTHORIZED"
         })
 
+        const getUser = await privy.getUser(user)
+
         //update userinfo
 
         const updateUserInfo = await db.user_info.upsert({
@@ -46,7 +48,7 @@ export const userRoute = {
                 user_id: user
             },
             update: data,
-            create: { ...data, user_id: user }
+            create: { ...data, user_id: user, wallet: getUser.wallet?.address as string }
         })
         if (!updateUserInfo) throw new TRPCError({
             code: "BAD_REQUEST",

@@ -48,6 +48,7 @@ const nextAuthOptions = {
     },
     pages: {
         signIn: '/auth',
+        signOut: '/auth',
         error: '/error',
     },
 } satisfies NextAuthOptions

@@ -14,7 +14,6 @@ export const snapshotRoute = {
         try {
 
             await rateLimiter.consume(1);
-
             const snapshots = await db.snapshot.findMany({
                 select: {
                     start_date: true,
@@ -175,18 +174,24 @@ export const snapshotRoute = {
             await db.$disconnect()
         }
     }),
-    reset: publicProcedure.mutation(async () => {
+    reset: publicProcedure.query(async () => {
+
         try {
             await rateLimiter.consume(1);
 
             // Retrieve token holders and users
             const [tokenHolders, users, previousSnapshots] = await Promise.all([
                 getTokenHolders(),
-                privy.getUsers(),
+                db.user_info.findMany({
+                    select: {
+                        user_id: true,
+                        wallet: true
+                    }
+                }),
                 db.snapshot.findMany({
                     where: { completed: false },
                     orderBy: { created_at: 'desc' },
-                    take: 1 // Retrieve only the most recejnt snapshots needed
+                    take: 1
                 })
             ])
 
@@ -197,8 +202,8 @@ export const snapshotRoute = {
                 });
             }
 
-            const userWalletMap = new Map(users.map(user => [user.wallet?.address.toLowerCase(), user]));
-            const userIdMap = new Map(users.map(user => [user.id, user]));
+            const userWalletMap = new Map(users.map(user => [user.wallet.toLowerCase(), user]));
+            const userIdMap = new Map(users.map(user => [user.user_id, user]));
             const tokenHolderMap = new Map(tokenHolders.map(holder => [holder.owner_address.toLowerCase(), holder]));
 
             const now = new Date();
@@ -208,7 +213,7 @@ export const snapshotRoute = {
             end_date.setUTCHours(16, 0, 0, 0); // Set end_date to 4:00 PM UTC
 
             if (previousSnapshot) {
-                if (new Date(previousSnapshot.end_date) <= now) {
+                if (new Date(previousSnapshot.end_date)) {
 
                     // Mark previous snapshot as completed
                     const updatedSnapshot = await db.snapshot.update({
@@ -231,7 +236,7 @@ export const snapshotRoute = {
                     // Process user snapshots and collect IDs for bulk updates
                     updatedSnapshot.user_snapshot.map(usrSnapshot => {
                         const user = userIdMap.get(usrSnapshot.user_id);
-                        const tokenHolder = user?.wallet ? tokenHolderMap.get(user.wallet.address.toLowerCase()) : null;
+                        const tokenHolder = user?.wallet ? tokenHolderMap.get(user.wallet.toLowerCase()) : null;
 
                         if (tokenHolder) {
                             const stake = Number(usrSnapshot.stake);
@@ -281,15 +286,15 @@ export const snapshotRoute = {
 
                     const userSnapshots = tokenHolders.reduce((acc, holder) => {
                         const user = userWalletMap.get(holder.owner_address.toLowerCase());
-                        if (user && user.wallet?.address) {
+                        if (user) {
                             const balance = Number(holder.balance_formatted).toString()
                             const reward = (Number(holder.balance_formatted) * 0.005).toFixed(8); // 0.5% reward
                             acc.push({
                                 stake: balance,
                                 reward,
                                 status: 1,
-                                wallet: user.wallet.address,
-                                user_id: user.id,
+                                wallet: user.wallet,
+                                user_id: user.user_id,
                                 snapshot_id: newSnapshot.id
                             });
                         }
@@ -326,14 +331,14 @@ export const snapshotRoute = {
 
                 const userSnapshots = tokenHolders.reduce((acc, holder) => {
                     const user = userWalletMap.get(holder.owner_address.toLowerCase());
-                    if (user && user.wallet?.address) {
+                    if (user) {
                         const reward = (Number(holder.balance_formatted) * 0.005).toFixed(8); // 0.5% reward
                         acc.push({
                             stake: Number(holder.balance_formatted).toString(),
                             reward,
                             status: 1,
-                            wallet: user.wallet.address,
-                            user_id: user.id,
+                            wallet: user.wallet,
+                            user_id: user.user_id,
                             snapshot_id: newSnapshot.id
                         });
                     }

@@ -1,8 +1,8 @@
 'use client'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
 import React from 'react'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet'
 import { Button } from '../ui/button'
 import { LogOut, Menu } from 'lucide-react'
 import Link from 'next/link'
@@ -13,7 +13,7 @@ const AdminHeader = () => {
     const session = useSession({
         required: true,
         onUnauthenticated: () => {
-            redirect('/')
+            redirect('/auth')
         }
     })
 
@@ -26,7 +26,7 @@ const AdminHeader = () => {
             <Link className='hover:text-foreground' href={'/admin/'}>Admin</Link>
             <div className='ml-3 flex items-center gap-4'>
                 <ToggleTheme />
-                <Button>
+                <Button onClick={() => signOut({ redirect: false })}>
                     <LogOut size={16} className='hover:text-foreground' />
                 </Button>
             </div>
@@ -48,6 +48,9 @@ const AdminHeader = () => {
                     <Link href={'/admin/snapshot'}>Snapshots</Link>
                     <Link href={'/admin/users'}>Users</Link>
                     <Link href={'/admin/'}>Admin</Link>
+                    <Button onClick={() => signOut({ redirect: false })} className='mt-5'>
+                        <LogOut size={16} className='hover:text-foreground' />
+                    </Button>
                 </div>
             </SheetContent>
         </Sheet>
