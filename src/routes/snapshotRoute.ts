@@ -179,18 +179,16 @@ export const snapshotRoute = {
         try {
             await rateLimiter.consume(1);
 
-            // Retrieve previous snapshots
-            const previousSnapshots = await db.snapshot.findMany({
-                where: { completed: false },
-                orderBy: { created_at: 'desc' },
-                take: 1 // Retrieve only the most recent snapshots needed
-            });
-
             // Retrieve token holders and users
-            const [tokenHolders, users] = await Promise.all([
+            const [tokenHolders, users, previousSnapshots] = await Promise.all([
                 getTokenHolders(),
-                privy.getUsers()
-            ]);
+                privy.getUsers(),
+                db.snapshot.findMany({
+                    where: { completed: false },
+                    orderBy: { created_at: 'desc' },
+                    take: 1 // Retrieve only the most recejnt snapshots needed
+                })
+            ])
 
             if (!tokenHolders || !users) {
                 throw new TRPCError({
@@ -210,12 +208,21 @@ export const snapshotRoute = {
             end_date.setUTCHours(16, 0, 0, 0); // Set end_date to 4:00 PM UTC
 
             if (previousSnapshot) {
-                if (new Date(previousSnapshot.end_date)) {
+                if (new Date(previousSnapshot.end_date) <= now) {
+
                     // Mark previous snapshot as completed
                     const updatedSnapshot = await db.snapshot.update({
                         where: { id: previousSnapshot.id },
                         data: { completed: true },
-                        include: { user_snapshot: true }
+                        include: {
+                            user_snapshot: {
+                                select: {
+                                    id: true,
+                                    stake: true,
+                                    user_id: true
+                                }
+                            }
+                        }
                     });
 
                     const updateZeroRewardIds: number[] = [];
@@ -240,6 +247,7 @@ export const snapshotRoute = {
 
                     // Perform batch updates if there are IDs to update
                     if (updateZeroRewardIds.length > 0) {
+
                         await db.user_snapshot.updateMany({
                             where: {
                                 id: {
@@ -274,9 +282,10 @@ export const snapshotRoute = {
                     const userSnapshots = tokenHolders.reduce((acc, holder) => {
                         const user = userWalletMap.get(holder.owner_address.toLowerCase());
                         if (user && user.wallet?.address) {
+                            const balance = Number(holder.balance_formatted).toString()
                             const reward = (Number(holder.balance_formatted) * 0.005).toFixed(8); // 0.5% reward
                             acc.push({
-                                stake: Number(holder.balance_formatted).toString(),
+                                stake: balance,
                                 reward,
                                 status: 1,
                                 wallet: user.wallet.address,
@@ -294,7 +303,6 @@ export const snapshotRoute = {
                         snapshot_id: number
                     }[]);
 
-                    
                     // Insert all user snapshots in one go
                     if (userSnapshots.length > 0) {
                         await db.user_snapshot.createMany({
