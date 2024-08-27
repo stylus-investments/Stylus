@@ -82,8 +82,8 @@ export const orderMessageRoute = {
                     id: order.id
                 },
                 data: {
-                    user_unread_messages: sender === 'admin' ? order.user_unread_messages + 1 : order.user_unread_messages,
-                    admin_unread_messages: sender === 'user' ? order.admin_unread_messages + 1 : order.admin_unread_messages,
+                    user_unread_messages: sender === 'admin' ? order.user_unread_messages + 1 : 0,
+                    admin_unread_messages: sender === 'user' ? order.admin_unread_messages + 1 : 0,
                 }
             })
         ])
