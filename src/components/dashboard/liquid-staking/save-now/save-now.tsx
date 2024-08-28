@@ -47,48 +47,48 @@ const DepositSave = () => {
         setFormData(prev => ({ ...prev, status: prev.status - 1 }))
     }
 
-    const confirmOrder = async (e: React.MouseEvent) => {
-        try {
-            e.preventDefault()
+    // const confirmOrder = async (e: React.MouseEvent) => {
+    //     try {
+    //         e.preventDefault()
 
-            if (!confirmed) return toast.error("Confirm the transaction first.")
+    //         if (!confirmed) return toast.error("Confirm the transaction first.")
 
-            const result = await createOrder.mutateAsync({
-                data: {
-                    amount: formData.amount,
-                    receipt: formData.receipt,
-                    price: formData.price,
-                    method: formData.method,
-                    currency: 'PHP'
-                }
-            })
+    //         const result = await createOrder.mutateAsync({
+    //             data: {
+    //                 amount: formData.amount,
+    //                 receipt: formData.receipt,
+    //                 price: formData.price,
+    //                 method: formData.method,
+    //                 currency: 'PHP'
+    //             }
+    //         })
 
-            if (result) {
-                await getUserOrder.refetch()
-                clearForm()
-                toast.success("Success! order has been created.")
-                setOpen(false)
+    //         if (result) {
+    //             await getUserOrder.refetch()
+    //             clearForm()
+    //             toast.success("Success! order has been created.")
+    //             setOpen(false)
 
-            }
+    //         }
 
-        } catch (error: any) {
-            if (error.shape.message) {
-                setOpen(false)
-                clearForm()
-                return toast.error(error.shape.message)
-            }
-            alert("Something went wrong")
-        }
-    }
+    //     } catch (error: any) {
+    //         if (error.shape.message) {
+    //             setOpen(false)
+    //             clearForm()
+    //             return toast.error(error.shape.message)
+    //         }
+    //         alert("Something went wrong")
+    //     }
+    // }
 
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
                 <Button className='w-full'>
-                    Deposit
+                    Create
                 </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className='w-full max-w-96 max-h-[600px] overflow-y-auto'>
+            {/* <AlertDialogContent className='w-full max-w-96 max-h-[600px] overflow-y-auto'>
                 {formData.status === 1 && <EnterAmount
                     setFormData={setFormData}
                     currency={currency}
@@ -112,7 +112,7 @@ const DepositSave = () => {
                     confirmed={confirmed}
                     formBack={formBack}
                 />}
-            </AlertDialogContent>
+            </AlertDialogContent> */}
         </AlertDialog>
     )
 }

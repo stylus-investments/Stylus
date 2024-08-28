@@ -42,47 +42,57 @@ model user_snapshot {
 }
 
 model user_order {
-  id                    String          @id @default(uuid())
-  amount                String
-  price                 String
-  status                String
-  receipt               String
-  method                String
-  currency              String
-  user_id               String
-  user_unread_messages  Int             @default(0)
-  admin_unread_messages Int             @default(0)
-  package               Boolean         @default(false)
-  investment_plan_id    String?
-  closed                Boolean         @default(false)
-  created_at            DateTime        @default(now())
-  updated_at            DateTime        @updatedAt
-  order_message         order_message[]
+  id                      String               @id @default(uuid())
+  user_id                 String
+  amount                  String
+  price                   String
+  status                  String
+  receipt                 String
+  method                  String
+  currency                String
+  user_unread_messages    Int                  @default(0)
+  admin_unread_messages   Int                  @default(0)
+  closed                  Boolean              @default(false)
+  created_at              DateTime             @default(now())
+  updated_at              DateTime             @updatedAt
+  order_message           order_message[]
+  user_investment_plan    user_investment_plan @relation(fields: [user_investment_plan_id], references: [id])
+  user_investment_plan_id String
 }
 
 model user_investment_plan {
-  id               String        @id @default(uuid())
-  user_id          String
-  name             String
-  completed        Boolean       @default(false)
-  package          order_package @relation(fields: [order_package_id], references: [id])
-  order_package_id String
-  payment_count    Int
-  next_payment     DateTime
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id                         String                  @id @default(uuid())
+  user_id                    String
+  name                       String
+  base_amount                Float
+  total_amount               Float
+  payment_count              Int
+  completed                  Boolean                 @default(false)
+  profit_protection          Boolean                 @default(false) // Optional for 10-year plans
+  insurance                  Boolean                 @default(false) // Optional for 10 and 20-year plans
+  currency                   String                  @default("PHP")
+  payments                   user_order[]
+  package                    investment_plan_package @relation(fields: [investment_plan_package_id], references: [id])
+  investment_plan_package_id String
+  created_at                 DateTime                @default(now())
+  updated_at                 DateTime                @updatedAt
 }
 
-model order_package {
-  id                   String                 @id @default(uuid())
-  name                 String
-  perks                String
-  duration             Int
-  currency             String
-  created_at           DateTime               @default(now())
-  updated_at           DateTime               @updatedAt
+model investment_plan_package {
+  id            String       @id @default(uuid())
+  name          String
+  duration      Int
+  billing_cycle BillingCycle
+  prices        Json
+  perks         Json
+
   user_investment_plan user_investment_plan[]
+}
+
+enum BillingCycle {
+  DAILY
+  WEEKLY
+  MONTHLY
 }
 
 model currency_conversion {

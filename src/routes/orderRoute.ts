@@ -41,6 +41,7 @@ export const orderRoute = {
             method: z.string(),
             currency: z.string(),
             price: z.string(),
+            investment_plan_id: z.string()
         })
     })).mutation(async (opts) => {
 
@@ -82,7 +83,12 @@ export const orderRoute = {
             data: {
                 ...data,
                 status: ORDERSTATUS['processing'],
-                user_id: user
+                user_id: user,
+                user_investment_plan: {
+                    connect: {
+                        id: data.investment_plan_id
+                    }
+                }
             }
         })
 

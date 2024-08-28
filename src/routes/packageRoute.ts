@@ -1,28 +1,80 @@
 import db from "@/db/db";
 import { getAuth } from "@/lib/nextAuth";
+import { getUserId } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { publicProcedure } from "@/trpc/trpc";
+import { BillingCycle } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const packageRoute = {
-    getAllPackages: publicProcedure.query(async () => {
+    getSinglePackage: publicProcedure.input(z.string()).query(async (opts) => {
+
+        const auth = await getAuth()
+        if (!auth) throw new TRPCError({
+            code: 'UNAUTHORIZED'
+        })
+
+        const packageID = opts.input
+
+        const packagePlan = await db.investment_plan_package.findUnique({
+            where: {
+                id: packageID
+            }
+        })
+        if (!packagePlan) throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Package not found"
+        })
+
+        const modifyPackage = {
+            ...packagePlan,
+            perks: packagePlan.perks as string[],
+            prices: packagePlan.prices as number[],
+            billing_cycle: packagePlan.billing_cycle as "DAILY" | "WEEKLY" | "MONTHLY"
+        }
+
+        return modifyPackage
+
+    }),
+    getAllPackages: publicProcedure.input(z.enum(["ADMIN", "USER"])).query(async (opts) => {
+
+
+        const user = opts.input
+
+        if (user === 'ADMIN') {
+            const auth = await getAuth()
+            if (!auth) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+        } else {
+            const user = await getUserId()
+            if (!user) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+        }
 
         await rateLimiter.consume(1)
 
-        const packages = await db.order_package.findMany()
+        const packages = await db.investment_plan_package.findMany()
 
         await db.$disconnect()
 
-        return packages
+        const modifyPackage = packages.map(obj => ({
+            ...obj,
+            perks: obj.perks as string[],
+            prices: obj.prices as number[]
+        }))
+
+        return modifyPackage
 
     }),
     createPackage: publicProcedure.input(z.object({
         name: z.string(),
-        perks: z.string(),
+        perks: z.array(z.string()),
+        prices: z.array(z.number()),
         duration: z.number(),
-        monthly_payment: z.number(),
-        currency: z.string()
+        billing_cycle: z.enum([BillingCycle.DAILY, BillingCycle.WEEKLY, BillingCycle.MONTHLY]),
     })).mutation(async (opts) => {
 
         try {
@@ -35,7 +87,7 @@ export const packageRoute = {
             })
 
             //create the package
-            const createPackage = await db.order_package.create({
+            const createPackage = await db.investment_plan_package.create({
                 data: opts.input
             })
             if (!createPackage) throw new TRPCError({
@@ -58,13 +110,11 @@ export const packageRoute = {
     }),
     updatePackage: publicProcedure.input(z.object({
         name: z.string(),
-        perks: z.string(),
-        duration: z.number(),
-        monthly_payment: z.number(),
-        currency: z.string(),
-        package_id: z.string()
+        perks: z.array(z.string()),
+        prices: z.array(z.number()),
+        package_id: z.string(),
+        billing_cycle: z.enum([BillingCycle.DAILY, BillingCycle.WEEKLY, BillingCycle.MONTHLY]),
     })).mutation(async (opts) => {
-
 
         try {
 
@@ -75,12 +125,14 @@ export const packageRoute = {
                 code: "UNAUTHORIZED"
             })
 
+            const data = { ...opts.input, package_id: undefined }
+
             //create the package
-            const updatePackage = await db.order_package.update({
+            const updatePackage = await db.investment_plan_package.update({
                 where: {
                     id: opts.input.package_id
                 },
-                data: opts.input
+                data
             })
             if (!updatePackage) throw new TRPCError({
                 code: "BAD_REQUEST",
@@ -98,6 +150,5 @@ export const packageRoute = {
         } finally {
             await db.$disconnect()
         }
-
     })
 }

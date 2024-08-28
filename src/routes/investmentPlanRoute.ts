@@ -5,10 +5,15 @@ import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+const INSURANCE_PRICE = 300
+
 export const investmentPlanRoute = {
     createUserInvestmentPlan: publicProcedure.input(z.object({
         name: z.string(),
         package_id: z.string(),
+        base_amount: z.number(),
+        profit_protection: z.boolean(),
+        insurance: z.boolean(),
     })).mutation(async (opts) => {
 
         await rateLimiter.consume(1)
@@ -18,32 +23,56 @@ export const investmentPlanRoute = {
             code: "UNAUTHORIZED"
         })
 
-        const { name, package_id } = opts.input
+        const { name, package_id, base_amount, profit_protection, insurance } = opts.input
 
         //retrieve package
 
-        const orderPackage = await db.order_package.findUnique({ where: { id: package_id } })
-        if (!orderPackage) throw new TRPCError({
+        const investmentPackage = await db.investment_plan_package.findUnique({ where: { id: package_id } })
+        if (!investmentPackage) throw new TRPCError({
             code: "NOT_FOUND",
             message: "Package not found"
         })
+        if (investmentPackage.duration === 5 && (profit_protection || insurance)) throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Something is not right"
+        })
+
+        let totalAmount: number = base_amount
+
+        if (investmentPackage.duration === 10) {
+
+            if (profit_protection && insurance) {
+                totalAmount = (base_amount * 1.25) + INSURANCE_PRICE;
+
+            } else if (profit_protection && !insurance) {
+
+                totalAmount = base_amount * 1.25;
+            } else if (insurance && !profit_protection) {
+
+                totalAmount = base_amount + INSURANCE_PRICE;
+            }
+
+        } else if (investmentPackage.duration === 20) {
+
+            if (insurance) {
+                totalAmount = base_amount + INSURANCE_PRICE;
+            }
+
+        }
 
         //create the user investment plan
-
-        const now = new Date()
-        const nextMonth = new Date(now);
-        nextMonth.setMonth(now.getMonth() + 1);
 
         const investmentPlan = await db.user_investment_plan.create({
             data: {
                 user_id: user, name,
-                payment_count: (orderPackage.duration * 12),
-                next_payment: nextMonth,
+                total_amount: totalAmount,
+                payment_count: (investmentPackage.duration * 12),
                 package: {
                     connect: {
-                        id: orderPackage.id
+                        id: investmentPackage.id
                     }
-                }
+                },
+                base_amount
             }
         })
         if (!investmentPlan) throw new TRPCError({
@@ -54,18 +83,6 @@ export const investmentPlanRoute = {
         await db.$disconnect()
 
         return true
-
-        // //create a initial order
-        // const createFirstOrder = await db.user_order.create({
-        //     data: {
-        //         method,
-        //         package: true,
-        //         receipt: "/save.webp",
-        //         investment_plan_id: investmentPlan.id,
-        //         user_id: user,
-        //         status: ORDERSTATUS['processing']
-        //     }
-        // })
 
     }),
     getUserInvestmentPlans: publicProcedure.query(async () => {
