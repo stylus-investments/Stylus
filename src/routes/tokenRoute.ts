@@ -82,31 +82,6 @@ export const tokenRoute = {
 
             return index
 
-            //user willing to invest (USD)
-            const user_input = 10000
-
-            //total token user will received
-            const totalToken = user_input / index
-            console.log("TOKENS", totalToken)
-
-            //asset equivalent (admin can see this)
-            const assetEquivalent = {
-                btc: {
-                    btc_ua: (user_input / 2) / btc_market,
-                    btc_eq: user_input / 2
-                },
-                usdc: {
-                    usdc_ua: (user_input / 4) / usdc_market,
-                    usdc_eq: user_input / 4
-                },
-                ecpc: {
-                    ecpc_ua: (user_input / 4) / ecpc_market,
-                    ecpc_eq: user_input / 4
-                },
-            }
-
-            console.log("Underlying Assets", assetEquivalent)
-
         } catch (error: any) {
             console.log(error);
             throw new TRPCError({

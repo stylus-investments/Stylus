@@ -11,7 +11,8 @@ export const investmentPlanRoute = {
     createUserInvestmentPlan: publicProcedure.input(z.object({
         name: z.string(),
         package_id: z.string(),
-        base_amount: z.number(),
+        base_price: z.number(),
+        total_price: z.number(),
         profit_protection: z.boolean(),
         insurance: z.boolean(),
     })).mutation(async (opts) => {
@@ -23,7 +24,7 @@ export const investmentPlanRoute = {
             code: "UNAUTHORIZED"
         })
 
-        const { name, package_id, base_amount, profit_protection, insurance } = opts.input
+        const { name, package_id, base_price, profit_protection, insurance, total_price } = opts.input
 
         //retrieve package
 
@@ -37,42 +38,49 @@ export const investmentPlanRoute = {
             message: "Something is not right"
         })
 
-        let totalAmount: number = base_amount
+        const prices = investmentPackage.prices as number[]
+
+        if (!prices.includes(base_price)) throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Base price does not exist in package"
+        })
+
+        let recalculateTotalPrice: number = base_price
 
         if (investmentPackage.duration === 10) {
 
             if (profit_protection && insurance) {
-                totalAmount = (base_amount * 1.25) + INSURANCE_PRICE;
+                recalculateTotalPrice = (base_price * 1.25) + INSURANCE_PRICE;
 
             } else if (profit_protection && !insurance) {
 
-                totalAmount = base_amount * 1.25;
+                recalculateTotalPrice = base_price * 1.25;
             } else if (insurance && !profit_protection) {
 
-                totalAmount = base_amount + INSURANCE_PRICE;
+                recalculateTotalPrice = base_price + INSURANCE_PRICE;
             }
 
-        } else if (investmentPackage.duration === 20) {
-
-            if (insurance) {
-                totalAmount = base_amount + INSURANCE_PRICE;
-            }
-
+        } else if (investmentPackage.duration === 20 && insurance) {
+            recalculateTotalPrice = base_price + INSURANCE_PRICE;
         }
+
+        if (recalculateTotalPrice !== total_price) throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Prices are not matched"
+        })
 
         //create the user investment plan
 
         const investmentPlan = await db.user_investment_plan.create({
             data: {
-                user_id: user, name,
-                total_amount: totalAmount,
+                user_id: user, name, total_price: recalculateTotalPrice,
                 payment_count: (investmentPackage.duration * 12),
                 package: {
                     connect: {
                         id: investmentPackage.id
                     }
                 },
-                base_amount
+                base_price
             }
         })
         if (!investmentPlan) throw new TRPCError({

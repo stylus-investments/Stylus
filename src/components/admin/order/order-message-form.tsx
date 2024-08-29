@@ -81,8 +81,8 @@ const OrderMessageForm = ({ initialData, sender }: {
                     </CardTitle>
                     <CardDescription className='flex items-center gap-5'>
                         <small>Method: {initialData.method}</small>
-                        <small>Currency: {initialData.currency}</small>
-                        <small>Price: {initialData.price}</small>
+                        <small>Currency: {initialData.user_investment_plan.package.currency}</small>
+                        <small>Price: {initialData.user_investment_plan.total_price}</small>
                         <small>STXBTC Amount: {initialData.amount}</small>
                     </CardDescription>
                 </CardHeader>

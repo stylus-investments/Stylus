@@ -1,4 +1,3 @@
-
 import { ORDERSTATUS } from "@/constant/order";
 import db from "@/db/db";
 import { getAuth } from "@/lib/nextAuth";
@@ -6,6 +5,7 @@ import { getUserId } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
+import axios from "axios";
 import { z } from "zod";
 
 export const orderRoute = {
@@ -36,11 +36,8 @@ export const orderRoute = {
     }),
     createOrder: publicProcedure.input(z.object({
         data: z.object({
-            amount: z.string(),
             receipt: z.string(),
             method: z.string(),
-            currency: z.string(),
-            price: z.string(),
             investment_plan_id: z.string()
         })
     })).mutation(async (opts) => {
@@ -52,36 +49,36 @@ export const orderRoute = {
             code: 'UNAUTHORIZED'
         })
 
-        const userOrders = await db.user_order.findMany({
-            where: {
-                user_id: user
-            }
+        const { data } = opts.input
+
+        const [investmentPlan, index] = await Promise.all([
+            db.user_investment_plan.findUnique({
+                where: { id: data.investment_plan_id }, include: {
+                    package: {
+                        select: {
+                            currency: true
+                        }
+                    }
+                }
+            }),
+            axios.get(`${process.env.NEXTAUTH_URL}/api/trpc/token.getIndexPrice`)
+        ])
+        if (!investmentPlan) throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "This plan does not exist"
         })
+
+        const stxBtcAmount = (investmentPlan.total_price / index.data as number)
 
         if (!user) throw new TRPCError({
             code: 'NOT_FOUND',
             message: "User Not found"
         })
 
-        const { data } = opts.input
-
-        //if user has pending order don't allow to create one
-        const hasProcessingOrder = userOrders.some(order => order.status === ORDERSTATUS['processing']);
-        if (hasProcessingOrder) throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "You cannot perform this action because you have a processing order."
-        });
-
-        //check if user is a dumbass
-        const invalidOrdersCount = userOrders.filter(order => order.status === ORDERSTATUS['invalid']).length
-        if (invalidOrdersCount >= 5) throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "You have reached the maximum number of invalid orders."
-        })
-
         const createOrder = await db.user_order.create({
             data: {
                 ...data,
+                amount: stxBtcAmount.toFixed(6),
                 status: ORDERSTATUS['processing'],
                 user_id: user,
                 user_investment_plan: {

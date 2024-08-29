@@ -8,7 +8,7 @@ const Page = () => {
     return (
         <>
             <AdminHeader />
-            <div className='flex flex-col gap-10 pt-28 padding'>
+            <div className='flex flex-col gap-10 py-28 padding'>
                 <div className='w-full border-b pb-2 flex items-center justify-between'>
                     <Label className='text-xl'>Package List</Label>
                     <CreateOrUpdatePackage type='Create' />

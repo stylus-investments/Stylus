@@ -3,11 +3,11 @@ import React, { useState } from 'react'
 import { availableCurrencies } from '@/constant/availableCurrency'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '../../ui/button'
-import Link from 'next/link'
 import useBalanceStore from '@/state/balanceStore'
 import { Eye, EyeOff } from 'lucide-react'
 import { Label } from '@/components/ui/label'
-import DepositSave from './save-now/save-now'
+import { toast } from 'sonner'
+import CreateInvestment from '../investment-plan/create-investment'
 
 
 const BalancesHeader = ({ balances }: {
@@ -52,12 +52,10 @@ const BalancesHeader = ({ balances }: {
                 })}
             </div>
             <div className='flex items-center self-center w-full xl:w-80 sm:gap-5 gap-5'>
-                <DepositSave />
-                <Link href={process.env.NEXT_PUBLIC_GRAPHENE_LINK as string} target='_blank' className='w-full'>
-                    <Button className='w-full' variant={'secondary'}>
-                        Swap
-                    </Button>
-                </Link>
+                <CreateInvestment />
+                <Button className='w-full' variant={'secondary'} onClick={() => toast("Working pako ani sir hehehe")}>
+                    Pay
+                </Button>
             </div>
         </div >
     )

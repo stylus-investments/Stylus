@@ -38,7 +38,6 @@ const OrderTable = ({ orders }: {
                     <TableRow>
                         <TableHead>Status</TableHead>
                         <TableHead>Method</TableHead>
-                        <TableHead>Price</TableHead>
                         <TableHead>Amount (STXBTC)</TableHead>
                         <TableHead>Receipt</TableHead>
                         <TableHead>Messages</TableHead>
@@ -49,7 +48,6 @@ const OrderTable = ({ orders }: {
                         <TableRow key={order.id}>
                             <TableCell>{order.status}</TableCell>
                             <TableCell>{order.method}</TableCell>
-                            <TableCell>{order.currency} - {order.price}</TableCell>
                             <TableCell>{order.amount}</TableCell>
                             <TableCell>
                                 <AlertDialog>

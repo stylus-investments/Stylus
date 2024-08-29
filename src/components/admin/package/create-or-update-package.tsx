@@ -6,31 +6,44 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
+import { $Enums } from '@prisma/client'
 import { LoaderCircle, Settings2, X } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 type BillingCycle = "DAILY" | "WEEKLY" | "MONTHLY";
+type Currency = "PHP" | "USD" | "EUR"
+const formInitialData = {
+    name: "",
+    perks: [],
+    billing_cycle: 'MONTHLY',
+    currency: "PHP",
+    prices: [],
+    duration: 0,
+} as {
+    name: string
+    perks: string[]
+    prices: number[]
+    duration: number
+    billing_cycle: "DAILY" | "WEEKLY" | "MONTHLY"
+    currency: "PHP" | "USD" | "EUR"
+}
 
-const CreateOrUpdatePackage = ({ package_id, type }: {
+const CreateOrUpdatePackage = ({ pckg, type }: {
     type: "Create" | "Update"
-    package_id?: string
+    pckg?: {
+        id: string;
+        name: string;
+        duration: number;
+        currency: Currency;
+        billing_cycle: $Enums.BillingCycle;
+        prices: number[];
+        perks: string[];
+    }
 }) => {
 
     const [open, setOpen] = useState(false)
-    const [formData, setFormData] = useState<{
-        name: string
-        perks: string[]
-        prices: number[]
-        duration: number
-        billing_cycle: "DAILY" | "WEEKLY" | "MONTHLY"
-    }>({
-        name: "",
-        perks: [],
-        billing_cycle: 'MONTHLY',
-        prices: [],
-        duration: 0,
-    })
+    const [formData, setFormData] = useState(formInitialData)
 
     const [perksInput, setPerksInput] = useState('')
     const [priceInput, setPriceInput] = useState('')
@@ -72,10 +85,6 @@ const CreateOrUpdatePackage = ({ package_id, type }: {
         }
     }
 
-    const { data } = trpc.package.getSinglePackage.useQuery(package_id as string, {
-        enabled: (package_id && open) ? true : false
-    })
-
     const getAllPackages = trpc.package.getAllPackages.useQuery('ADMIN', {
         enabled: false
     })
@@ -85,6 +94,7 @@ const CreateOrUpdatePackage = ({ package_id, type }: {
             setOpen(false),
                 getAllPackages.refetch()
             toast.success("Success! package created.")
+            setFormData(formInitialData)
         },
         onError: (err) => {
             toast.error(err.message)
@@ -96,7 +106,7 @@ const CreateOrUpdatePackage = ({ package_id, type }: {
             setOpen(false)
             getAllPackages.refetch()
             toast.success("Success! package updated.")
-
+            setFormData(formInitialData)
         },
         onError: (err) => {
             toast.error(err.message)
@@ -108,7 +118,7 @@ const CreateOrUpdatePackage = ({ package_id, type }: {
 
             e.preventDefault()
 
-            const { perks, name, prices, duration, billing_cycle } = formData
+            const { perks, name, prices, duration, billing_cycle, currency } = formData
 
             if (perks.length < 1) return toast.error("Put atlest 1 perks")
             if (prices.length < 1) return toast.error("Put ateast 1 prices")
@@ -122,11 +132,12 @@ const CreateOrUpdatePackage = ({ package_id, type }: {
                 name,
                 prices: modifyPrices,
                 duration: Number(duration),
-                billing_cycle
+                billing_cycle,
+                currency
             }
 
-            if (type === 'Update' && package_id) {
-                await updatePackage.mutateAsync({ ...data, package_id })
+            if (type === 'Update' && pckg) {
+                await updatePackage.mutateAsync({ ...data, package_id: pckg.id })
             } else {
                 await createPackage.mutateAsync(data)
             }
@@ -139,11 +150,9 @@ const CreateOrUpdatePackage = ({ package_id, type }: {
 
     useEffect(() => {
 
-        if (data) {
-            setFormData(data)
-        }
+        if (pckg) setFormData(pckg)
 
-    }, [data])
+    }, [pckg])
 
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>

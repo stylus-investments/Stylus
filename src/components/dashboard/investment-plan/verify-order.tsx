@@ -11,7 +11,7 @@ const VerifyOrder = (props: {
     formData: {
         amount: string;
         method: string;
-        price: string;
+        price: number;
         receipt: string
         status: number;
     }

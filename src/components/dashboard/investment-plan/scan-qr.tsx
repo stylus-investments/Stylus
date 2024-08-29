@@ -1,4 +1,3 @@
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import React, { useState } from 'react'
 import { toast } from 'sonner';
@@ -8,14 +7,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { UploadButton } from '@/lib/utils';
 import { CircleCheck } from 'lucide-react';
-import axios from 'axios';
 
 
 const ScanQr = (props: {
     formData: {
         amount: string;
         method: string;
-        price: string;
+        price: number;
         receipt: string
         status: number;
     }
@@ -23,7 +21,7 @@ const ScanQr = (props: {
         amount: string;
         method: string;
         receipt: string
-        price: string;
+        price: number;
         status: number;
     }>>
     currency: string

@@ -29,35 +29,49 @@ export const currencyRoute = {
     }),
     update: publicProcedure.mutation(async () => {
 
-        await rateLimiter.consume(1);
+        try {
 
-        const { data } = await axios.get(`https://v6.exchangerate-api.com/v6/${exchangeApiKey}/latest/USD`)
 
-        if (!data) throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Faild to get currency conversion"
-        })
 
-        const conversionRates = Object.entries(data.conversion_rates).map(([currency, rate]) => ({
-            currency: currency,
-            conversion_rate: String(rate) // Directly using the rate as it is already a number
-        }))
+            await rateLimiter.consume(1);
 
-        const availableCurrencyCodes = availableCurrencies.map(c => c.currency);
+            const { data } = await axios.get(`https://v6.exchangerate-api.com/v6/${exchangeApiKey}/latest/USD`)
 
-        // Filter currencies that need upserting
-        const currenciesToUpsert = conversionRates.filter(({ currency }) => availableCurrencyCodes.includes(currency));
-
-        // Upsert specific currencies
-        await Promise.all(currenciesToUpsert.map(({ currency, conversion_rate }) =>
-            db.currency_conversion.upsert({
-                where: { currency },
-                update: { conversion_rate },
-                create: { currency, conversion_rate }
+            if (!data) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Faild to get currency conversion"
             })
-        ));
 
-        return true
+            const conversionRates = Object.entries(data.conversion_rates).map(([currency, rate]) => ({
+                currency: currency,
+                conversion_rate: String(rate) // Directly using the rate as it is already a number
+            }))
+
+            const availableCurrencyCodes = availableCurrencies.map(c => c.currency);
+
+            // Filter currencies that need upserting
+            const currenciesToUpsert = conversionRates.filter(({ currency }) => availableCurrencyCodes.includes(currency));
+
+            // Upsert specific currencies
+            await Promise.all(currenciesToUpsert.map(({ currency, conversion_rate }) =>
+                db.currency_conversion.upsert({
+                    where: { currency },
+                    update: { conversion_rate },
+                    create: { currency, conversion_rate }
+                })
+            ));
+
+            return true
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code || "BAD_REQUEST",
+                message: error.message || "Something went wrong"
+            })
+        } finally {
+            await db.$disconnect()
+        }
     }),
     test: publicProcedure.query(async () => {
         return true

@@ -40,7 +40,6 @@ const OrderHistory = () => {
                                 <TableRow className='text-xs md:text-sm'>
                                     <TableHead className='min-w-32'>Amount SAVE</TableHead>
                                     <TableHead className='min-w-32'>Status</TableHead>
-                                    <TableHead className='min-w-32'>Price</TableHead>
                                     <TableHead className=' min-w-52'>Payment Method</TableHead>
                                     <TableHead className='min-w-32'>Receipt</TableHead>
                                     <TableHead className='min-w-32'>Messages</TableHead>
@@ -51,7 +50,6 @@ const OrderHistory = () => {
                                     <TableRow key={order.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
                                         <TableCell>{order.amount}</TableCell>
                                         <TableCell>{order.status}</TableCell>
-                                        <TableCell>{order.price} ({order.currency})</TableCell>
                                         <TableCell>{order.method.toUpperCase()}</TableCell>
                                         <TableCell>
                                             <AlertDialog>

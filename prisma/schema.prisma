@@ -43,13 +43,11 @@ model user_snapshot {
 
 model user_order {
   id                      String               @id @default(uuid())
-  user_id                 String
   amount                  String
-  price                   String
+  user_id                 String
   status                  String
   receipt                 String
   method                  String
-  currency                String
   user_unread_messages    Int                  @default(0)
   admin_unread_messages   Int                  @default(0)
   closed                  Boolean              @default(false)
@@ -64,13 +62,12 @@ model user_investment_plan {
   id                         String                  @id @default(uuid())
   user_id                    String
   name                       String
-  base_amount                Float
-  total_amount               Float
+  base_price                 Int
+  total_price                Int
   payment_count              Int
   completed                  Boolean                 @default(false)
   profit_protection          Boolean                 @default(false) // Optional for 10-year plans
   insurance                  Boolean                 @default(false) // Optional for 10 and 20-year plans
-  currency                   String                  @default("PHP")
   payments                   user_order[]
   package                    investment_plan_package @relation(fields: [investment_plan_package_id], references: [id])
   investment_plan_package_id String
@@ -83,10 +80,17 @@ model investment_plan_package {
   name          String
   duration      Int
   billing_cycle BillingCycle
+  currency      Currency
   prices        Json
   perks         Json
 
   user_investment_plan user_investment_plan[]
+}
+
+enum Currency {
+  PHP
+  USD
+  EUR
 }
 
 enum BillingCycle {

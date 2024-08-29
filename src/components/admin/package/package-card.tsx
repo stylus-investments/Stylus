@@ -3,14 +3,13 @@ import { trpc } from '@/app/_trpc/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { CircleCheckBig, LoaderCircle, Settings2 } from 'lucide-react'
+import { CircleCheckBig, LoaderCircle } from 'lucide-react'
 import React from 'react'
 import CreateOrUpdatePackage from './create-or-update-package'
 
 const PackageCard = () => {
 
     const { data, isLoading, isError } = trpc.package.getAllPackages.useQuery('ADMIN')
-
 
     if (isLoading) return (
         <div className='h-96 w-full flex items-center justify-center'>
@@ -25,13 +24,13 @@ const PackageCard = () => {
 
     return (
 
-        <div className='flex w-full space-y-10 flex-wrap'>
+        <div className='flex w-full gap-8 flex-wrap justify-center'>
             {data && data.length > 0 ? data.map(obj => (
-                <Card className='max-w-[450px] w-full' key={obj.id}>
+                <Card className='max-w-[450px] w-full h-full' key={obj.id}>
                     <CardHeader>
                         <CardTitle className='flex items-center justify-between'>
                             <h1>{obj.name}</h1>
-                            <CreateOrUpdatePackage type='Update' package_id={obj.id} />
+                            <CreateOrUpdatePackage type='Update' pckg={obj} />
                         </CardTitle>
                         <CardDescription className='flex items-center gap-3 flex-wrap pt-2'>PRICES:{
                             obj.prices.map((price, i) => (
@@ -39,7 +38,7 @@ const PackageCard = () => {
                             ))}
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className='flex flex-col gap-5'>
+                    <CardContent className='flex flex-col gap-5 h-full'>
                         <div className='flex flex-col gap-2'>
                             <Label className='text-base'>Benefits</Label>
                             {obj.perks.map((perk, i) => (
@@ -50,12 +49,13 @@ const PackageCard = () => {
                             ))
                             }
                         </div>
-                        <Separator />
-                        <div className='w-full flex items-center justify-between'>
-                            <small>Duration:{obj.duration} Years</small>
-                            <small>Cycle: {obj.billing_cycle}</small>
+                        <div className='flex flex-col gap-2 justify-self-end'>
+                            <Separator />
+                            <div className='w-full flex items-center justify-between'>
+                                <small>Duration:{obj.duration} Years</small>
+                                <small>Cycle: {obj.billing_cycle}</small>
+                            </div>
                         </div>
-
                     </CardContent>
                 </Card>
             )) : <div className='h-96 w-full flex items-center justify-center text-lg'>No Package.</div>}

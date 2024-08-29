@@ -2,26 +2,25 @@
 import { trpc } from '@/app/_trpc/client'
 import { AlertDialog, AlertDialogContent, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import useBalanceStore from '@/state/balanceStore'
 import React, { useState } from 'react'
-import { toast } from 'sonner'
-import EnterAmount from './enter-amount'
 import ScanQr from './scan-qr'
 import VerifyOrder from './verify-order'
+import { toast } from 'sonner'
+import { Currency, user_investment_plan } from '@prisma/client'
+import SelectPaymentMethod from './select-payment-method'
 
-const DepositSave = () => {
+const PayInvestmentPlan = ({ investment, currency }: { investment: user_investment_plan, currency: Currency }) => {
 
     const [open, setOpen] = useState(false)
 
     const [formData, setFormData] = useState({
         amount: '',
+        price: investment.total_price,
         method: '',
-        price: '',
         receipt: '',
         status: 1
     })
     const [confirmed, setConfirmed] = useState(false)
-    const { currency, setCurrency } = useBalanceStore()
 
     const { data } = trpc.token.getIndexPrice.useQuery(undefined, {
         refetchInterval: formData.status === 1 && open ? 30000 : false
@@ -34,12 +33,7 @@ const DepositSave = () => {
 
     const createOrder = trpc.order.createOrder.useMutation()
 
-    const clearForm = () => {
-        setFormData({ amount: '', method: '', price: '', status: 1, receipt: '' })
-    }
-
     const closeOrder = () => {
-        clearForm()
         setOpen(false)
     }
 
@@ -47,39 +41,35 @@ const DepositSave = () => {
         setFormData(prev => ({ ...prev, status: prev.status - 1 }))
     }
 
-    // const confirmOrder = async (e: React.MouseEvent) => {
-    //     try {
-    //         e.preventDefault()
+    const confirmOrder = async (e: React.MouseEvent) => {
+        try {
+            e.preventDefault()
 
-    //         if (!confirmed) return toast.error("Confirm the transaction first.")
+            if (!confirmed) return toast.error("Confirm the transaction first.")
 
-    //         const result = await createOrder.mutateAsync({
-    //             data: {
-    //                 amount: formData.amount,
-    //                 receipt: formData.receipt,
-    //                 price: formData.price,
-    //                 method: formData.method,
-    //                 currency: 'PHP'
-    //             }
-    //         })
+            const result = await createOrder.mutateAsync({
+                data: {
+                    receipt: formData.receipt,
+                    method: formData.method,
+                    investment_plan_id: investment.id
+                }
+            })
 
-    //         if (result) {
-    //             await getUserOrder.refetch()
-    //             clearForm()
-    //             toast.success("Success! order has been created.")
-    //             setOpen(false)
+            if (result) {
+                await getUserOrder.refetch()
+                toast.success("Success! order has been created.")
+                setOpen(false)
 
-    //         }
+            }
 
-    //     } catch (error: any) {
-    //         if (error.shape.message) {
-    //             setOpen(false)
-    //             clearForm()
-    //             return toast.error(error.shape.message)
-    //         }
-    //         alert("Something went wrong")
-    //     }
-    // }
+        } catch (error: any) {
+            if (error.shape.message) {
+                setOpen(false)
+                return toast.error(error.shape.message)
+            }
+            alert("Something went wrong")
+        }
+    }
 
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
@@ -88,11 +78,9 @@ const DepositSave = () => {
                     Create
                 </Button>
             </AlertDialogTrigger>
-            {/* <AlertDialogContent className='w-full max-w-96 max-h-[600px] overflow-y-auto'>
-                {formData.status === 1 && <EnterAmount
+            <AlertDialogContent className='w-full max-w-96 max-h-[600px] overflow-y-auto'>
+                {formData.status === 1 && <SelectPaymentMethod
                     setFormData={setFormData}
-                    currency={currency}
-                    setCurrency={setCurrency}
                     formData={formData}
                     closeOrder={closeOrder}
                     indexPrice={data}
@@ -112,11 +100,11 @@ const DepositSave = () => {
                     confirmed={confirmed}
                     formBack={formBack}
                 />}
-            </AlertDialogContent> */}
+            </AlertDialogContent>
         </AlertDialog>
     )
 }
 
 
 
-export default DepositSave
+export default PayInvestmentPlan

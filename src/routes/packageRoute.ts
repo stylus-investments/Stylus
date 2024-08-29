@@ -3,7 +3,7 @@ import { getAuth } from "@/lib/nextAuth";
 import { getUserId } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { publicProcedure } from "@/trpc/trpc";
-import { BillingCycle } from "@prisma/client";
+import { BillingCycle, Currency } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -31,7 +31,8 @@ export const packageRoute = {
             ...packagePlan,
             perks: packagePlan.perks as string[],
             prices: packagePlan.prices as number[],
-            billing_cycle: packagePlan.billing_cycle as "DAILY" | "WEEKLY" | "MONTHLY"
+            billing_cycle: packagePlan.billing_cycle as "DAILY" | "WEEKLY" | "MONTHLY",
+            currency: packagePlan.currency as "USD" | "PHP" | "EUR"
         }
 
         return modifyPackage
@@ -75,6 +76,7 @@ export const packageRoute = {
         prices: z.array(z.number()),
         duration: z.number(),
         billing_cycle: z.enum([BillingCycle.DAILY, BillingCycle.WEEKLY, BillingCycle.MONTHLY]),
+        currency: z.enum([Currency.PHP, Currency.USD, Currency.EUR])
     })).mutation(async (opts) => {
 
         try {
