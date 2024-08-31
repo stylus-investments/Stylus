@@ -13,6 +13,8 @@ import { availableCurrencies } from '@/constant/availableCurrency'
 import { usePrivy } from '@privy-io/react-auth'
 import { toast } from 'sonner'
 import UserProfile from './user-profile'
+import { Skeleton } from '../ui/skeleton'
+import { redirect } from 'next/navigation'
 
 const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
@@ -71,7 +73,10 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                                 <Download size={16} />
                             </DropdownMenuShortcut>
                         </DropdownMenuItem>}
-                        <DropdownMenuItem className='flex items-center gap-2' onClick={logout}>
+                        <DropdownMenuItem className='flex items-center gap-2' onClick={() => {
+                            logout()
+                            redirect('/connect')
+                        }}>
                             <span>
                                 Logout
                             </span>
@@ -113,9 +118,12 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button>
-                            {`${user?.wallet?.address.substring(0, 6)}...${user?.wallet?.address.substring(38)}`}
-                        </Button>
+                        {user?.wallet?.address ?
+                            <Button>
+                                {`${user?.wallet?.address.substring(0, 6)}...${user?.wallet?.address.substring(38)}`}
+                            </Button>
+                            :
+                            <Skeleton className='w-32 h-9' />}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
@@ -128,7 +136,10 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                                 <Download size={16} />
                             </DropdownMenuShortcut>
                         </DropdownMenuItem>}
-                        <DropdownMenuItem className='flex items-center gap-2' onClick={logout}>
+                        <DropdownMenuItem className='flex items-center gap-2' onClick={() => {
+                            logout()
+                            redirect('/connect')
+                        }}>
                             <span>
                                 Logout
                             </span>

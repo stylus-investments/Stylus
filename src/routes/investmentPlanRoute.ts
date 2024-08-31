@@ -1,3 +1,4 @@
+import { ORDERSTATUS, PAYMENT_METHOD } from "@/constant/order";
 import db from "@/db/db";
 import { getUserId } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
@@ -70,11 +71,16 @@ export const investmentPlanRoute = {
         })
 
         //create the user investment plan
+        const now = new Date()
+        const nextMonth = new Date(now.setMonth(now.getMonth() + 1))
+        nextMonth.setHours(0, 0, 0, 0);
 
         const investmentPlan = await db.user_investment_plan.create({
             data: {
                 user_id: user, name, total_price: recalculateTotalPrice,
                 payment_count: (investmentPackage.duration * 12),
+                next_order_creation: nextMonth,
+                profit_protection, insurance,
                 package: {
                     connect: {
                         id: investmentPackage.id
@@ -86,6 +92,22 @@ export const investmentPlanRoute = {
         if (!investmentPlan) throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Faild to create investment plan"
+        })
+
+        //create initialOrder
+        await db.user_order.create({
+            data: {
+                amount: "Pay First",
+                user_id: user,
+                status: ORDERSTATUS['unpaid'],
+                receipt: '/qrpay.webp',
+                method: PAYMENT_METHOD['GCASH'],
+                user_investment_plan: {
+                    connect: {
+                        id: investmentPlan.id
+                    }
+                }
+            }
         })
 
         await db.$disconnect()
@@ -104,11 +126,71 @@ export const investmentPlanRoute = {
                 code: "UNAUTHORIZED"
             })
 
-            return await db.user_investment_plan.findMany({
+            const userPlans = await db.user_investment_plan.findMany({
+                where: {
+                    user_id: user
+                },
                 orderBy: {
                     created_at: "desc"
                 }
             })
+            if (!userPlans) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to retrieve user investment plans"
+            })
+
+            return userPlans.map(plan => ({
+                ...plan,
+                created_at: new Date(plan.created_at).toISOString(),
+                next_order_creation: new Date(plan.next_order_creation).toISOString(),
+                updated_at: new Date(plan.updated_at).toISOString()
+            }))
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code || "INTERNAL_SERVER_ERROR",
+                message: error.code || "Failed to retrieve user investments plan"
+            })
+        } finally {
+            await db.$disconnect()
+        }
+
+    }),
+    retrieveSinglePlan: publicProcedure.input(z.string()).query(async (opts) => {
+        try {
+
+
+            await rateLimiter.consume(1)
+
+            const user = await getUserId()
+            if (!user) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+
+            const investmentPlan = await db.user_investment_plan.findUnique({
+                where: { id: opts.input },
+                include: {
+                    payments: true
+                }
+            })
+            if (!investmentPlan) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Plan not found"
+            })
+
+            return {
+                ...investmentPlan,
+                created_at: new Date(investmentPlan.created_at).toISOString(),
+                next_order_creation: new Date(investmentPlan.next_order_creation).toISOString(),
+                updated_at: new Date(investmentPlan.updated_at).toISOString(),
+                payments: investmentPlan.payments.map(order => ({
+                    ...order,
+                    closed: undefined,
+                    created_at: new Date(order.created_at).toISOString(),
+                    updated_at: new Date(order.updated_at).toISOString()
+                }))
+            }
 
         } catch (error) {
             console.log(error);
@@ -117,6 +199,5 @@ export const investmentPlanRoute = {
                 message: "Failed to retrieve user investments plan"
             })
         }
-
     })
 }

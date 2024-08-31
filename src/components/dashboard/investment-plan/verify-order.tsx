@@ -63,7 +63,7 @@ const VerifyOrder = (props: {
                 <Button variant={'ghost'} className='w-32' type='button' onClick={formBack}>Back</Button>
                 <Button className='w-32' type='button' onClick={confirmOrder}>{createOrderPending ?
                     <FontAwesomeIcon icon={faSpinner} width={16} height={16} className='animate-spin' />
-                    : "Create Order"}</Button>
+                    : "Pay Order"}</Button>
             </div>
         </div>
     )

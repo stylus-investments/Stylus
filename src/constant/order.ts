@@ -1,4 +1,5 @@
 const ORDERSTATUS = {
+    'unpaid': 'unpaid',
     'invalid': 'invalid',
     'cancelled': 'cancelled',
     'processing': 'processing',

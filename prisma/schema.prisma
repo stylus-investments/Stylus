@@ -48,6 +48,7 @@ model user_order {
   status                  String
   receipt                 String
   method                  String
+  active                  Boolean              @default(false)
   user_unread_messages    Int                  @default(0)
   admin_unread_messages   Int                  @default(0)
   closed                  Boolean              @default(false)
@@ -65,6 +66,7 @@ model user_investment_plan {
   base_price                 Int
   total_price                Int
   payment_count              Int
+  next_order_creation        DateTime
   completed                  Boolean                 @default(false)
   profit_protection          Boolean                 @default(false) // Optional for 10-year plans
   insurance                  Boolean                 @default(false) // Optional for 10 and 20-year plans

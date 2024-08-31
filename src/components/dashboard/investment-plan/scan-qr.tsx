@@ -54,7 +54,7 @@ const ScanQr = (props: {
                 </a>
             </div>
             <div className='text-muted-foreground text-sm'>
-                Please proceed with a purchase of {formData.amount} SAVE tokens, equivalent to {formData.price} {currency}. Payment should be made using ({formData.method.toUpperCase()}) option.
+                Please proceed with a purchase of {formData.amount} STXBTC tokens, equivalent to {formData.price} {currency}. Payment should be made using ({formData.method.toUpperCase()}) option.
                 Scan the QR code above to complete your transaction.
             </div>
             <div className='flex gap-3 items-center justify-between'>

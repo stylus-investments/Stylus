@@ -83,8 +83,6 @@ const getCurrentBalance = ({ usdcPrice, totalUsdc, totalSave }: {
 
 }
 
-
-
 const getRewardsAccumulated = ({ usdcPrice, totalEarn, totalSvn }: {
     usdcPrice: string
     totalEarn: string

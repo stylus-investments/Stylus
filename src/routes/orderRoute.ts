@@ -1,4 +1,4 @@
-import { ORDERSTATUS } from "@/constant/order";
+import { ORDERSTATUS, PAYMENT_METHOD } from "@/constant/order";
 import db from "@/db/db";
 import { getAuth } from "@/lib/nextAuth";
 import { getUserId } from "@/lib/privy";
@@ -16,29 +16,80 @@ export const orderRoute = {
             code: 'UNAUTHORIZED'
         })
 
-        return await db.user_order.findMany()
-
-    }),
-    getCurrentUserOrder: publicProcedure.query(async () => {
-
-        await rateLimiter.consume(1)
-
-        const user = await getUserId()
-
-        if (!user) throw new TRPCError({
-            code: "UNAUTHORIZED"
-        })
-
         return await db.user_order.findMany({
-            where: { user_id: user }
+            where: {
+                status: {
+                    not: ORDERSTATUS['unpaid']
+                }
+            }
         })
 
     }),
-    createOrder: publicProcedure.input(z.object({
+    createOrders: publicProcedure.query(async () => {
+        try {
+
+            await rateLimiter.consume(1)
+
+            const now = new Date()
+
+            const plans = await db.user_investment_plan.findMany({
+                where: {
+                    next_order_creation: {
+                        lte: now
+                    },
+                },
+                select: {
+                    id: true,
+                    user_id: true
+                }
+            })
+
+            if (plans.length > 0) {
+
+                const ordersData = plans.map(plan => ({
+                    amount: 'Pay First.',
+                    user_id: plan.user_id,
+                    status: ORDERSTATUS['unpaid'],
+                    receipt: '/qrpay.webp',
+                    method: PAYMENT_METHOD['GCASH'],
+                    user_investment_plan_id: plan.id
+                }));
+
+                const nextMonth = new Date(now.setMonth(now.getMonth() + 1));
+                nextMonth.setHours(0, 0, 0, 0);
+                await db.user_order.createMany({
+                    data: ordersData
+                })
+
+                await db.user_investment_plan.updateMany({
+                    where: {
+                        id: {
+                            in: plans.map(plan => plan.id)
+                        }
+                    },
+                    data: {
+                        next_order_creation: nextMonth
+                    }
+                })
+            }
+
+            return true
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code || "INTERNAL_SERVER_ERROR",
+                message: error.message || "Server error"
+            })
+        } finally {
+            await db.$disconnect()
+        }
+    }),
+    payOrder: publicProcedure.input(z.object({
         data: z.object({
             receipt: z.string(),
             method: z.string(),
-            investment_plan_id: z.string()
+            order_id: z.string(),
         })
     })).mutation(async (opts) => {
 
@@ -51,15 +102,19 @@ export const orderRoute = {
 
         const { data } = opts.input
 
+        const order = await db.user_order.findUnique({
+            where: {
+                id: data.order_id
+            }
+        })
+        if (!order) throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: "Order not found"
+        })
+
         const [investmentPlan, index] = await Promise.all([
             db.user_investment_plan.findUnique({
-                where: { id: data.investment_plan_id }, include: {
-                    package: {
-                        select: {
-                            currency: true
-                        }
-                    }
-                }
+                where: { id: order.user_investment_plan_id }
             }),
             axios.get(`${process.env.NEXTAUTH_URL}/api/trpc/token.getIndexPrice`)
         ])
@@ -68,30 +123,25 @@ export const orderRoute = {
             message: "This plan does not exist"
         })
 
-        const stxBtcAmount = (investmentPlan.total_price / index.data as number)
+        const stxBtcAmount = (investmentPlan.total_price / index.data.result.data as number)
 
-        if (!user) throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: "User Not found"
-        })
+        const now = new Date()
 
-        const createOrder = await db.user_order.create({
+        const updateOrder = await db.user_order.update({
+            where: {
+                id: opts.input.data.order_id
+            },
             data: {
-                ...data,
+                receipt: data.receipt,
+                method: data.method,
+                created_at: now,
                 amount: stxBtcAmount.toFixed(6),
-                status: ORDERSTATUS['processing'],
-                user_id: user,
-                user_investment_plan: {
-                    connect: {
-                        id: data.investment_plan_id
-                    }
-                }
+                status: ORDERSTATUS['processing']
             }
         })
-
-        if (!createOrder) throw new TRPCError({
+        if (!updateOrder) throw new TRPCError({
             code: 'BAD_REQUEST',
-            message: "Failed to create an order"
+            message: "Failed to pay order"
         })
 
         return true
@@ -193,6 +243,7 @@ export const orderRoute = {
         ])
 
         await db.$disconnect()
+
         return true
     }),
     toggleOrderConversation: publicProcedure.input(z.string()).mutation(async (opts) => {

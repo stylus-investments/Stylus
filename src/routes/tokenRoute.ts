@@ -1,3 +1,4 @@
+import db from "@/db/db";
 import { getMoralis } from "@/lib/moralis";
 import { getUserTokenData } from "@/lib/prices";
 import { getUserId, privy } from "@/lib/privy";
@@ -46,7 +47,7 @@ export const tokenRoute = {
 
             const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&precision=full`;
 
-            const [bitcoin, usdc] = await Promise.all([
+            const [bitcoin, usdc, conversionRate] = await Promise.all([
                 axios.get(url, {
                     headers: {
                         'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
@@ -55,8 +56,16 @@ export const tokenRoute = {
                 Moralis.EvmApi.token.getTokenPrice({
                     chain: process.env.CHAIN,
                     address: USDC_ADDRESS
+                }),
+                db.currency_conversion.findFirst({
+                    where: {
+                        currency: "PHP"
+                    }
                 })
             ])
+            if (!conversionRate) throw new TRPCError({
+                code: "NOT_FOUND"
+            })
 
             //BITCOIN
             const btc_shot = 50000
@@ -70,9 +79,6 @@ export const tokenRoute = {
             const usdc_delta = usdc_market / usdc_shot * 100
             const usdc_weight = (usdc_delta - 100) / 4
 
-            //ECPC
-            const ecpc_market = 1
-
             //weight sum
             const asset_weight = btc_weight + usdc_weight
             const decimal = asset_weight / 100;
@@ -80,7 +86,7 @@ export const tokenRoute = {
             //index price
             const index = 1 + 1 * decimal;
 
-            return index
+            return index * Number(conversionRate.conversion_rate)
 
         } catch (error: any) {
             console.log(error);
@@ -89,8 +95,6 @@ export const tokenRoute = {
                 message: error.message || "Something went wrong"
             })
         }
-
-
     })
 
 }

@@ -2,6 +2,7 @@
 import { caller } from '@/app/_trpc/server'
 import OrderMessageForm from '@/components/admin/order/order-message-form'
 import DashboardHeader from '@/components/dashboard/dashboard-header'
+import DashboardLinksFooter from '@/components/dashboard/dashboard-links-footer'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb'
 import { getUserId } from '@/lib/privy'
 import { redirect } from 'next/navigation'
@@ -26,6 +27,7 @@ const ClientOrderMesages = async ({ params }: Props) => {
     return (
         <div>
             <DashboardHeader currentPage='wallet' />
+            <DashboardLinksFooter currentPage='wallet' />
             <div className='padding flex flex-col pt-24 gap-5 w-full items-center'>
                 <Breadcrumb>
                     <BreadcrumbList>

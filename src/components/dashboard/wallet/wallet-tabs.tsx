@@ -2,11 +2,10 @@
 import React, { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import GuideAccordions from '../liquid-staking/guide-accordions'
-import OrderHistory from '../liquid-staking/order-history'
 import SnapshotHistory from '../grow-rewards/snapshot-history'
 import AssetsData from './assets-data'
 
-const tabList = ['Assets', 'Snapshots', 'Orders', 'Guides']
+const tabList = ['Assets', 'Snapshots', 'Guides']
 
 const WalletTabs = ({ assets }: {
     assets: {
@@ -37,9 +36,6 @@ const WalletTabs = ({ assets }: {
             </TabsContent>
             <TabsContent value="snapshots" className='w-full'>
                 <SnapshotHistory />
-            </TabsContent>
-            <TabsContent value="orders" className='w-full'>
-                <OrderHistory />
             </TabsContent>
             <TabsContent value="guides" className='w-full'>
                 <GuideAccordions />

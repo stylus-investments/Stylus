@@ -2,20 +2,31 @@
 import { trpc } from '@/app/_trpc/client'
 import { AlertDialog, AlertDialogContent, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ScanQr from './scan-qr'
 import VerifyOrder from './verify-order'
 import { toast } from 'sonner'
-import { Currency, user_investment_plan } from '@prisma/client'
+import { Currency } from '@prisma/client'
 import SelectPaymentMethod from './select-payment-method'
 
-const PayInvestmentPlan = ({ investment, currency }: { investment: user_investment_plan, currency: Currency }) => {
+interface Props {
+    investmentPrice: number
+    currency: Currency
+    orderID: string
+    investmentPlanID: string
+}
+
+const PayInvestmentPlan = ({
+    investmentPrice,
+    currency,
+    orderID,
+    investmentPlanID }: Props) => {
 
     const [open, setOpen] = useState(false)
 
     const [formData, setFormData] = useState({
         amount: '',
-        price: investment.total_price,
+        price: investmentPrice,
         method: '',
         receipt: '',
         status: 1
@@ -26,12 +37,11 @@ const PayInvestmentPlan = ({ investment, currency }: { investment: user_investme
         refetchInterval: formData.status === 1 && open ? 30000 : false
     })
 
-    const getUserOrder = trpc.order.getCurrentUserOrder.useQuery(undefined, {
-        refetchOnMount: false,
+    const updateOrder = trpc.order.payOrder.useMutation()
+
+    const refetchOrder = trpc.investment.retrieveSinglePlan.useQuery(investmentPlanID, {
         enabled: false
     })
-
-    const createOrder = trpc.order.createOrder.useMutation()
 
     const closeOrder = () => {
         setOpen(false)
@@ -41,23 +51,31 @@ const PayInvestmentPlan = ({ investment, currency }: { investment: user_investme
         setFormData(prev => ({ ...prev, status: prev.status - 1 }))
     }
 
+    useEffect(() => {
+        if (data && investmentPrice) {
+            const indexPrice = data
+            const amount = investmentPrice / indexPrice
+            setFormData(prev => ({ ...prev, amount: amount.toFixed(6) }))
+        }
+    }, [data, investmentPrice])
+
     const confirmOrder = async (e: React.MouseEvent) => {
         try {
             e.preventDefault()
 
             if (!confirmed) return toast.error("Confirm the transaction first.")
 
-            const result = await createOrder.mutateAsync({
+            const result = await updateOrder.mutateAsync({
                 data: {
                     receipt: formData.receipt,
                     method: formData.method,
-                    investment_plan_id: investment.id
+                    order_id: orderID
                 }
             })
 
             if (result) {
-                await getUserOrder.refetch()
-                toast.success("Success! order has been created.")
+                toast.success("Success!.")
+                refetchOrder.refetch()
                 setOpen(false)
 
             }
@@ -71,11 +89,12 @@ const PayInvestmentPlan = ({ investment, currency }: { investment: user_investme
         }
     }
 
+
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button className='w-full'>
-                    Create
+                <Button className='w-full h-7'>
+                    Pay Now
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className='w-full max-w-96 max-h-[600px] overflow-y-auto'>
@@ -96,7 +115,7 @@ const PayInvestmentPlan = ({ investment, currency }: { investment: user_investme
                     currency={currency}
                     confirmOrder={confirmOrder}
                     setConfirmed={setConfirmed}
-                    createOrderPending={createOrder.isPending}
+                    createOrderPending={updateOrder.isPending}
                     confirmed={confirmed}
                     formBack={formBack}
                 />}

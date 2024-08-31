@@ -11,12 +11,18 @@ import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, 
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
+import { caller } from '@/app/_trpc/server';
+import { ORDERSTATUS } from '@/constant/order';
+import PayInvestmentPlan from '../investment-plan/pay-investment';
 
-const OrderHistory = () => {
+const OrderHistory = ({ initialData }: {
+    initialData: Awaited<ReturnType<typeof caller['investment']['retrieveSinglePlan']>>
+}) => {
 
-    const { data, isLoading } = trpc.order.getCurrentUserOrder.useQuery(undefined, {
+    const { data, isLoading } = trpc.investment.retrieveSinglePlan.useQuery(initialData.id, {
         refetchOnMount: false,
-        refetchInterval: 10000
+        refetchInterval: 10000,
+        initialData
     })
 
     const [currentTable, setCurrentTable] = useState<user_order[] | undefined>(undefined)
@@ -25,7 +31,7 @@ const OrderHistory = () => {
 
     useEffect(() => {
 
-        setCurrentTable(getCurrentData(data))
+        setCurrentTable(getCurrentData(data.payments))
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, currentPage])
@@ -38,11 +44,11 @@ const OrderHistory = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow className='text-xs md:text-sm'>
-                                    <TableHead className='min-w-32'>Amount SAVE</TableHead>
+                                    <TableHead className='min-w-32'>Amount (STXBTC)</TableHead>
                                     <TableHead className='min-w-32'>Status</TableHead>
                                     <TableHead className=' min-w-52'>Payment Method</TableHead>
                                     <TableHead className='min-w-32'>Receipt</TableHead>
-                                    <TableHead className='min-w-32'>Messages</TableHead>
+                                    <TableHead className='min-w-32'>Operation</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -67,15 +73,24 @@ const OrderHistory = () => {
                                             </AlertDialog>
                                         </TableCell>
                                         <TableCell>
-                                            <Link href={`/dashboard/wallet/order-message/${order.id}`} className='w-full relative h-7'>
-                                                <Button className='h-full w-full'>
-                                                    Chat
-                                                </Button>
-                                                {order.user_unread_messages ?
-                                                    <div className=' absolute bg-destructive text-white px-2 py-1 shadow-2xl text-xs rounded-br-full rounded-t-full -right-4 -top-4'>{order.user_unread_messages}</div>
-                                                    : null
-                                                }
-                                            </Link>
+                                            {order.status === ORDERSTATUS['unpaid'] ?
+                                                <PayInvestmentPlan
+                                                    investmentPrice={initialData.total_price}
+                                                    orderID={order.id}
+                                                    currency="PHP"
+                                                    investmentPlanID={initialData.id}
+                                                />
+                                                :
+                                                <Link href={`/dashboard/wallet/order-message/${order.id}`} className='w-full relative h-7'>
+                                                    <Button className='h-full w-full'>
+                                                        Chat
+                                                    </Button>
+                                                    {order.user_unread_messages ?
+                                                        <div className=' absolute bg-destructive text-white px-2 py-1 shadow-2xl text-xs rounded-br-full rounded-t-full -right-4 -top-4'>{order.user_unread_messages}</div>
+                                                        : null
+                                                    }
+                                                </Link>
+                                            }
                                         </TableCell>
                                     </TableRow>
                                 )) :
@@ -85,8 +100,8 @@ const OrderHistory = () => {
                                 }
                             </TableBody>
                         </Table>
-                        <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>Save Order History</div>
-                        <TablePagination data={data || []} />
+                        <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>Order History</div>
+                        <TablePagination data={data.payments || []} />
                     </CardContent>
                 </Card >
             }
