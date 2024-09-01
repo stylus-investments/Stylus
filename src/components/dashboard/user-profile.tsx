@@ -89,7 +89,7 @@ const UserProfile = () => {
                     </div>
                     <div className='flex flex-col w-full gap-1.5'>
                         <Label htmlFor='mobile'>Phone Number</Label>
-                        <Input required type='number' placeholder='Email address' value={formData.mobile} name='mobile' onChange={handleChange} />
+                        <Input required type='number' placeholder='Phone Number' value={formData.mobile} name='mobile' onChange={handleChange} />
                     </div>
                     <div className='flex items-center gap-5'>
                         <div className='flex flex-col w-full gap-1.5'>

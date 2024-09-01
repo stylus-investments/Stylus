@@ -14,7 +14,6 @@ export const userRoute = {
             code: "UNAUTHORIZED"
         })
 
-        //retrieve user info
         const userInfo = await db.user_info.findUnique({
             where: { user_id: user }
         })
@@ -32,6 +31,7 @@ export const userRoute = {
                 privy.getUser(user),
                 db.referral_info.findUnique({ where: { referral_code: referalCode || "" } })
             ])
+
             const referal = inviter ? inviter.referral_code : process.env.VEGETA
 
             //create a initial user info
@@ -58,7 +58,24 @@ export const userRoute = {
                     }
                 })
             ])
-            if (!createInitialInfo || !createInitialReferralInfo) throw new TRPCError({
+
+            const createInitialReferralRewards = await db.referral_reward.create({
+                data: {
+                    reward: 0,
+                    user: {
+                        connect: {
+                            user_id: createInitialReferralInfo.user_id
+                        }
+                    },
+                    inviter_referral_info: {
+                        connect: {
+                            user_id: inviter?.user_id
+                        }
+                    }
+                }
+            })
+
+            if (!createInitialInfo || !createInitialReferralInfo || !createInitialReferralRewards) throw new TRPCError({
                 code: "BAD_REQUEST",
                 message: "Faild to create initial user info"
             })
@@ -66,11 +83,6 @@ export const userRoute = {
 
             return createInitialInfo
         }
-
-        const referralInfo = await db.referral_info.findUnique({ where: { user_id: userInfo.user_id } })
-        if (!referralInfo) throw new TRPCError({
-            code: "NOT_FOUND"
-        })
 
         return userInfo
 

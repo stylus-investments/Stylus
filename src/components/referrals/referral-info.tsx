@@ -36,11 +36,16 @@ const ReferralInfo = ({ initialData }: {
         enabled: false,
         refetchOnMount: false
     })
+    const getRewards = trpc.referral.getReferals.useQuery(undefined, {
+        enabled: false,
+        refetchOnMount: false
+    })
 
     const withdrawReferralReward = trpc.referral.withdrawReferralRewards.useMutation({
         onSuccess: () => {
             toast.success("Success! payout is requested.")
             refetch()
+            getRewards.refetch()
             getPayouts.refetch()
         },
         onError: (err) => {
@@ -90,11 +95,11 @@ const ReferralInfo = ({ initialData }: {
                         <div className='flex items-center gap-5'>
                             <div className='flex flex-col gap-1.5 w-full'>
                                 <Label >Total Rewards</Label>
-                                <Input value={`₱${data.total_reward}`} readOnly />
+                                <Input value={`₱ ${data.total_reward}`} readOnly />
                             </div>
                             <div className='flex flex-col gap-1.5 w-full'>
                                 <Label>Unclaimed Rewards</Label>
-                                <Input readOnly value={`₱${data.unclaimed_reward}`} />
+                                <Input readOnly value={`₱ ${data.unclaimed_reward}`} />
                             </div>
                         </div>
                         <div className='flex flex-col gap-1.5 w-full'>

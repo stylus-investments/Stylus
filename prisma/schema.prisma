@@ -157,7 +157,7 @@ model referral_reward {
   id                       Int           @id @default(autoincrement())
   reward                   Int
   user                     user_info     @relation(fields: [user_invited_id], references: [user_id])
-  user_invited_id          String
+  user_invited_id          String        @unique
   inviter_referral_info    referral_info @relation(fields: [inviter_referral_info_id], references: [user_id])
   inviter_referral_info_id String
 }

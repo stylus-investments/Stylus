@@ -165,10 +165,10 @@ export const orderRoute = {
             message: "Order not found"
         })
 
-        if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "This order is invalid or completed"
-        })
+        // if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
+        //     code: 'BAD_REQUEST',
+        //     message: "This order is invalid or completed"
+        // })
 
         const updateOrder = await db.user_order.update({
             where: { id: order.id },
@@ -184,15 +184,19 @@ export const orderRoute = {
         const secondaryInviterCommission = orderBasePrice * 0.02
 
         //give referrals commission
-        const user = await db.user_info.findUnique({ where: { user_id: order.user_id } })
-        if (!user) throw new TRPCError({
+        const primaryUser = await db.user_info.findUnique({
+            where: { user_id: order.user_id }, include: {
+                inviter_reward: true
+            }
+        })
+        if (!primaryUser) throw new TRPCError({
             code: "NOT_FOUND",
             message: "User not found"
         })
         //retrieve inviter
         const primaryInviter = await db.referral_info.findUnique({
             where: {
-                referral_code: user.inviter_referral_code
+                referral_code: primaryUser.inviter_referral_code
             }
         })
         if (!primaryInviter) throw new TRPCError({
@@ -204,6 +208,9 @@ export const orderRoute = {
         const secondaryUser = await db.user_info.findUnique({
             where: {
                 user_id: primaryInviter.user_id
+            },
+            include: {
+                inviter_reward: true,
             }
         })
         if (!secondaryUser) throw new TRPCError({
@@ -223,7 +230,7 @@ export const orderRoute = {
         })
 
         // Update their unclaimed_reward based on order.base_price
-        const [updateSecondaryInviter, updatePrimaryInviter] = await Promise.all([
+        const [updateSecondaryInviter, updatePrimaryInviter, updateSecondaryUserReferralReward, updatePrimaryserReferralReward] = await Promise.all([
 
             // Update the secondary inviter's unclaimed reward
             db.referral_info.update({
@@ -245,9 +252,28 @@ export const orderRoute = {
                     unclaimed_reward: primaryInviter.unclaimed_reward + primaryInviterCommission,
                     total_reward: primaryInviter.total_reward + primaryInviterCommission
                 }
-            })
+            }),
+
+            // Increase the secondary inviter's user referral reward
+            db.referral_reward.update({
+                where: {
+                    user_invited_id: secondaryUser.user_id
+                }, data: {
+                    reward: secondaryUser.inviter_reward[0].reward + secondaryInviterCommission
+                }
+            }),
+
+            // Increase the primary inviter's user referral reward
+            db.referral_reward.update({
+                where: {
+                    user_invited_id: primaryUser.user_id
+                }, data: {
+                    reward: primaryUser.inviter_reward[0].reward + primaryInviterCommission
+                }
+            }),
+
         ])
-        if (!updatePrimaryInviter || !updateSecondaryInviter) throw new TRPCError({
+        if (!updatePrimaryInviter || !updateSecondaryInviter || !updateSecondaryUserReferralReward || !updatePrimaryserReferralReward) throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Failed to update inviter unclaimed rewards"
         })
@@ -269,10 +295,10 @@ export const orderRoute = {
             message: "Order not found"
         })
 
-        if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "This order is invalid or completed"
-        })
+        // if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
+        //     code: 'BAD_REQUEST',
+        //     message: "This order is invalid or completed"
+        // })
 
         const updateOrder = await db.user_order.update({
             where: { id: order.id },
