@@ -9,6 +9,7 @@ import { PaymentMethods } from '@prisma/client';
 import TablePagination from '@/components/dashboard/table-pagination';
 import { caller } from '@/app/_trpc/server';
 import ConfirmPayout from './confirm-payout';
+import { ORDERSTATUS } from '@/constant/order';
 
 const PayoutRequestTable = ({ initialData }: {
     initialData: Awaited<ReturnType<typeof caller['referral']['getAllPayouts']>>
@@ -66,7 +67,7 @@ const PayoutRequestTable = ({ initialData }: {
                                             <TableCell>{payout.payment_account_number}</TableCell>
                                             <TableCell>{new Date(payout.created_at).toDateString()}</TableCell>
                                             <TableCell>
-                                                <ConfirmPayout payoutRequestData={payout} />
+                                                {payout.status !== ORDERSTATUS['completed'] && < ConfirmPayout payoutRequestData={payout} />}
                                             </TableCell>
                                         </TableRow>
                                     ))
