@@ -6,7 +6,6 @@ import { Button } from '../../ui/button'
 import useBalanceStore from '@/state/balanceStore'
 import { Eye, EyeOff } from 'lucide-react'
 import { Label } from '@/components/ui/label'
-import { toast } from 'sonner'
 import CreateInvestment from '../investment-plan/create-investment'
 import Link from 'next/link'
 
@@ -56,7 +55,7 @@ const BalancesHeader = ({ balances }: {
                 <CreateInvestment />
                 <Link href={'/dashboard/wallet/plans'} className='w-full'>
                     <Button className='w-full' variant={'secondary'}>
-                        Pay
+                        Plans
                     </Button>
                 </Link>
             </div>

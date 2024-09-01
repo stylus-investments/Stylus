@@ -20,9 +20,20 @@ export const investmentPlanRoute = {
 
         await rateLimiter.consume(1)
 
-        const user = await getUserId()
-        if (!user) throw new TRPCError({
+        const auth = await getUserId()
+        if (!auth) throw new TRPCError({
             code: "UNAUTHORIZED"
+        })
+
+        const user = await db.user_info.findUnique({ where: { user_id: auth } })
+        if (!user) throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found"
+        })
+
+        if (!user.first_name) throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Setup your profile first."
         })
 
         const { name, package_id, base_price, profit_protection, insurance, total_price } = opts.input
@@ -77,7 +88,12 @@ export const investmentPlanRoute = {
 
         const investmentPlan = await db.user_investment_plan.create({
             data: {
-                user_id: user, name, total_price: recalculateTotalPrice,
+                user: {
+                    connect: {
+                        user_id: user.user_id
+                    }
+                },
+                name, total_price: recalculateTotalPrice,
                 payment_count: (investmentPackage.duration * 12),
                 next_order_creation: nextMonth,
                 profit_protection, insurance,
@@ -98,7 +114,7 @@ export const investmentPlanRoute = {
         await db.user_order.create({
             data: {
                 amount: "Pay First",
-                user_id: user,
+                user_id: user.user_id,
                 status: ORDERSTATUS['unpaid'],
                 receipt: '/qrpay.webp',
                 method: PAYMENT_METHOD['GCASH'],

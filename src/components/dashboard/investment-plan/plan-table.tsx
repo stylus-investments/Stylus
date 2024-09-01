@@ -69,7 +69,7 @@ const UserPlansTable = ({ initialData }: {
                                     <TableCell>{plan.completed ? "Yes" : "No"}</TableCell>
                                     <TableCell>
                                         <Link href={`/dashboard/wallet/plans/${plan.id}`}>
-                                            <Button className='h-7'>Pay</Button>
+                                            <Button className='h-7'>View</Button>
                                         </Link>
                                     </TableCell>
                                 </TableRow>

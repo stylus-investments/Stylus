@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { AlertDialog, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog'
-import { CircleUserRound, CircleX, LoaderCircle } from 'lucide-react'
+import { CircleUserRound, CircleX, Copy, LoaderCircle } from 'lucide-react'
 import { Button } from '../ui/button'
 import { trpc } from '@/app/_trpc/client'
 import { toast } from 'sonner'
@@ -18,11 +18,10 @@ const UserProfile = () => {
         email: "",
         mobile: "",
         age: "",
-        birth_date: ""
+        birth_date: "",
     })
 
     const { data } = trpc.user.getCurrentUserInfo.useQuery(undefined, {
-        enabled: open,
         retry: false
     })
 
@@ -109,7 +108,6 @@ const UserProfile = () => {
                 </form >
             </AlertDialogContent>
         </AlertDialog>
-
     )
 }
 

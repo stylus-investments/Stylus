@@ -1,21 +1,19 @@
 'use client'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { usePrivy } from '@privy-io/react-auth';
 import { Button } from '@/components/ui/button';
-import { redirect } from 'next/navigation';
 
 
 const ConnectPage = () => {
 
-    const { login, user } = usePrivy();
+    const { login, user, ready } = usePrivy();
 
-    if (user) {
-        redirect('/dashboard/wallet')
+    if (ready && user) {
+        window.location.href = '/dashboard/wallet'
     }
 
     return (
         <div className='padding xl:container overflow-x-hidden xl:overflow-visible grid place-items-center h-screen'>
-            {/* <DashboardHeader currentPage='' /> */}
             <Button onClick={login}>Connect To Stylus</Button>
         </div>
     )

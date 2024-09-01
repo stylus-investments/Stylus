@@ -37,6 +37,7 @@ const WalletTabs = ({ assets }: {
             <TabsContent value="snapshots" className='w-full'>
                 <SnapshotHistory />
             </TabsContent>
+
             <TabsContent value="guides" className='w-full'>
                 <GuideAccordions />
             </TabsContent>

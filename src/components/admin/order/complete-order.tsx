@@ -38,7 +38,6 @@ const CompleteOrder = ({ orderID }: { orderID: string }) => {
                     <Button variant={'secondary'} className='w-full' onClick={() => setOpen(false)}>Cancel</Button>
                     <Button
                         disabled={isPending}
-                        variant={'destructive'}
                         onClick={async (e) => await mutateAsync(orderID)}
                         className='w-full'>{isPending ? <LoaderCircle size={18} className='animate-spin' /> : "Yes I'm Sure"}</Button>
                 </AlertDialogFooter>

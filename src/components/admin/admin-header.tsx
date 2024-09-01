@@ -21,6 +21,7 @@ const AdminHeader = () => {
         <div className='items-center gap-8 text-muted-foreground text-sm hidden lg:flex'>
             <Link className='hover:text-foreground' href={'/admin/order'}>Orders</Link>
             <Link className='hover:text-foreground' href={'/admin/package'}>Packages</Link>
+            <Link className='hover:text-foreground' href={'/admin/referrals'}>Referrals</Link>
             <Link className='hover:text-foreground' href={'/admin/snapshot'}>Snapshots</Link>
             <Link className='hover:text-foreground' href={'/admin/users'}>Users</Link>
             <Link className='hover:text-foreground' href={'/admin/'}>Admin</Link>
@@ -45,6 +46,7 @@ const AdminHeader = () => {
                 <div className='flex flex-col gap-2 text-muted-foreground'>
                     <Link href={'/admin/order'}>Orders</Link>
                     <Link href={'/admin/package'}>Packages</Link>
+                    <Link href={'/admin/referrals'}>Referrals</Link>
                     <Link href={'/admin/snapshot'}>Snapshots</Link>
                     <Link href={'/admin/users'}>Users</Link>
                     <Link href={'/admin/'}>Admin</Link>

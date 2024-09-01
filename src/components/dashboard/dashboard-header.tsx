@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Button } from '../ui/button'
 import { ToggleTheme } from '../ui/toggle-theme'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -18,9 +18,17 @@ import { redirect } from 'next/navigation'
 
 const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
-    const { user, logout, exportWallet } = usePrivy()
+    const { user, logout, exportWallet, authenticated, ready } = usePrivy()
 
     const { currency, setCurrency } = useBalanceStore()
+
+    useEffect(() => {
+
+        if (ready && !authenticated) {
+            redirect('/connect')
+        }
+
+    }, [user, ready, authenticated])
 
     const mobileScreen = (
         <nav className='lg:hidden flex items-center justify-between w-full'>

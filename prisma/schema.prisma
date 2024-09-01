@@ -61,6 +61,7 @@ model user_order {
 
 model user_investment_plan {
   id                         String                  @id @default(uuid())
+  user                       user_info               @relation(fields: [user_id], references: [user_id])
   user_id                    String
   name                       String
   base_price                 Int
@@ -121,14 +122,55 @@ model order_message {
 }
 
 model user_info {
-  user_id    String   @unique
-  wallet     String
-  first_name String
-  last_name  String
-  email      String
-  mobile     String
-  age        String
-  birth_date DateTime
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  user_id               String                 @id
+  wallet                String
+  first_name            String
+  last_name             String
+  email                 String
+  mobile                String
+  age                   String
+  birth_date            DateTime
+  created_at            DateTime               @default(now())
+  updated_at            DateTime               @updatedAt
+  inviter_referral_code String
+  investment_plans      user_investment_plan[]
+  referral_payout       referral_payout[]
+  inviter_reward        referral_reward[]
+}
+
+model referral_info {
+  user_id                String            @id
+  total_reward           Int               @default(0)
+  unclaimed_reward       Int               @default(0)
+  payment_method         PaymentMethods    @default(GCASH)
+  payment_account_name   String
+  payment_account_number String
+  reward_history         referral_reward[]
+  referral_code          String            @unique
+}
+
+enum PaymentMethods {
+  GCASH
+}
+
+model referral_reward {
+  id                       Int           @id @default(autoincrement())
+  reward                   Int
+  user                     user_info     @relation(fields: [user_invited_id], references: [user_id])
+  user_invited_id          String
+  inviter_referral_info    referral_info @relation(fields: [inviter_referral_info_id], references: [user_id])
+  inviter_referral_info_id String
+}
+
+model referral_payout {
+  id                     String         @id @default(uuid())
+  amount                 Int
+  status                 String
+  payment_method         PaymentMethods @default(GCASH)
+  payment_account_name   String
+  payment_account_number String
+  user                   user_info      @relation(fields: [user_id], references: [user_id])
+  user_id                String
+  created_at             DateTime       @default(now())
+  updated_at             DateTime       @updatedAt
 }

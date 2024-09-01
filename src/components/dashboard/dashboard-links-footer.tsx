@@ -12,7 +12,7 @@ const DashboardLinksFooter = ({ currentPage }: { currentPage: string }) => {
                 {dashboardLinks.map((link, i) => (
                     <Link href={link.link} key={i} className={`flex flex-col items-center cursor-pointer ${currentPage === link.label.toLocaleLowerCase() && "text-primary"} p-1 justify-center rounded-md w-full`}>
                         <FontAwesomeIcon icon={link.icon} width={18} height={18} className='text-lg p-1' />
-                        <Label className='font-normal text-xs'>{link.label}</Label>
+                        <Label className='font-normal text-xs cursor-pointer'>{link.label}</Label>
                     </Link>
                 ))}
             </div>

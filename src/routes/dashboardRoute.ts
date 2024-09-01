@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getCurrentBalance, getRewardsAccumulated, getUserTokenData } from "@/lib/prices";
 import { calculateBalanceArray } from "@/lib/balances";
 import { rateLimiter } from "@/lib/ratelimiter";
-import { getUserId } from "@/lib/privy";
+import { getUserId, privy } from "@/lib/privy";
 
 const saveTokenAddress = process.env.SAVE_ADDRESS as string
 const earnTokenAddress = process.env.EARN_ADDRESS as string
@@ -16,18 +16,17 @@ const svnTokenAddress = process.env.SVN_ADDRESS as string
 
 
 export const dashboardRoute = {
-    getWalletData: publicProcedure.input(z.object({
-        wallet_address: z.string()
-    })).query(async (opts) => {
+    getWalletData: publicProcedure.query(async (opts) => {
 
-        const userWalletAddress = opts.input.wallet_address
+        const auth = await getUserId()
 
-        const user = await getUserId()
-
-        if (!user || !userWalletAddress) throw new TRPCError({
+        if (!auth) throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "Login First."
         })
+
+        const user = await privy.getUser(auth)
+        const userWalletAddress = user.wallet?.address as string
 
         const [nextSnapshot, currentSnapshot, usdcPrice, currencyExchangeRate] = await Promise.all([
             db.snapshot.findMany({

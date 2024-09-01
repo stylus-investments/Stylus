@@ -2,7 +2,9 @@ import db from "@/db/db";
 import { getUserId, privy } from "@/lib/privy";
 import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
+import { cookies } from "next/headers";
 import { z } from "zod";
+import { generate } from 'voucher-code-generator'
 
 export const userRoute = {
     getCurrentUserInfo: publicProcedure.query(async () => {
@@ -13,11 +15,61 @@ export const userRoute = {
         })
 
         //retrieve user info
-        const userInfo = await db.user_info.findUnique({ where: { user_id: user } })
+        const userInfo = await db.user_info.findUnique({
+            where: { user_id: user }
+        })
 
-        if (!userInfo) throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "User doesn't have information set"
+        if (!userInfo) {
+
+            const referalCode = cookies().get("inviter")?.value || process.env.VEGETA
+
+            const userReferralCode = generate({
+                length: 8,
+                count: 1
+            })
+
+            const [getUser, inviter] = await Promise.all([
+                privy.getUser(user),
+                db.referral_info.findUnique({ where: { referral_code: referalCode || "" } })
+            ])
+            const referal = inviter ? inviter.referral_code : process.env.VEGETA
+
+            //create a initial user info
+            const [createInitialInfo, createInitialReferralInfo] = await Promise.all([
+                db.user_info.create({
+                    data: {
+                        first_name: "",
+                        last_name: "",
+                        email: "",
+                        inviter_referral_code: referal || "",
+                        mobile: "",
+                        age: "",
+                        birth_date: new Date(),
+                        user_id: user,
+                        wallet: getUser.wallet?.address || ""
+                    }
+                }),
+                db.referral_info.create({
+                    data: {
+                        user_id: user,
+                        payment_account_name: '',
+                        payment_account_number: '',
+                        referral_code: userReferralCode[0]
+                    }
+                })
+            ])
+            if (!createInitialInfo || !createInitialReferralInfo) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Faild to create initial user info"
+            })
+            if (referalCode) cookies().delete("inviter")
+
+            return createInitialInfo
+        }
+
+        const referralInfo = await db.referral_info.findUnique({ where: { user_id: userInfo.user_id } })
+        if (!referralInfo) throw new TRPCError({
+            code: "NOT_FOUND"
         })
 
         return userInfo
@@ -39,16 +91,17 @@ export const userRoute = {
             code: "UNAUTHORIZED"
         })
 
-        const getUser = await privy.getUser(user)
+        const getUser = await db.user_info.findUnique({ where: { user_id: user } })
+        if (!getUser) throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found"
+        })
 
         //update userinfo
-
-        const updateUserInfo = await db.user_info.upsert({
+        const updateUserInfo = await db.user_info.update({
             where: {
                 user_id: user
-            },
-            update: data,
-            create: { ...data, user_id: user, wallet: getUser.wallet?.address as string }
+            }, data
         })
         if (!updateUserInfo) throw new TRPCError({
             code: "BAD_REQUEST",
