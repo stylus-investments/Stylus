@@ -4,7 +4,6 @@ import { okayRes } from "@/lib/apiResponse";
 import { getTokenHolders } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import { rateLimiter } from "@/lib/ratelimiter";
-import { privy } from "@/lib/privy";
 import { getAuth } from "@/lib/nextAuth";
 import { z } from "zod";
 

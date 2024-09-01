@@ -1,6 +1,6 @@
 import { publicProcedure } from "@/trpc/trpc";
 import db from "@/db/db";
-import { getMoralis, getTokenHolders } from "@/lib/moralis";
+import { getMoralis } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import Moralis from "moralis";
 import { z } from "zod";
@@ -8,12 +8,7 @@ import { getCurrentBalance, getRewardsAccumulated, getUserTokenData } from "@/li
 import { calculateBalanceArray } from "@/lib/balances";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { getUserId, privy } from "@/lib/privy";
-
-const saveTokenAddress = process.env.SAVE_ADDRESS as string
-const earnTokenAddress = process.env.EARN_ADDRESS as string
-const usdcTokenAddress = process.env.USDC_ADDRESS as string
-const svnTokenAddress = process.env.SVN_ADDRESS as string
-
+import { EARN_ADDRESS, SAVE_ADDRESS, SVN_ADDRESS, USDC_ADDRESS } from "@/lib/token_address";
 
 export const dashboardRoute = {
     getWalletData: publicProcedure.query(async (opts) => {
@@ -39,15 +34,15 @@ export const dashboardRoute = {
                     created_at: "desc"
                 }
             }),
-            getUserTokenData(usdcTokenAddress, userWalletAddress, "USDC"),
+            getUserTokenData(USDC_ADDRESS, userWalletAddress, "USDC"),
             db.currency_conversion.findMany()
         ])
 
         const assets = await Promise.all([
-            getUserTokenData(saveTokenAddress, userWalletAddress, "SAVE"),
-            getUserTokenData(usdcTokenAddress, userWalletAddress, "USDC"),
-            getUserTokenData(earnTokenAddress, userWalletAddress, "EARN"),
-            getUserTokenData(svnTokenAddress, userWalletAddress, "SVN"),
+            getUserTokenData(SAVE_ADDRESS, userWalletAddress, "SAVE"),
+            getUserTokenData(USDC_ADDRESS, userWalletAddress, "USDC"),
+            getUserTokenData(EARN_ADDRESS, userWalletAddress, "EARN"),
+            getUserTokenData(SVN_ADDRESS, userWalletAddress, "SVN"),
         ])
         const currentBalance = getCurrentBalance({
             usdcPrice: usdcPrice.price,
@@ -104,7 +99,7 @@ export const dashboardRoute = {
                 address: userWalletAddress
             }),
             db.currency_conversion.findMany(),
-            getUserTokenData(usdcTokenAddress, userWalletAddress, "USDC"),
+            getUserTokenData(USDC_ADDRESS, userWalletAddress, "USDC"),
             db.user_snapshot.findMany({
                 where: { user_id: user },
                 orderBy: {
@@ -114,8 +109,8 @@ export const dashboardRoute = {
         ])
 
         const [earn, svn] = await Promise.all([
-            getUserTokenData(earnTokenAddress, userWalletAddress, "EARN"),
-            getUserTokenData(svnTokenAddress, userWalletAddress, "SVN"),
+            getUserTokenData(EARN_ADDRESS, userWalletAddress, "EARN"),
+            getUserTokenData(SVN_ADDRESS, userWalletAddress, "SVN"),
         ])
 
         const rewardsAccumulated = getRewardsAccumulated({
