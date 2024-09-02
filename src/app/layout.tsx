@@ -7,6 +7,8 @@ import { footerTexts } from "@/constant/footerTexts";
 import Privy from "@/components/providers/privy-provider";
 import { Analytics } from "@vercel/analytics/react"
 import SessionProviders from "@/components/providers/session-provider";
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 
 export const metadata: Metadata = {
   title: "Stylus",
@@ -38,6 +40,7 @@ export default function RootLayout({
           </TrpcProvider>
         </Privy>
         <Analytics />
+        <SpeedInsights />
       </SessionProviders>
     </html>
   );
