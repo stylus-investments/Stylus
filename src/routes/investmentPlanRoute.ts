@@ -202,7 +202,6 @@ export const investmentPlanRoute = {
                 updated_at: new Date(investmentPlan.updated_at).toISOString(),
                 payments: investmentPlan.payments.map(order => ({
                     ...order,
-                    closed: undefined,
                     created_at: new Date(order.created_at).toISOString(),
                     updated_at: new Date(order.updated_at).toISOString()
                 }))

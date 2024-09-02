@@ -2,6 +2,7 @@ import { ORDERSTATUS } from "@/constant/order";
 import db from "@/db/db";
 import { getAuth } from "@/lib/nextAuth";
 import { getUserId } from "@/lib/privy";
+import { rateLimiter } from "@/lib/ratelimiter";
 import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -115,6 +116,8 @@ export const referralsRoute = {
     })).mutation(async (opts) => {
         try {
 
+            await rateLimiter.consume(1)
+
             const auth = await getUserId()
             if (!auth) throw new TRPCError({ code: "UNAUTHORIZED" })
 
@@ -147,6 +150,8 @@ export const referralsRoute = {
 
         try {
 
+            await rateLimiter.consume(1)
+
             const auth = await getUserId()
             if (!auth) throw new TRPCError({
                 code: "UNAUTHORIZED"
@@ -161,9 +166,9 @@ export const referralsRoute = {
                 code: "NOT_FOUND",
                 message: "Referral user not found"
             })
-            if (referralInfo.unclaimed_reward < 100) throw new TRPCError({
+            if (!referralInfo.unclaimed_reward) throw new TRPCError({
                 code: "BAD_REQUEST",
-                message: "Minimum Payout is ₱100"
+                message: "Minimum Payout is 1 STXPHP"
             })
             if (!referralInfo.payment_account_name || !referralInfo.payment_account_number) throw new TRPCError({
                 code: "BAD_REQUEST",
@@ -287,6 +292,8 @@ export const referralsRoute = {
     confirmPayout: publicProcedure.input(z.string()).mutation(async (opts) => {
         try {
 
+            await rateLimiter.consume(1)
+
             const auth = await getAuth()
             if (!auth) throw new TRPCError({
                 code: "UNAUTHORIZED"
@@ -311,6 +318,27 @@ export const referralsRoute = {
             throw new TRPCError({
                 code: error.code || "INTERNAL_SERVER_ERROR",
                 message: error.message || "Server error"
+            })
+        } finally {
+            await db.$disconnect()
+        }
+    }),
+    distributeTokenReward: publicProcedure.query(async () => {
+        try {
+
+            await rateLimiter.consume(1)
+
+            const now = new Date()
+            if (now.getDate() !== 1) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "STXPHP Distribution only allowed in the first day of the month"
+            })
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code || "INTERNAL_SERVER_ERROR",
+                message: error.message || "Server Error"
             })
         } finally {
             await db.$disconnect()

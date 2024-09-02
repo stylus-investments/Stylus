@@ -18,7 +18,14 @@ export const orderMessageRoute = {
         const order = await db.user_order.findUnique({
             where: { id: orderID },
             include: {
-                order_message: true, user_investment_plan: {
+                order_message: {
+                    select: {
+                        content: true,
+                        is_image: true,
+                        sender: true,
+                    }
+                },
+                user_investment_plan: {
                     select: {
                         total_price: true,
                         package: {
@@ -106,7 +113,7 @@ export const orderMessageRoute = {
     updateUnreadMessage: publicProcedure.input(z.object({
         orderID: z.string(),
         sender: z.string()
-    })).query(async (opts) => {
+    })).mutation(async (opts) => {
 
         const { orderID, sender } = opts.input
 

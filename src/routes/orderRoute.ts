@@ -144,7 +144,7 @@ export const orderRoute = {
             message: "Failed to pay order"
         })
 
-        return true
+        return updateOrder
     }),
     completeOrder: publicProcedure.input(z.string()).mutation(async (opts) => {
 
@@ -165,10 +165,10 @@ export const orderRoute = {
             message: "Order not found"
         })
 
-        if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "This order is invalid or completed"
-        })
+        // if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
+        //     code: 'BAD_REQUEST',
+        //     message: "This order is invalid or completed"
+        // })
 
         const updateOrder = await db.user_order.update({
             where: { id: order.id },
@@ -295,10 +295,10 @@ export const orderRoute = {
             message: "Order not found"
         })
 
-        if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "This order is invalid or completed"
-        })
+        // if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
+        //     code: 'BAD_REQUEST',
+        //     message: "This order is invalid or completed"
+        // })
 
         const updateOrder = await db.user_order.update({
             where: { id: order.id },

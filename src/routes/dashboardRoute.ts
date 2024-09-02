@@ -8,7 +8,7 @@ import { getCurrentBalance, getRewardsAccumulated, getUserTokenData } from "@/li
 import { calculateBalanceArray } from "@/lib/balances";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { getUserId, privy } from "@/lib/privy";
-import { EARN_ADDRESS, SAVE_ADDRESS, SVN_ADDRESS, USDC_ADDRESS } from "@/lib/token_address";
+import { BASE_CHAIN_ID, EARN_ADDRESS, SAVE_ADDRESS, STXPHP_ADDRESS, SVN_ADDRESS, TEST_CHAIN_ID, USDC_ADDRESS } from "@/lib/token_address";
 
 export const dashboardRoute = {
     getWalletData: publicProcedure.query(async (opts) => {
@@ -34,15 +34,51 @@ export const dashboardRoute = {
                     created_at: "desc"
                 }
             }),
-            getUserTokenData(USDC_ADDRESS, userWalletAddress, "USDC"),
+            getUserTokenData({
+                tokenAddress: USDC_ADDRESS,
+                tokenName: "USDC",
+                chain: BASE_CHAIN_ID,
+                walletAddress: userWalletAddress
+
+            }),
             db.currency_conversion.findMany()
         ])
 
         const assets = await Promise.all([
-            getUserTokenData(SAVE_ADDRESS, userWalletAddress, "SAVE"),
-            getUserTokenData(USDC_ADDRESS, userWalletAddress, "USDC"),
-            getUserTokenData(EARN_ADDRESS, userWalletAddress, "EARN"),
-            getUserTokenData(SVN_ADDRESS, userWalletAddress, "SVN"),
+            getUserTokenData({
+                tokenAddress: SAVE_ADDRESS,
+                tokenName: "SAVE",
+                chain: BASE_CHAIN_ID,
+                walletAddress: userWalletAddress
+
+            }),
+            getUserTokenData({
+                tokenAddress: USDC_ADDRESS,
+                tokenName: "USDC",
+                chain: BASE_CHAIN_ID,
+                walletAddress: userWalletAddress
+
+            }),
+            getUserTokenData({
+                tokenAddress: EARN_ADDRESS,
+                tokenName: "EARN",
+                chain: BASE_CHAIN_ID,
+                walletAddress: userWalletAddress
+
+            }),
+            getUserTokenData({
+                tokenAddress: SVN_ADDRESS,
+                tokenName: "SVN",
+                chain: BASE_CHAIN_ID,
+                walletAddress: userWalletAddress
+
+            }),
+            // getUserTokenData({
+            //     tokenAddress: STXPHP_ADDRESS,
+            //     tokenName: "STXPHP",
+            //     chain: TEST_CHAIN_ID,
+            //     walletAddress: userWalletAddress
+            // }),
         ])
         const currentBalance = getCurrentBalance({
             usdcPrice: usdcPrice.price,
@@ -93,13 +129,14 @@ export const dashboardRoute = {
             code: "UNAUTHORIZED"
         })
 
-        const [userToken, currencyExchangeRate, usdcPrice, userSnapshots] = await Promise.all([
-            Moralis.EvmApi.token.getWalletTokenBalances({
-                chain: process.env.CHAIN,
-                address: userWalletAddress
-            }),
+        const [currencyExchangeRate, usdcPrice, userSnapshots] = await Promise.all([
             db.currency_conversion.findMany(),
-            getUserTokenData(USDC_ADDRESS, userWalletAddress, "USDC"),
+            getUserTokenData({
+                tokenAddress: USDC_ADDRESS,
+                tokenName: "USDC",
+                walletAddress: userWalletAddress,
+                chain: BASE_CHAIN_ID
+            }),
             db.user_snapshot.findMany({
                 where: { user_id: user },
                 orderBy: {
@@ -109,8 +146,18 @@ export const dashboardRoute = {
         ])
 
         const [earn, svn] = await Promise.all([
-            getUserTokenData(EARN_ADDRESS, userWalletAddress, "EARN"),
-            getUserTokenData(SVN_ADDRESS, userWalletAddress, "SVN"),
+            getUserTokenData({
+                tokenAddress: EARN_ADDRESS,
+                tokenName: "EARN",
+                walletAddress: userWalletAddress,
+                chain: BASE_CHAIN_ID
+            }),
+            getUserTokenData({
+                tokenAddress: SVN_ADDRESS,
+                tokenName: "SVN",
+                walletAddress: userWalletAddress,
+                chain: BASE_CHAIN_ID
+            }),
         ])
 
         const rewardsAccumulated = getRewardsAccumulated({

@@ -4,7 +4,8 @@ import { caller } from '@/app/_trpc/server'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import Link from 'next/link'
 
-const SinglePlanData = ({ initialData }: {
+const SinglePlanData = ({ initialData, user_id }: {
+    user_id: string
     initialData: Awaited<ReturnType<typeof caller['investment']['retrieveSinglePlan']>>
 }) => {
 
@@ -30,7 +31,7 @@ const SinglePlanData = ({ initialData }: {
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
-            <OrderHistory initialData={initialData} />
+            <OrderHistory initialData={initialData} user_id={user_id} />
         </div>
     )
 }

@@ -44,7 +44,7 @@ const ReferralsTable = () => {
                                     <TableHead className='min-w-40'>Name</TableHead>
                                     <TableHead className='min-w-28'>Total Plans</TableHead>
                                     <TableHead className='min-w-28'>Unpaid Plans</TableHead>
-                                    <TableHead className='min-w-28'>Reward</TableHead>
+                                    <TableHead className='min-w-28'>Reward (STXPHP)</TableHead>
                                     <TableHead className='min-w-32'>Operation</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -55,7 +55,7 @@ const ReferralsTable = () => {
                                             <TableCell>{user.first_name} {user.last_name}</TableCell>
                                             <TableCell>{user.totalPlans}</TableCell>
                                             <TableCell>{user.unpaidPlans}</TableCell>
-                                            <TableCell>₱{user.reward}</TableCell>
+                                            <TableCell>{user.reward}</TableCell>
                                             <TableCell>
                                                 <Button className='h-7' onClick={() => toast.error("Poke me daddy!")}>Poke!</Button>
                                             </TableCell>

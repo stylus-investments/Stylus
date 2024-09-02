@@ -24,7 +24,7 @@ const PlanOrdersPage = async ({ params }: {
         <div>
             <DashboardHeader currentPage='wallet' />
             <DashboardLinksFooter currentPage='wallet' />
-            <SinglePlanData initialData={retrievePlan} />
+            <SinglePlanData user_id={user} initialData={retrievePlan} />
         </div>
     )
 }

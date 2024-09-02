@@ -5,13 +5,18 @@ import { Button } from '@/components/ui/button'
 import { Ban, LoaderCircle } from 'lucide-react'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
+import { socket } from '@/lib/socket'
 
-const InvalidOrder = ({ orderID }: { orderID: string }) => {
+const InvalidOrder = ({ orderID }: {
+    orderID: string
+
+}) => {
 
     const [open, setOpen] = useState(false)
 
     const { mutateAsync, isPending } = trpc.order.invalidOrder.useMutation({
         onSuccess: () => {
+            socket.emit("update", { orderID, status: "invalid" })
             toast.success("Success! Order updated")
             setOpen(false)
         },
@@ -23,7 +28,7 @@ const InvalidOrder = ({ orderID }: { orderID: string }) => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <div className='flex flex-col gap-1 items-center p-2 hover:bg-muted text-muted-foreground hover:text-foreground rounded-full justify-center w-16 h-16 cursor-pointer'>
+                <div className='flex flex-col gap-1 items-center p-2 hover:bg-muted text-muted-foreground hover:text-foreground rounded-full justify-center min-w-16 h-16 cursor-pointer'>
                     <Ban size={20} />
                     <small>Invalid</small>
                 </div>

@@ -1,5 +1,4 @@
 'use client'
-import { trpc } from '@/app/_trpc/client'
 import TablePagination from '@/components/dashboard/table-pagination'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
@@ -7,18 +6,15 @@ import { TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell, T
 import usePaginationStore from '@/state/paginationStore'
 import { user_order } from '@prisma/client'
 import Image from 'next/image'
-import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
+import DisplayAdminMessages from './display-admin-message'
+import { socket } from '@/lib/socket'
 
 const OrderTable = ({ orders }: {
     orders: user_order[]
 }) => {
 
-    const { data, isLoading } = trpc.order.getAllOrder.useQuery(undefined, {
-        initialData: orders as any,
-        refetchOnMount: false,
-        refetchInterval: 10000
-    })
+    const [ordersData, setOrdersData] = useState(orders)
 
     const [currentTable, setCurrentTable] = useState<user_order[] | undefined>(undefined)
 
@@ -26,10 +22,32 @@ const OrderTable = ({ orders }: {
 
     useEffect(() => {
 
-        setCurrentTable(getCurrentData(data))
+        socket.connect()
+        socket.on("newOrder", (data) => {
+            setOrdersData(prev => [...prev!, data]);
+        })
+        socket.on("admin_unseen_messages", (data) => {
+            const orderID = data
+            setOrdersData(prev =>
+                prev.map(order =>
+                    order.id === orderID
+                        ? { ...order, admin_unread_messages: order.admin_unread_messages + 1 }
+                        : order
+                )
+            );
+        })
 
+        return () => {
+            socket.off('newOrder')
+            socket.off("admin_unseen_messages")
+            socket.disconnect()
+        }
+    }, [])
+
+    useEffect(() => {
+        setCurrentTable(getCurrentData(ordersData))
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data, currentPage])
+    }, [ordersData, currentPage])
     return (
         <div className='padding pt-28 flex flex-col gap-10'>
             <Table >
@@ -37,17 +55,19 @@ const OrderTable = ({ orders }: {
                 <TableHeader>
                     <TableRow>
                         <TableHead>Status</TableHead>
-                        <TableHead>Method</TableHead>
                         <TableHead>Amount (STXBTC)</TableHead>
                         <TableHead>Receipt</TableHead>
                         <TableHead>Messages</TableHead>
+                        <TableHead>Method</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {currentTable && currentTable.map(order => (
                         <TableRow key={order.id}>
                             <TableCell>{order.status}</TableCell>
-                            <TableCell>{order.method}</TableCell>
+                            <TableCell>
+                                <DisplayAdminMessages orderID={order.id} unseen={order.admin_unread_messages} />
+                            </TableCell>
                             <TableCell>{order.amount}</TableCell>
                             <TableCell>
                                 <AlertDialog>
@@ -64,22 +84,12 @@ const OrderTable = ({ orders }: {
                                     </AlertDialogContent>
                                 </AlertDialog>
                             </TableCell>
-                            <TableCell>
-                                <Link href={`/admin/order/message/${order.id}`} className='w-full relative h-7'>
-                                    <Button className='h-full w-full'>
-                                        Chat
-                                    </Button>
-                                    {order.admin_unread_messages ?
-                                        <div className=' absolute bg-destructive text-white px-2 py-1 shadow-2xl text-xs rounded-br-full rounded-t-full -right-4 -top-4'>{order.admin_unread_messages}</div>
-                                        : null
-                                    }
-                                </Link>
-                            </TableCell>
+                            <TableCell>{order.method}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
-            <TablePagination data={data || []} />
+            <TablePagination data={ordersData || []} />
         </div>
     )
 }

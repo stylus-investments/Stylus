@@ -114,10 +114,21 @@ const ReferralInfo = ({ initialData }: {
                             <Button
                                 disabled={withdrawReferralReward.isPending}
                                 className='w-full'
-                                onClick={async (e) => {
-                                    e.preventDefault()
+                                onClick={async () => {
+
+                                    const now = new Date();
+                                    const month = now.getMonth();
+
+                                    const lastDayOfMonth = new Date(now.getFullYear(), month + 1, 0).getDate();
+
+                                    const isQuarterEnd = (month === 2 || month === 5 || month === 8 || month === 11) && now.getDate() === lastDayOfMonth;
+
+                                    if (!isQuarterEnd) {
+                                        return toast.error("Withdrawals can only be made on the last day of the month at the end of each quarter.");
+                                    }
                                     if (data.unclaimed_reward < 100) return toast.error("Minimum payout is ₱100")
                                     await withdrawReferralReward.mutateAsync()
+
                                 }}>
                                 {withdrawReferralReward.isPending ? <LoaderCircle size={18} className='animate-spin' /> : "Withdraw"}
                             </Button>
@@ -144,7 +155,7 @@ const ReferralInfo = ({ initialData }: {
                         </div>
 
                         <div className='flex items-center gap-5 w-full pt-2'>
-                            <Button className='w-full' disabled={isPending}>{isPending ? <LoaderCircle className='animate-spin' size={18} /> : "Update"}</Button>
+                            <Button className='w-full lg:w-1/2 lg:ml-auto' disabled={isPending}>{isPending ? <LoaderCircle className='animate-spin' size={18} /> : "Update"}</Button>
                         </div>
                     </form>
                 </CardContent>

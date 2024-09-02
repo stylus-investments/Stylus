@@ -1,7 +1,12 @@
 import Moralis from "moralis";
 import { getMoralis } from "./moralis"
 
-const getUserTokenData = async (tokenAddress: string, walletAddress: string, tokenName: string) => {
+const getUserTokenData = async ({ tokenAddress, tokenName, chain, walletAddress }: {
+    tokenAddress: string
+    walletAddress: string
+    tokenName: string
+    chain: string
+}) => {
 
     try {
 
@@ -10,11 +15,11 @@ const getUserTokenData = async (tokenAddress: string, walletAddress: string, tok
         const [tokenData, userToken] = await Promise.all([
 
             Moralis.EvmApi.token.getTokenPrice({
-                chain: process.env.CHAIN,
+                chain: chain,
                 address: tokenAddress
             }),
             Moralis.EvmApi.token.getWalletTokenBalances({
-                chain: process.env.CHAIN,
+                chain: chain,
                 address: walletAddress
             })
         ])
@@ -26,7 +31,7 @@ const getUserTokenData = async (tokenAddress: string, walletAddress: string, tok
         const balance = Number(userTokenData?.balance ?? 0);
         const decimals = userTokenData?.decimals ?? 0;
         const formatBalance = decimals > 0 ? balance / (10 ** decimals) : 0;
-       const amount = isNaN(formatBalance) ? "0.0000" : formatBalance.toFixed(6);
+        const amount = isNaN(formatBalance) ? "0.0000" : formatBalance.toFixed(6);
 
         const formatTokenValue = decimals > 0 ? totalTokenValue / (10 ** decimals) : 0;
         const formattedValue = formatTokenValue.toFixed(6) || "0.000000";
@@ -44,7 +49,7 @@ const getUserTokenData = async (tokenAddress: string, walletAddress: string, tok
     } catch (error) {
 
         const userToken = await Moralis.EvmApi.token.getWalletTokenBalances({
-            chain: process.env.CHAIN,
+            chain: chain,
             address: walletAddress
         })
 
@@ -53,7 +58,7 @@ const getUserTokenData = async (tokenAddress: string, walletAddress: string, tok
         const balance = Number(userTokenData?.balance ?? 0);
         const decimals = userTokenData?.decimals ?? 0;
         const formatBalance = decimals > 0 ? balance / (10 ** decimals) : 0;
-       const amount = isNaN(formatBalance) ? "0.0000" : formatBalance.toFixed(6);
+        const amount = isNaN(formatBalance) ? "0.0000" : formatBalance.toFixed(6);
 
         return {
             amount,

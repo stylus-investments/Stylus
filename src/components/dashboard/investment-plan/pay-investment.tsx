@@ -2,12 +2,13 @@
 import { trpc } from '@/app/_trpc/client'
 import { AlertDialog, AlertDialogContent, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import React, { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import ScanQr from './scan-qr'
 import VerifyOrder from './verify-order'
 import { toast } from 'sonner'
 import { Currency } from '@prisma/client'
 import SelectPaymentMethod from './select-payment-method'
+import { socket } from '@/lib/socket'
 
 interface Props {
     investmentPrice: number
@@ -65,7 +66,7 @@ const PayInvestmentPlan = ({
 
             if (!confirmed) return toast.error("Confirm the transaction first.")
 
-            const result = await updateOrder.mutateAsync({
+            const data = await updateOrder.mutateAsync({
                 data: {
                     receipt: formData.receipt,
                     method: formData.method,
@@ -73,7 +74,8 @@ const PayInvestmentPlan = ({
                 }
             })
 
-            if (result) {
+            if (data) {
+                socket.emit("newOrder", data)
                 toast.success("Success!.")
                 refetchOrder.refetch()
                 setOpen(false)
@@ -88,6 +90,14 @@ const PayInvestmentPlan = ({
             alert("Something went wrong")
         }
     }
+
+    useEffect(() => {
+        socket.connect()
+
+        return () => {
+            socket.disconnect()
+        }
+    }, [])
 
 
     return (

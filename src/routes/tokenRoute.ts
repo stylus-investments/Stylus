@@ -3,7 +3,7 @@ import { getMoralis } from "@/lib/moralis";
 import { getUserTokenData } from "@/lib/prices";
 import { getUserId, privy } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
-import { USDC_ADDRESS } from "@/lib/token_address";
+import { BASE_CHAIN_ID, USDC_ADDRESS } from "@/lib/token_address";
 import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import axios from "axios";
@@ -30,7 +30,12 @@ export const tokenRoute = {
             message: "User not found"
         })
 
-        const price = await getUserTokenData(tokenAddress, user.wallet?.address as string, tokenName)
+        const price = await getUserTokenData({
+            tokenAddress,
+            tokenName,
+            walletAddress: user.wallet?.address as string,
+            chain: BASE_CHAIN_ID
+        })
 
         if (!price) throw new TRPCError({
             code: 'BAD_REQUEST'
@@ -54,7 +59,7 @@ export const tokenRoute = {
                     }
                 }),
                 Moralis.EvmApi.token.getTokenPrice({
-                    chain: process.env.CHAIN,
+                    chain: BASE_CHAIN_ID,
                     address: USDC_ADDRESS
                 }),
                 db.currency_conversion.findFirst({
