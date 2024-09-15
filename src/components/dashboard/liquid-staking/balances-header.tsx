@@ -52,12 +52,12 @@ const BalancesHeader = ({ balances }: {
                 })}
             </div>
             <div className='flex items-center self-center w-full xl:w-80 sm:gap-5 gap-5'>
-                <CreateInvestment />
                 <Link href={'/dashboard/wallet/plans'} className='w-full'>
-                    <Button className='w-full' variant={'secondary'}>
-                        Plans
+                    <Button className='w-full'>
+                        My Plan
                     </Button>
                 </Link>
+                <CreateInvestment />
             </div>
         </div >
     )

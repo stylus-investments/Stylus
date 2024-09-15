@@ -9,7 +9,6 @@ import { Analytics } from "@vercel/analytics/react"
 import SessionProviders from "@/components/providers/session-provider";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
-
 export const metadata: Metadata = {
   title: "Stylus",
   description: footerTexts.description,

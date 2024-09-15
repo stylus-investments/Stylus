@@ -73,12 +73,6 @@ export const dashboardRoute = {
                 walletAddress: userWalletAddress
 
             }),
-            // getUserTokenData({
-            //     tokenAddress: STXPHP_ADDRESS,
-            //     tokenName: "STXPHP",
-            //     chain: TEST_CHAIN_ID,
-            //     walletAddress: userWalletAddress
-            // }),
         ])
         const currentBalance = getCurrentBalance({
             usdcPrice: usdcPrice.price,

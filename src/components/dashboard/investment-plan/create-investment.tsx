@@ -81,7 +81,7 @@ const CreateInvestment = () => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button className='w-full'>Create</Button>
+                <Button className='w-full'>Create Plan</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>

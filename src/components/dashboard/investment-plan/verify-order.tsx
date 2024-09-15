@@ -25,7 +25,7 @@ const VerifyOrder = (props: {
 
     const { formData, currency, formBack, confirmed, setConfirmed, confirmOrder, createOrderPending } = props
 
-    const [showReceipt, setShowReceipt] = useState(false)
+    const [showReceipt, setShowReceipt] = useState(true)
 
     return (
         <div className='flex flex-col gap-5'>

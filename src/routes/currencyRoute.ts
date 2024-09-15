@@ -5,7 +5,6 @@ import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import axios from "axios";
 import { RateLimiterMemory } from "rate-limiter-flexible";
-import { generate } from "voucher-code-generator";
 
 const exchangeApiKey = process.env.CURRENCY_EXCHANGE_API_KEY
 
@@ -71,14 +70,5 @@ export const currencyRoute = {
         } finally {
             await db.$disconnect()
         }
-    }),
-    test: publicProcedure.query(async () => {
-
-        const userReferralCode = generate({
-            length: 11,
-            count: 1
-        })
-
-        return userReferralCode[0]
     })
 }

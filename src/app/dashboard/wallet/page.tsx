@@ -31,7 +31,7 @@ const WalletPage = async () => {
                 <Separator />
                 <Label className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-5 bg-card lg:text-base">LIQUID STAKING</Label>
             </div>
-            <StakingData snapshot={initialData.snapshot} saveBalance={initialData.balances.current_save_balance} />
+            {/* <StakingData snapshot={initialData.snapshot} saveBalance={initialData.balances.current_save_balance} /> */}
         </div>
     )
 }

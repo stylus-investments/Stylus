@@ -61,16 +61,28 @@ const OrderHistory = ({ initialData, user_id }: {
                     <Table>
                         <TableHeader>
                             <TableRow className='text-xs md:text-sm'>
+                                <TableHead className='min-w-32'>Operation</TableHead>
                                 <TableHead className='min-w-32'>Amount (STXBTC)</TableHead>
                                 <TableHead className='min-w-32'>Status</TableHead>
                                 <TableHead className=' min-w-52'>Payment Method</TableHead>
                                 <TableHead className='min-w-32'>Receipt</TableHead>
-                                <TableHead className='min-w-32'>Operation</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {currentTable && currentTable.length > 0 ? currentTable.map((order, i) => (
                                 <TableRow key={order.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
+                                    <TableCell>
+                                        {order.status === ORDERSTATUS['unpaid'] ?
+                                            <PayInvestmentPlan
+                                                investmentPrice={initialData.total_price}
+                                                orderID={order.id}
+                                                currency="PHP"
+                                                investmentPlanID={initialData.id}
+                                            />
+                                            :
+                                            <DisplayClientMessages orderID={order.id} unseen={order.user_unread_messages} />
+                                        }
+                                    </TableCell>
                                     <TableCell>{order.amount}</TableCell>
                                     <TableCell>{order.status}</TableCell>
                                     <TableCell>{order.method.toUpperCase()}</TableCell>
@@ -89,18 +101,7 @@ const OrderHistory = ({ initialData, user_id }: {
                                             </AlertDialogContent>
                                         </AlertDialog>
                                     </TableCell>
-                                    <TableCell>
-                                        {order.status === ORDERSTATUS['unpaid'] ?
-                                            <PayInvestmentPlan
-                                                investmentPrice={initialData.total_price}
-                                                orderID={order.id}
-                                                currency="PHP"
-                                                investmentPlanID={initialData.id}
-                                            />
-                                            :
-                                            <DisplayClientMessages orderID={order.id} unseen={order.user_unread_messages} />
-                                        }
-                                    </TableCell>
+
                                 </TableRow>
                             )) :
                                 <TableRow>

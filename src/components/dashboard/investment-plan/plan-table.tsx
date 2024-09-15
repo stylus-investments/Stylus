@@ -51,27 +51,25 @@ const UserPlansTable = ({ initialData }: {
                     <Table>
                         <TableHeader>
                             <TableRow className='text-xs md:text-sm'>
+                                <TableHead className='min-w-32'>Payments</TableHead>
                                 <TableHead className='min-w-32'>Plan Name</TableHead>
                                 <TableHead className='min-w-32'>Monthly Payment</TableHead>
                                 <TableHead className=' min-w-52'>Profit Protection</TableHead>
                                 <TableHead className='min-w-32'>Health Insurance</TableHead>
-                                <TableHead className='min-w-32'>Completed</TableHead>
-                                <TableHead className='min-w-32'>Payments</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {currentTable && currentTable.length > 0 ? currentTable.map((plan, i) => (
                                 <TableRow key={plan.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
-                                    <TableCell>{plan.name}</TableCell>
-                                    <TableCell>₱{plan.total_price}</TableCell>
-                                    <TableCell>{plan.profit_protection ? "Yes" : "No"}</TableCell>
-                                    <TableCell>{plan.insurance ? "Yes" : "No"}</TableCell>
-                                    <TableCell>{plan.completed ? "Yes" : "No"}</TableCell>
                                     <TableCell>
                                         <Link href={`/dashboard/wallet/plans/${plan.id}`}>
                                             <Button className='h-7'>View</Button>
                                         </Link>
                                     </TableCell>
+                                    <TableCell>{plan.name}</TableCell>
+                                    <TableCell>₱{plan.total_price}</TableCell>
+                                    <TableCell>{plan.profit_protection ? "Yes" : "No"}</TableCell>
+                                    <TableCell>{plan.insurance ? "Yes" : "No"}</TableCell>
                                 </TableRow>
                             )) :
                                 <TableRow>

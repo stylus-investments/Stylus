@@ -5,7 +5,7 @@ import GuideAccordions from '../liquid-staking/guide-accordions'
 import SnapshotHistory from '../grow-rewards/snapshot-history'
 import AssetsData from './assets-data'
 
-const tabList = ['Assets', 'Snapshots', 'Guides']
+const tabList = ['Assets', 'Status', 'Guides']
 
 const WalletTabs = ({ assets }: {
     assets: {
@@ -34,10 +34,9 @@ const WalletTabs = ({ assets }: {
             <TabsContent value="assets" className='w-full'>
                 <AssetsData assets={assets} />
             </TabsContent>
-            <TabsContent value="snapshots" className='w-full'>
+            <TabsContent value="status" className='w-full'>
                 <SnapshotHistory />
             </TabsContent>
-
             <TabsContent value="guides" className='w-full'>
                 <GuideAccordions />
             </TabsContent>
