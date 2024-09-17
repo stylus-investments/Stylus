@@ -24,36 +24,44 @@ export const referralsRoute = {
             })
 
             //retrieve all invited users
-            const invitedUsers = await db.user_info.findMany({
+            const invitedUsers = await db.referral_info.findMany({
                 where: {
                     inviter_referral_code: user.referral_code,
-                    first_name: {
-                        not: ''
+                    user_info: {
+                        first_name: {
+                            not: ""
+                        }
                     }
                 }, select: {
-                    first_name: true,
-                    last_name: true,
-                    created_at: true,
-                    inviter_reward: {
+                    user_info: {
                         select: {
-                            reward: true,
-                        }
-                    },
-                    investment_plans: {
-                        select: {
-                            id: true,
-                            payments: {
+                            first_name: true,
+                            last_name: true,
+                            created_at: true,
+                            inviter_reward: {
                                 select: {
-                                    status: true
+                                    reward: true,
+                                }
+                            },
+                            investment_plans: {
+                                select: {
+                                    id: true,
+                                    payments: {
+                                        select: {
+                                            status: true
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-
                 }
             })
 
-            return invitedUsers.map(user => {
+            return invitedUsers.map(referral_info => {
+
+                const user = referral_info.user_info
+
                 const totalPlans = user.investment_plans.length;
                 const unpaidPlans = user.investment_plans.reduce((total, plan) => {
                     const totalUnpaidOrder = plan.payments.reduce((total, order) => {
@@ -348,69 +356,37 @@ export const referralsRoute = {
 
         try {
 
-            // const user = await getUserId()
-            // if (!user) throw new TRPCError({
-            //     code: "UNAUTHORIZED",
-            // })
+            const user = await getUserId()
+            if (!user) throw new TRPCError({
+                code: "UNAUTHORIZED",
+            })
 
-            const top10UserIds = await db.$queryRaw`
-    SELECT r.user_id
-    FROM referral_info r
-    LEFT JOIN referral_reward rh ON r.user_id = rh.inviter_referral_info_id
-    GROUP BY r.user_id
-    ORDER BY COUNT(rh.inviter_referral_info_id) DESC
-    LIMIT 10
-` as { user_id: string }[]
-
-            const sortedUserIds = top10UserIds.map(result => result.user_id);
-            // Step 3: Fetch detailed user information including reward history
-            const [top10Users, userInfos] = await Promise.all([
-                db.referral_info.findMany({
-                    where: {
-                        user_id: {
-                            in: sortedUserIds
+            const topReferrals = await db.referral_info.findMany({
+                where: {
+                    user_info: {
+                        first_name: {
+                            not: ""
                         }
                     },
-                    select: {
-                        user_id: true,
-                        total_reward: true,
-                        reward_history: {
-                            select: {
-                                id: true
-                            }
+                 
+                },
+                orderBy: {
+                    total_invites: 'desc'
+                },
+                take: 10,
+                select: {
+                    total_invites: true,
+                    total_reward: true,
+                    user_info: {
+                        select: {
+                            first_name: true,
+                            last_name: true
                         }
                     }
-                }),
-                // Fetch additional user details from user_info
-                db.user_info.findMany({
-                    where: {
-                        user_id: {
-                            in: sortedUserIds
-                        }
-                    }, select: {
-                        first_name: true,
-                        last_name: true,
-                        user_id: true
-                    }
-                })
-            ])
+                }
+            })
 
-            const userInfoMap = new Map(userInfos.map(user => [user.user_id, user]));
-
-            const detailedResults = sortedUserIds.map(userId => {
-                const user = top10Users.find(u => u.user_id === userId);
-                const userInfo = userInfoMap.get(userId);
-
-                return {
-                    ...user,
-                    name: `${userInfo?.first_name} ${userInfo?.last_name}`,
-                    reward_history: undefined,
-                    total_reward: user?.total_reward,
-                    totalInvites: user?.reward_history.length
-                };
-            });
-
-            return detailedResults
+            return topReferrals
 
         } catch (error: any) {
             console.log(error);

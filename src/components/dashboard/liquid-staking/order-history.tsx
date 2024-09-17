@@ -13,13 +13,19 @@ import { ORDERSTATUS } from '@/constant/order';
 import PayInvestmentPlan from '../investment-plan/pay-investment';
 import DisplayClientMessages from '../messages/display-client-messages';
 import { socket } from '@/lib/socket';
+import { trpc } from '@/app/_trpc/client';
 
 const OrderHistory = ({ initialData, user_id }: {
     initialData: Awaited<ReturnType<typeof caller['investment']['retrieveSinglePlan']>>
     user_id: string
 }) => {
 
-    const [ordersData, setOrdersData] = useState(initialData.payments)
+    const { data } = trpc.investment.retrieveSinglePlan.useQuery(initialData.id, {
+        enabled: false,
+        initialData: initialData
+    })
+
+    const [ordersData, setOrdersData] = useState(data.payments)
     const [currentTable, setCurrentTable] = useState<user_order[] | undefined>(undefined)
     const { getCurrentData, currentPage } = usePaginationStore()
 
@@ -46,6 +52,10 @@ const OrderHistory = ({ initialData, user_id }: {
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    useEffect(() => {
+        setOrdersData(data.payments)
+    }, [data])
 
     useEffect(() => {
 

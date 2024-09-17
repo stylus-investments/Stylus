@@ -180,7 +180,9 @@ const OrderMessageForm = ({ initialData, sender }: {
                     <UploadButton
                         endpoint='orderReceiptUploader'
                         onClientUploadComplete={(res) => {
-                            sendMessage({ content: res[0].url, is_image: true })
+                            if (res) {
+                                sendMessage({ content: res[0].url, is_image: true })
+                            }
                         }}
                         content={{
                             button({ ready }) {

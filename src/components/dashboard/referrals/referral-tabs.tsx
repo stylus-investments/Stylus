@@ -3,8 +3,9 @@ import React, { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ReferralsTable from './referrals-table'
 import PayoutTables from './payout-tables'
+import TopReferralsTable from './top-referrals-table'
 
-const tabList = ['Rewards', 'Payouts']
+const tabList = ['Rewards', 'Payouts', 'Leaderboard']
 
 const ReferralTabs = () => {
 
@@ -25,6 +26,9 @@ const ReferralTabs = () => {
       </TabsContent>
       <TabsContent value="payouts" className='w-full'>
         <PayoutTables />
+      </TabsContent>
+      <TabsContent value="leaderboard" className='w-full'>
+        <TopReferralsTable />
       </TabsContent>
     </Tabs>
   )

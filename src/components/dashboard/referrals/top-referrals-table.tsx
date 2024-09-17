@@ -8,19 +8,19 @@ import { trpc } from '@/app/_trpc/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PaymentMethods } from '@prisma/client';
 
-const PayoutTables = () => {
+const TopReferralsTable = () => {
 
-    const { data, isLoading } = trpc.referral.getPayoutHistory.useQuery(undefined, {
+    const { data, isLoading } = trpc.referral.getReferralLeaderboard.useQuery(undefined, {
         refetchOnMount: false
     })
 
     const [currentTable, setCurrentTable] = useState<{
-        amount: string
-        status: string
-        payment_method: PaymentMethods
-        payment_account_name: string
-        payment_account_number: string
-        created_at: Date
+        user_info: {
+            first_name: string;
+            last_name: string;
+        };
+        total_reward: number;
+        total_invites: number;
     }[] | undefined>(undefined)
 
     const { getCurrentData, currentPage } = usePaginationStore()
@@ -34,30 +34,24 @@ const PayoutTables = () => {
 
     return (
         <>
-            {isLoading ? <PayoutTableSkeleton /> :
+            {isLoading ? <TopReferralsTablekeleton /> :
                 <Card>
                     <CardContent className='flex flex-col gap-2'>
                         <Table>
                             <TableHeader>
                                 <TableRow className='text-xs sm:text-sm'>
-                                    <TableHead className='min-w-32'>Amount</TableHead>
-                                    <TableHead className='min-w-32'>Status</TableHead>
-                                    <TableHead className='min-w-28'>Method</TableHead>
-                                    <TableHead className='min-w-40'>Account Name</TableHead>
-                                    <TableHead className='min-w-40'>Account Number</TableHead>
-                                    <TableHead className='min-w-40'>Date</TableHead>
+                                    <TableHead className='min-w-52'>Full Name</TableHead>
+                                    <TableHead className='min-w-32'>Total Invites</TableHead>
+                                    <TableHead className='min-w-32'>Total Reward</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {currentTable && currentTable.length > 0 ?
-                                    currentTable.map((payout, i) => (
+                                    currentTable.map((user, i) => (
                                         <TableRow key={i} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
-                                            <TableCell>₱{payout.amount}</TableCell>
-                                            <TableCell>{payout.status}</TableCell>
-                                            <TableCell>{payout.payment_method}</TableCell>
-                                            <TableCell>{payout.payment_account_name}</TableCell>
-                                            <TableCell>{payout.payment_account_number}</TableCell>
-                                            <TableCell>{new Date(payout.created_at).toDateString()}</TableCell>
+                                            <TableCell>{user.user_info.first_name} {user.user_info.last_name}</TableCell>
+                                            <TableCell>{user.total_invites}</TableCell>
+                                            <TableCell>{user.total_reward}</TableCell>
                                         </TableRow>
                                     ))
                                     :
@@ -67,7 +61,7 @@ const PayoutTables = () => {
                                 }
                             </TableBody>
                         </Table>
-                        <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>Payout History</div>
+                        <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>Referral Leadearboard</div>
                         <TablePagination data={data || []} />
                     </CardContent>
                 </Card>
@@ -76,7 +70,7 @@ const PayoutTables = () => {
     )
 }
 
-const PayoutTableSkeleton = () => {
+const TopReferralsTablekeleton = () => {
 
     return (
         <Card>
@@ -84,44 +78,32 @@ const PayoutTableSkeleton = () => {
                 <Table>
                     <TableHeader>
                         <TableRow className='text-xs sm:text-sm'>
-                            <TableHead className='min-w-32'>Amount</TableHead>
-                            <TableHead className='min-w-32'>Status</TableHead>
-                            <TableHead className='min-w-28'>Method</TableHead>
-                            <TableHead className='min-w-40'>Account Name</TableHead>
-                            <TableHead className='min-w-40'>Account Number</TableHead>
-                            <TableHead className='min-w-40'>Date</TableHead>
+                            <TableHead className='min-w-52'>Name</TableHead>
+                            <TableHead className='min-w-32'>Total Invites</TableHead>
+                            <TableHead className='min-w-32'>Total Reward</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {[1, 2, 3, 4, 5, 6, 7].map(skel => (
                             <TableRow key={skel} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
                                 <TableCell>
-                                    <Skeleton className='w-32 h-7' />
+                                    <Skeleton className='w-52 h-7' />
                                 </TableCell>
                                 <TableCell>
                                     <Skeleton className='w-32 h-7' />
                                 </TableCell>
                                 <TableCell>
-                                    <Skeleton className='w-28 h-7' />
-                                </TableCell>
-                                <TableCell>
-                                    <Skeleton className='w-40 h-7' />
-                                </TableCell>
-                                <TableCell>
-                                    <Skeleton className='w-40 h-7' />
-                                </TableCell>
-                                <TableCell>
-                                    <Skeleton className='w-40 h-7' />
+                                    <Skeleton className='w-32 h-7' />
                                 </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
-                <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>Payout History</div>
+                <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>Referral Leaderboard</div>
                 <TablePagination data={[]} />
             </CardContent>
         </Card>
     )
 }
 
-export default PayoutTables
+export default TopReferralsTable

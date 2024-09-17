@@ -156,8 +156,15 @@ export const orderRoute = {
         })
 
         const order = await db.user_order.findUnique({
-            where: { id: orderID }, include: {
-                user_investment_plan: true
+            where: { id: orderID }, select: {
+                id: true,
+                user_id: true,
+                user_investment_plan: {
+                    select: {
+                        id: true,
+                        base_price: true,
+                    }
+                }
             }
         })
         if (!order) throw new TRPCError({
@@ -184,9 +191,13 @@ export const orderRoute = {
         const secondaryInviterCommission = orderBasePrice * 0.02
 
         //give referrals commission
-        const primaryUser = await db.user_info.findUnique({
+        const primaryUser = await db.referral_info.findUnique({
             where: { user_id: order.user_id }, include: {
-                inviter_reward: true
+                user_info: {
+                    include: {
+                        inviter_reward: true
+                    }
+                }
             }
         })
         if (!primaryUser) throw new TRPCError({
@@ -194,46 +205,44 @@ export const orderRoute = {
             message: "User not found"
         })
 
+        //update total_invites in referral_info
+        const userCompletedOrders = await db.user_order.findMany({
+            where: {
+                user_id: order.user_id,
+                status: ORDERSTATUS['completed']
+            }
+        })
+
         if (primaryUser.inviter_referral_code) {
 
-            //retrieve inviter
-            const primaryInviter = await db.referral_info.findUnique({
-                where: {
-                    referral_code: primaryUser.inviter_referral_code
-                }
-            })
-            if (!primaryInviter) throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Inviter not found"
-            })
-
-            const [_, __, secondaryUser] = await Promise.all([
+            const [_, secondaryUser] = await Promise.all([
                 // Increase the primary inviter's user referral reward
                 db.referral_reward.update({
                     where: {
                         user_invited_id: primaryUser.user_id
                     }, data: {
-                        reward: primaryUser.inviter_reward[0].reward + primaryInviterCommission
+                        reward: primaryUser.user_info.inviter_reward[0].reward + primaryInviterCommission
                     }
                 }),
                 // Update the primary inviter's unclaimed reward
                 db.referral_info.update({
                     where: {
-                        user_id: primaryInviter.user_id
+                        referral_code: primaryUser.inviter_referral_code
                     },
                     data: {
-                        unclaimed_reward: primaryInviter.unclaimed_reward + primaryInviterCommission,
-                        total_reward: primaryInviter.total_reward + primaryInviterCommission
-                    }
-                }),
-
-                //retrieve secondary user
-                db.user_info.findUnique({
-                    where: {
-                        user_id: primaryInviter.user_id
+                        unclaimed_reward: {
+                            increment: primaryInviterCommission
+                        },
+                        total_reward: {
+                            increment: primaryInviterCommission
+                        }
                     },
                     include: {
-                        inviter_reward: true,
+                        user_info: {
+                            include: {
+                                inviter_reward: true
+                            }
+                        }
                     }
                 })
             ])
@@ -242,18 +251,22 @@ export const orderRoute = {
                 message: "Secondary User not found"
             })
 
-            if (secondaryUser.inviter_referral_code) {
+            if (userCompletedOrders.length === 1 && primaryUser.inviter_referral_code) {
 
-                //retireve secondary inviter
-                const secondaryInviter = await db.referral_info.findUnique({
+                await db.referral_info.update({
                     where: {
-                        referral_code: secondaryUser.inviter_referral_code
+                        referral_code: primaryUser.inviter_referral_code
+                    },
+                    data: {
+                        total_invites: {
+                            increment: 1
+                        }
                     }
                 })
-                if (!secondaryInviter) throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Seondary Inviter Not Found"
-                })
+            }
+
+
+            if (secondaryUser.inviter_referral_code) {
 
                 // Update their unclaimed_reward based on order.base_price
                 await Promise.all([
@@ -261,11 +274,15 @@ export const orderRoute = {
                     // Update the secondary inviter's unclaimed reward
                     db.referral_info.update({
                         where: {
-                            user_id: secondaryInviter.user_id
+                            referral_code: secondaryUser.inviter_referral_code
                         },
                         data: {
-                            unclaimed_reward: secondaryInviter.unclaimed_reward + secondaryInviterCommission,
-                            total_reward: secondaryInviter.total_reward + secondaryInviterCommission
+                            unclaimed_reward: {
+                                increment: secondaryInviterCommission
+                            },
+                            total_reward: {
+                                increment: secondaryInviterCommission
+                            }
                         }
                     }),
 
@@ -274,11 +291,29 @@ export const orderRoute = {
                         where: {
                             user_invited_id: secondaryUser.user_id
                         }, data: {
-                            reward: secondaryUser.inviter_reward[0].reward + secondaryInviterCommission
+                            reward: {
+                                increment: secondaryInviterCommission
+                            }
                         }
                     }),
                 ])
+
+
+                if (userCompletedOrders.length === 1 && secondaryUser.inviter_referral_code) {
+
+                    await db.referral_info.update({
+                        where: {
+                            referral_code: secondaryUser.inviter_referral_code
+                        },
+                        data: {
+                            total_invites: {
+                                increment: 1
+                            }
+                        }
+                    })
+                }
             }
+
         }
 
         return true

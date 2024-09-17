@@ -76,7 +76,7 @@ const PayInvestmentPlan = ({
 
             if (data) {
                 socket.emit("newOrder", data)
-                toast.success("Success!.")
+                toast.success("Success!")
                 refetchOrder.refetch()
                 setOpen(false)
 

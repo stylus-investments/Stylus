@@ -35,36 +35,34 @@ export const userRoute = {
             const referal = inviter ? inviter.referral_code : process.env.VEGETA
 
             //create a initial user info
-            const [createInitialInfo, createInitialReferralInfo] = await Promise.all([
-                db.user_info.create({
-                    data: {
-                        first_name: "",
-                        last_name: "",
-                        email: "",
-                        inviter_referral_code: referal || "",
-                        mobile: "",
-                        age: "",
-                        birth_date: new Date(),
-                        user_id: user,
-                        wallet: getUser.wallet?.address || ""
+            const createInitialInfo = await db.user_info.create({
+                data: {
+                    first_name: "",
+                    last_name: "",
+                    id_image: [''],
+                    email: "",
+                    mobile: "",
+                    age: "",
+                    birth_date: new Date(),
+                    user_id: user,
+                    wallet: getUser.wallet?.address || "",
+                    referral_info: {
+                        create: {
+                            referral_code: userReferralCode[0],
+                            payment_account_name: "",
+                            payment_account_number: "",
+                            inviter_referral_code: referal || ""
+                        }
                     }
-                }),
-                db.referral_info.create({
-                    data: {
-                        user_id: user,
-                        payment_account_name: '',
-                        payment_account_number: '',
-                        referral_code: userReferralCode[0]
-                    }
-                })
-            ])
+                }
+            })
 
             const createInitialReferralRewards = await db.referral_reward.create({
                 data: {
                     reward: 0,
                     user: {
                         connect: {
-                            user_id: createInitialReferralInfo.user_id
+                            user_id: createInitialInfo.user_id
                         }
                     },
                     inviter_referral_info: {
@@ -75,16 +73,30 @@ export const userRoute = {
                 }
             })
 
-            if (!createInitialInfo || !createInitialReferralInfo || !createInitialReferralRewards) throw new TRPCError({
+            if (!createInitialInfo || !createInitialReferralRewards) throw new TRPCError({
                 code: "BAD_REQUEST",
                 message: "Faild to create initial user info"
             })
             if (referalCode) cookies().delete("inviter")
 
-            return createInitialInfo
+            const data = {
+                ...createInitialInfo,
+                birth_date: createInitialInfo.birth_date.toISOString(),
+                id_image: createInitialInfo.id_image as string[]
+            }
+
+            return data
+
+
         }
 
-        return userInfo
+        const data = {
+            ...userInfo,
+            birth_date: userInfo.birth_date.toISOString(),
+            id_image: userInfo.id_image as string[]
+        }
+
+        return data
 
     }),
     updateUserInfo: publicProcedure.input(z.object({
@@ -93,6 +105,7 @@ export const userRoute = {
         email: z.string(),
         mobile: z.string(),
         age: z.string(),
+        id_image: z.string().array(),
         birth_date: z.string(),
     })).mutation(async (opts) => {
 

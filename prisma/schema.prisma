@@ -36,7 +36,7 @@ model user_snapshot {
   updated_at  DateTime @updatedAt
   user_id     String
   snapshot_id Int
-  snapshot    snapshot @relation(fields: [snapshot_id], references: [id])
+  snapshot    snapshot @relation(fields: [snapshot_id], references: [id], onDelete: Cascade)
 
   @@index([snapshot_id], map: "user_snapshot_snapshot_id_fkey")
 }
@@ -55,13 +55,13 @@ model user_order {
   created_at              DateTime             @default(now())
   updated_at              DateTime             @updatedAt
   order_message           order_message[]
-  user_investment_plan    user_investment_plan @relation(fields: [user_investment_plan_id], references: [id])
+  user_investment_plan    user_investment_plan @relation(fields: [user_investment_plan_id], references: [id], onDelete: Cascade)
   user_investment_plan_id String
 }
 
 model user_investment_plan {
   id                         String                  @id @default(uuid())
-  user                       user_info               @relation(fields: [user_id], references: [user_id])
+  user                       user_info               @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   user_id                    String
   name                       String
   base_price                 Int
@@ -72,7 +72,7 @@ model user_investment_plan {
   profit_protection          Boolean                 @default(false) // Optional for 10-year plans
   insurance                  Boolean                 @default(false) // Optional for 10 and 20-year plans
   payments                   user_order[]
-  package                    investment_plan_package @relation(fields: [investment_plan_package_id], references: [id])
+  package                    investment_plan_package @relation(fields: [investment_plan_package_id], references: [id], onDelete: Cascade)
   investment_plan_package_id String
   created_at                 DateTime                @default(now())
   updated_at                 DateTime                @updatedAt
@@ -116,29 +116,38 @@ model order_message {
   is_image   Boolean
   seen       Boolean    @default(false)
   created_at DateTime   @default(now())
-  user_order user_order @relation(fields: [order_id], references: [id])
+  user_order user_order @relation(fields: [order_id], references: [id], onDelete: Cascade)
 
   @@index([order_id], map: "order_message_order_id_fkey")
 }
 
 model user_info {
-  user_id               String                 @id
-  wallet                String
-  first_name            String
-  last_name             String
-  email                 String
-  mobile                String
-  age                   String
-  birth_date            DateTime
-  created_at            DateTime               @default(now())
-  updated_at            DateTime               @updatedAt
-  inviter_referral_code String
-  investment_plans      user_investment_plan[]
-  referral_payout       referral_payout[]
-  inviter_reward        referral_reward[]
+  user_id          String                 @id
+  wallet           String
+  status           ProfileStatus          @default(PENDING)
+  first_name       String
+  last_name        String
+  email            String
+  mobile           String
+  age              String
+  id_image         Json
+  birth_date       DateTime
+  created_at       DateTime               @default(now())
+  updated_at       DateTime               @updatedAt
+  investment_plans user_investment_plan[]
+  referral_payout  referral_payout[]
+  inviter_reward   referral_reward[]
+  referral_info    referral_info[]
+}
+
+enum ProfileStatus {
+  PENDING
+  VERIFIED
+  INVALID
 }
 
 model referral_info {
+  user_info              user_info         @relation(fields: [user_id], references: [user_id])
   user_id                String            @id
   total_reward           Int               @default(0)
   unclaimed_reward       Int               @default(0)
@@ -146,6 +155,8 @@ model referral_info {
   payment_account_name   String
   payment_account_number String
   reward_history         referral_reward[]
+  total_invites          Int               @default(0)
+  inviter_referral_code  String
   referral_code          String            @unique
 }
 
@@ -156,9 +167,9 @@ enum PaymentMethods {
 model referral_reward {
   id                       Int           @id @default(autoincrement())
   reward                   Int
-  user                     user_info     @relation(fields: [user_invited_id], references: [user_id])
+  user                     user_info     @relation(fields: [user_invited_id], references: [user_id], onDelete: Cascade)
   user_invited_id          String        @unique
-  inviter_referral_info    referral_info @relation(fields: [inviter_referral_info_id], references: [user_id])
+  inviter_referral_info    referral_info @relation(fields: [inviter_referral_info_id], references: [user_id], onDelete: Cascade)
   inviter_referral_info_id String
 }
 
@@ -169,7 +180,7 @@ model referral_payout {
   payment_method         PaymentMethods @default(GCASH)
   payment_account_name   String
   payment_account_number String
-  user                   user_info      @relation(fields: [user_id], references: [user_id])
+  user                   user_info      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   user_id                String
   created_at             DateTime       @default(now())
   updated_at             DateTime       @updatedAt
