@@ -193,90 +193,93 @@ export const orderRoute = {
             code: "NOT_FOUND",
             message: "User not found"
         })
-        //retrieve inviter
-        const primaryInviter = await db.referral_info.findUnique({
-            where: {
-                referral_code: primaryUser.inviter_referral_code
+
+        if (primaryUser.inviter_referral_code) {
+
+            //retrieve inviter
+            const primaryInviter = await db.referral_info.findUnique({
+                where: {
+                    referral_code: primaryUser.inviter_referral_code
+                }
+            })
+            if (!primaryInviter) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Inviter not found"
+            })
+
+            const [_, __, secondaryUser] = await Promise.all([
+                // Increase the primary inviter's user referral reward
+                db.referral_reward.update({
+                    where: {
+                        user_invited_id: primaryUser.user_id
+                    }, data: {
+                        reward: primaryUser.inviter_reward[0].reward + primaryInviterCommission
+                    }
+                }),
+                // Update the primary inviter's unclaimed reward
+                db.referral_info.update({
+                    where: {
+                        user_id: primaryInviter.user_id
+                    },
+                    data: {
+                        unclaimed_reward: primaryInviter.unclaimed_reward + primaryInviterCommission,
+                        total_reward: primaryInviter.total_reward + primaryInviterCommission
+                    }
+                }),
+
+                //retrieve secondary user
+                db.user_info.findUnique({
+                    where: {
+                        user_id: primaryInviter.user_id
+                    },
+                    include: {
+                        inviter_reward: true,
+                    }
+                })
+            ])
+            if (!secondaryUser) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Secondary User not found"
+            })
+
+            if (secondaryUser.inviter_referral_code) {
+
+                //retireve secondary inviter
+                const secondaryInviter = await db.referral_info.findUnique({
+                    where: {
+                        referral_code: secondaryUser.inviter_referral_code
+                    }
+                })
+                if (!secondaryInviter) throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Seondary Inviter Not Found"
+                })
+
+                // Update their unclaimed_reward based on order.base_price
+                await Promise.all([
+
+                    // Update the secondary inviter's unclaimed reward
+                    db.referral_info.update({
+                        where: {
+                            user_id: secondaryInviter.user_id
+                        },
+                        data: {
+                            unclaimed_reward: secondaryInviter.unclaimed_reward + secondaryInviterCommission,
+                            total_reward: secondaryInviter.total_reward + secondaryInviterCommission
+                        }
+                    }),
+
+                    // Increase the secondary inviter's user referral reward
+                    db.referral_reward.update({
+                        where: {
+                            user_invited_id: secondaryUser.user_id
+                        }, data: {
+                            reward: secondaryUser.inviter_reward[0].reward + secondaryInviterCommission
+                        }
+                    }),
+                ])
             }
-        })
-        if (!primaryInviter) throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Inviter not found"
-        })
-
-        //retrieve secondary user
-        const secondaryUser = await db.user_info.findUnique({
-            where: {
-                user_id: primaryInviter.user_id
-            },
-            include: {
-                inviter_reward: true,
-            }
-        })
-        if (!secondaryUser) throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Secondary User not found"
-        })
-
-        //retireve secondary inviter
-        const secondaryInviter = await db.referral_info.findUnique({
-            where: {
-                referral_code: secondaryUser.inviter_referral_code
-            }
-        })
-        if (!secondaryInviter) throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Seondary Inviter Not Found"
-        })
-
-        // Update their unclaimed_reward based on order.base_price
-        const [updateSecondaryInviter, updatePrimaryInviter, updateSecondaryUserReferralReward, updatePrimaryserReferralReward] = await Promise.all([
-
-            // Update the secondary inviter's unclaimed reward
-            db.referral_info.update({
-                where: {
-                    user_id: secondaryInviter.user_id
-                },
-                data: {
-                    unclaimed_reward: secondaryInviter.unclaimed_reward + secondaryInviterCommission,
-                    total_reward: secondaryInviter.total_reward + secondaryInviterCommission
-                }
-            }),
-
-            // Update the primary inviter's unclaimed reward
-            db.referral_info.update({
-                where: {
-                    user_id: primaryInviter.user_id
-                },
-                data: {
-                    unclaimed_reward: primaryInviter.unclaimed_reward + primaryInviterCommission,
-                    total_reward: primaryInviter.total_reward + primaryInviterCommission
-                }
-            }),
-
-            // Increase the secondary inviter's user referral reward
-            db.referral_reward.update({
-                where: {
-                    user_invited_id: secondaryUser.user_id
-                }, data: {
-                    reward: secondaryUser.inviter_reward[0].reward + secondaryInviterCommission
-                }
-            }),
-
-            // Increase the primary inviter's user referral reward
-            db.referral_reward.update({
-                where: {
-                    user_invited_id: primaryUser.user_id
-                }, data: {
-                    reward: primaryUser.inviter_reward[0].reward + primaryInviterCommission
-                }
-            }),
-
-        ])
-        if (!updatePrimaryInviter || !updateSecondaryInviter || !updateSecondaryUserReferralReward || !updatePrimaryserReferralReward) throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Failed to update inviter unclaimed rewards"
-        })
+        }
 
         return true
     }),
