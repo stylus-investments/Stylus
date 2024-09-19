@@ -42,7 +42,7 @@ const StakingData = ({ snapshot, saveBalance }: {
                                     <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    Your active stake in SAVE tokens as recorded in the last snapshot.
+                                    Your active stake in SBTC tokens as recorded in the last snapshot.
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
@@ -52,7 +52,7 @@ const StakingData = ({ snapshot, saveBalance }: {
                         <span className='text-xs' >
                             .{(Number(snapshot.current_stake)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }).split('.')[1]}
                         </span>
-                        <span className='ml-2'>SAVE</span>
+                        <span className='ml-2'>SBTC</span>
                     </h1>
                     <small className='text-muted-foreground'>Last snapshot balance</small>
                 </div>
@@ -72,7 +72,7 @@ const StakingData = ({ snapshot, saveBalance }: {
                                     <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    Current amount of SAVE tokens in your crypto wallet.
+                                    Current amount of SBTC tokens in your crypto wallet.
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>

@@ -3,12 +3,11 @@ import React from 'react'
 import { usePrivy } from '@privy-io/react-auth';
 import { Button } from '@/components/ui/button';
 
-
 const ConnectPage = () => {
 
-    const { login, user, ready } = usePrivy();
+    const { login, user, ready, authenticated } = usePrivy();
 
-    if (ready && user) {
+    if (ready && user?.hasAcceptedTerms && authenticated) {
         window.location.href = '/dashboard/wallet'
     }
 

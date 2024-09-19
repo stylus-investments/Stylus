@@ -8,7 +8,7 @@ import { getCurrentBalance, getRewardsAccumulated, getUserTokenData } from "@/li
 import { calculateBalanceArray } from "@/lib/balances";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { getUserId, privy } from "@/lib/privy";
-import { BASE_CHAIN_ID, EARN_ADDRESS, SAVE_ADDRESS, STXPHP_ADDRESS, SVN_ADDRESS, TEST_CHAIN_ID, USDC_ADDRESS } from "@/lib/token_address";
+import { BASE_CHAIN_ID, EARN_ADDRESS, SBTC, SVN_ADDRESS, USDC_ADDRESS } from "@/lib/token_address";
 
 export const dashboardRoute = {
     getWalletData: publicProcedure.query(async (opts) => {
@@ -46,7 +46,7 @@ export const dashboardRoute = {
 
         const assets = await Promise.all([
             getUserTokenData({
-                tokenAddress: SAVE_ADDRESS,
+                tokenAddress: SBTC,
                 tokenName: "SAVE",
                 chain: BASE_CHAIN_ID,
                 walletAddress: userWalletAddress
@@ -195,7 +195,7 @@ export const dashboardRoute = {
                 chain: process.env.CHAIN,
                 order: "ASC",
                 address: "session user wallet",
-                contractAddresses: [process.env.SAVE_ADDRESS as string]
+                contractAddresses: [process.env.SBTC as string]
             })
 
             if (!getGoTokenBalanceHistory) throw new TRPCError({

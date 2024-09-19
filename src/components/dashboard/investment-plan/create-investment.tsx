@@ -2,12 +2,14 @@
 import { trpc } from '@/app/_trpc/client'
 import { AlertDialog, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { CircleCheckBig, LoaderCircle } from 'lucide-react'
+import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -15,12 +17,14 @@ const CreateInvestment = () => {
 
     const [open, setOpen] = useState(false)
 
+    const [selectedDuration, setSelectedDuration] = useState(0)
     const { data } = trpc.package.getAllPackages.useQuery('USER')
 
     const createInvestmentPlan = trpc.investment.createUserInvestmentPlan.useMutation({
         onSuccess: () => {
             toast.success("Success! investment plan created.")
             setOpen(false)
+            window.location.href = '/dashboard/wallet/plans'
         },
         onError: (err) => {
             toast.error(err.message)
@@ -100,7 +104,13 @@ const CreateInvestment = () => {
                         </div>
                         <div className='flex flex-col gap-1.5 w-full'>
                             <Label>Duration</Label>
-                            <Select required value={formData.package_id} onValueChange={(val) => setFormData(prev => ({ ...prev, package_id: val, base_price: 0 }))}>
+                            <Select required value={formData.package_id} onValueChange={(val) => {
+
+                                const selectedPackage = data?.find(pkg => pkg.id === val)?.duration
+                                setSelectedDuration(selectedPackage || 0)
+                                setFormData(prev => ({ ...prev, package_id: val, base_price: 0 }))
+                            }
+                            }>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select Package" />
                                 </SelectTrigger>
@@ -130,6 +140,7 @@ const CreateInvestment = () => {
                         <Separator />
                         <Label className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-5 bg-card lg:text-base">PERKS</Label>
                     </div>
+                    {formData.package_id && <Link target='_blank' href={'/'} className='text-primary underline text-sm font-bold'>Full Disclosure of Perks</Link>}
                     {data && data.length > 0 && formData.package_id && data.map(obj => {
                         if (obj.id === formData.package_id) {
                             return (
@@ -206,7 +217,12 @@ const CreateInvestment = () => {
                             Payment</Label>
                         <h1 className='text-xl font-[1000]'>₱ {formData.total_price}</h1>
                     </div>
-                    <AlertDialogFooter className=' w-full flex-row flex items-center gap-10 pt-5 border-t'>
+                    <Separator />
+                    {formData.base_price ? <div className='flex w-full items-center gap-5'>
+                        <Checkbox id='agree' required className='w-5 h-5' />
+                        <Label htmlFor='agree'>With this plan, I agree to be paying {formData.total_price} PHP per month for the next {selectedDuration} years with the agreed benefits previewed on the plan creation</Label>
+                    </div> : null}
+                    <AlertDialogFooter className=' w-full flex-row flex items-center gap-10'>
                         <Button className='w-full' variant={'secondary'} type='button' onClick={() => setOpen(false)}>Close</Button>
                         <Button className='w-full' disabled={createInvestmentPlan.isPending}>{createInvestmentPlan.isPending ? <LoaderCircle size={18} className='animate-spin' /> : "Create"}</Button>
                     </AlertDialogFooter>

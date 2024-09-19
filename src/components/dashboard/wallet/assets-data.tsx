@@ -2,7 +2,6 @@ import React from 'react'
 import Image from 'next/image';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent } from '@/components/ui/card';
 const AssetsData = ({ assets }: {
   assets: {
     symbol: string;
