@@ -11,7 +11,7 @@ const SinglePlanData = ({ initialData, user_id }: {
 
     return (
 
-        <div className='pt-28 padding flex flex-col gap-10'>
+        <div className='py-28 padding flex flex-col gap-10'>
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>

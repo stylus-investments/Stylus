@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { AlertDialog, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog'
-import { CircleCheck, CircleUserRound, LoaderCircle, UploadCloud } from 'lucide-react'
+import { CircleCheck, CircleCheckBig, CircleOff, CircleUserRound, Clock, LoaderCircle, UploadCloud } from 'lucide-react'
 import { Button } from '../ui/button'
 import { trpc } from '@/app/_trpc/client'
 import { toast } from 'sonner'
@@ -69,6 +69,34 @@ const UserProfile = () => {
         if (data) setFormData({ ...data, birth_date: new Date(data.birth_date).toISOString().split("T")[0] })
     }, [data])
 
+    const returnStatus = () => {
+        if (data?.status) {
+            switch (data.status) {
+                case "INVALID":
+                    return (
+                        <Button variant={'destructive'} className='flex items-center text-base gap-2'>
+                            <CircleOff size={18} />
+                            Invalid
+                        </Button>
+                    )
+                case "PENDING":
+                    return (
+                        <Button variant={'secondary'} className='flex items-center text-base gap-2'>
+                            <Clock size={18} />
+                            Pending Verification
+                        </Button>
+                    )
+                case "VERIFIED":
+                    return (
+                        <Button className='flex items-center text-base gap-2'>
+                            <CircleCheckBig size={18} />
+                            Verified
+                        </Button>
+                    )
+            }
+        }
+    }
+
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
@@ -78,7 +106,10 @@ const UserProfile = () => {
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Profile Information</AlertDialogTitle>
+                    <AlertDialogTitle className='flex items-center w-full justify-between'>
+                        <h1>Profile Info</h1>
+                        {data?.first_name && returnStatus()}
+                    </AlertDialogTitle>
                 </AlertDialogHeader>
                 <form onSubmit={updateOrCreateUserInfo} className='flex flex-col gap-5 max-h-[500px] overflow-y-auto p-5'>
                     <div className='flex flex-col w-full gap-1.5'>
@@ -135,7 +166,7 @@ const UserProfile = () => {
                                     }}
                                     onUploadError={(error: Error) => {
                                         // Do something with the error.
-                                        toast.error(`ERROR! ${error.message}`);
+                                        toast.error(`Please upload only 2 images: one for the front of the ID and one for the back.`);
                                     }}
                                     appearance={{
                                         button: 'bg-muted text-foreground w-auto',

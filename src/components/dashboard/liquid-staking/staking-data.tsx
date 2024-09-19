@@ -1,6 +1,6 @@
 import { Label } from '@/components/ui/label'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { faLock, faFlag, faSackDollar, faCircleInfo, faHandHoldingDollar, faDollarSign, faPesoSign } from '@fortawesome/free-solid-svg-icons'
+import { faLock, faFlag, faSackDollar, faCircleInfo } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
 import SnapshotTimer from './SnapshotTimer'

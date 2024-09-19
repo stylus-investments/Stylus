@@ -110,21 +110,36 @@ export const investmentPlanRoute = {
             message: "Faild to create investment plan"
         })
 
-        //create initialOrder
-        await db.user_order.create({
-            data: {
-                amount: "Pay First",
+        const durationInYears = investmentPackage.duration;
+        const totalMonths = durationInYears * 12;
+        const ordersData = Array.from({ length: totalMonths }, (_, i) => {
+            const orderDate = new Date();
+            orderDate.setMonth(orderDate.getMonth() + i);
+            orderDate.setHours(0, 0, 0, 0);
+
+            let status;
+            if (i === 0) {
+                status = ORDERSTATUS['unpaid']; // First order
+            } else if (i === 1) {
+                status = ORDERSTATUS['upcoming']; // Second order
+            } else {
+                status = ORDERSTATUS['inactive']; // All other orders
+            }
+
+            return {
+                amount: status, // Adjust as needed
                 user_id: user.user_id,
-                status: ORDERSTATUS['unpaid'],
+                status,
                 receipt: '/qrpay.webp',
                 method: PAYMENT_METHOD['GCASH'],
-                user_investment_plan: {
-                    connect: {
-                        id: investmentPlan.id
-                    }
-                }
-            }
-        })
+                user_investment_plan_id: investmentPlan.id,
+                created_at: orderDate
+            };
+        });
+        // Use createMany for batch insertion
+        await db.user_order.createMany({
+            data: ordersData,
+        });
 
         await db.$disconnect()
 
@@ -187,7 +202,11 @@ export const investmentPlanRoute = {
             const investmentPlan = await db.user_investment_plan.findUnique({
                 where: { id: opts.input },
                 include: {
-                    payments: true
+                    payments: {
+                        orderBy: {
+                            created_at: 'asc'
+                        }
+                    }
                 }
             })
             if (!investmentPlan) throw new TRPCError({
@@ -195,16 +214,25 @@ export const investmentPlanRoute = {
                 message: "Plan not found"
             })
 
+            // Separate unpaid order and sort the rest
+            const unpaidOrder = investmentPlan.payments.find(order => order.status === ORDERSTATUS['unpaid'])
+            const otherOrders = investmentPlan.payments.filter(order => order.status !== ORDERSTATUS['unpaid']).sort((a, b) => {
+                return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+            }).map(order => ({
+                ...order,
+                created_at: new Date(order.created_at).toISOString(),
+                updated_at: new Date(order.updated_at).toISOString(),
+            }))
             return {
                 ...investmentPlan,
                 created_at: new Date(investmentPlan.created_at).toISOString(),
                 next_order_creation: new Date(investmentPlan.next_order_creation).toISOString(),
                 updated_at: new Date(investmentPlan.updated_at).toISOString(),
-                payments: investmentPlan.payments.map(order => ({
-                    ...order,
-                    created_at: new Date(order.created_at).toISOString(),
-                    updated_at: new Date(order.updated_at).toISOString()
-                }))
+                payments: unpaidOrder ? [{
+                    ...unpaidOrder,
+                    created_at: new Date(unpaidOrder.created_at).toISOString(),
+                    updated_at: new Date(unpaidOrder.updated_at).toISOString(),
+                }, ...otherOrders] : otherOrders // Add unpaid first if it exists
             }
 
         } catch (error) {

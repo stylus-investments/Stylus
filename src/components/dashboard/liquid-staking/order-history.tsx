@@ -74,7 +74,7 @@ const OrderHistory = ({ initialData, user_id }: {
                                 <TableHead className='min-w-32'>Operation</TableHead>
                                 <TableHead className='min-w-32'>Amount (STXBTC)</TableHead>
                                 <TableHead className='min-w-32'>Status</TableHead>
-                                <TableHead className=' min-w-52'>Payment Method</TableHead>
+                                <TableHead className=' min-w-52'>Date</TableHead>
                                 <TableHead className='min-w-32'>Receipt</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -90,12 +90,13 @@ const OrderHistory = ({ initialData, user_id }: {
                                                 investmentPlanID={initialData.id}
                                             />
                                             :
-                                            <DisplayClientMessages orderID={order.id} unseen={order.user_unread_messages} />
+                                            order.status === ORDERSTATUS['upcoming'] ? "upcoming" : order.status === ORDERSTATUS['inactive'] ? "inactive" :
+                                                <DisplayClientMessages orderID={order.id} unseen={order.user_unread_messages} />
                                         }
                                     </TableCell>
-                                    <TableCell>{order.amount}</TableCell>
+                                    <TableCell>{order.amount === ORDERSTATUS['inactive'] ? "N/A" : order.amount}</TableCell>
                                     <TableCell>{order.status}</TableCell>
-                                    <TableCell>{order.method.toUpperCase()}</TableCell>
+                                    <TableCell>{new Date(order.created_at).toDateString()}</TableCell>
                                     <TableCell>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
