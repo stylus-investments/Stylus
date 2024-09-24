@@ -12,7 +12,7 @@ function OrderTimer({ created_at, status }: { created_at: Date, status: string }
                 return <Clock size={20} />;
             case ORDERSTATUS['invalid']:
                 return <Ban size={20} />;
-            case ORDERSTATUS['completed']:
+            case ORDERSTATUS['paid']:
                 return <CircleCheckBig size={20} />;
             default:
                 return <Clock size={20} />;
@@ -51,13 +51,13 @@ function OrderTimer({ created_at, status }: { created_at: Date, status: string }
 
     return (
         <div className={`text-sm text-foreground flex items-center gap-1.5 absolute -bottom-6 rounded-lg shadow 
-        ${status === ORDERSTATUS["processing"] ? "shadow-foreground" : status === ORDERSTATUS["completed"] ? "shadow-primary" : "shadow-destructive"} 
+        ${status === ORDERSTATUS["processing"] ? "shadow-foreground" : status === ORDERSTATUS["paid"] ? "shadow-primary" : "shadow-destructive"} 
         px-5 bg-secondary py-2 left-1/2 translate-x-[-50%]`}>
             {status === ORDERSTATUS['processing'] ? (
                 <>
                     {timeLeft > 0 ? formatTime(timeLeft) : <Skeleton className='w-20 h-8' />} {returnIcon()}
                 </>
-            ) : status === ORDERSTATUS['completed'] ? (
+            ) : status === ORDERSTATUS['paid'] ? (
                 <>
                     Completed {returnIcon()}
                 </>

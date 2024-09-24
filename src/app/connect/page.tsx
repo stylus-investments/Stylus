@@ -7,7 +7,7 @@ const ConnectPage = () => {
 
     const { login, user, ready, authenticated } = usePrivy();
 
-    if (ready && user?.hasAcceptedTerms && authenticated) {
+    if (ready && user?.hasAcceptedTerms && authenticated && user.wallet?.address) {
         window.location.href = '/dashboard/wallet'
     }
 

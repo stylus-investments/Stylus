@@ -67,7 +67,7 @@ const PayoutRequestTable = ({ initialData }: {
                                             <TableCell>{payout.payment_account_number}</TableCell>
                                             <TableCell>{new Date(payout.created_at).toDateString()}</TableCell>
                                             <TableCell>
-                                                {payout.status !== ORDERSTATUS['completed'] && < ConfirmPayout payoutRequestData={payout} />}
+                                                {payout.status !== ORDERSTATUS['paid'] && < ConfirmPayout payoutRequestData={payout} />}
                                             </TableCell>
                                         </TableRow>
                                     ))

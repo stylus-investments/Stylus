@@ -9,6 +9,7 @@ import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import DisplayAdminMessages from './display-admin-message'
 import { socket } from '@/lib/socket'
+import { ORDERSTATUS } from '@/constant/order'
 
 const OrderTable = ({ orders }: {
     orders: user_order[]
@@ -49,15 +50,15 @@ const OrderTable = ({ orders }: {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ordersData, currentPage])
     return (
-        <div className='padding pt-28 flex flex-col gap-10'>
+        <div className='padding py-28 flex flex-col gap-10'>
             <Table >
                 <TableCaption>A list of orders.</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Status</TableHead>
                         <TableHead>Amount (STXBTC)</TableHead>
-                        <TableHead>Receipt</TableHead>
                         <TableHead>Messages</TableHead>
+                        <TableHead>Receipt</TableHead>
                         <TableHead>Method</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -65,10 +66,10 @@ const OrderTable = ({ orders }: {
                     {currentTable && currentTable.map(order => (
                         <TableRow key={order.id}>
                             <TableCell>{order.status}</TableCell>
-                            <TableCell>
-                                <DisplayAdminMessages orderID={order.id} unseen={order.admin_unread_messages} />
-                            </TableCell>
                             <TableCell>{order.amount}</TableCell>
+                            <TableCell>
+                                {order.status !== (ORDERSTATUS['inactive'] || ORDERSTATUS['upcoming']) ? <DisplayAdminMessages orderID={order.id} unseen={order.admin_unread_messages} /> : order.status}
+                            </TableCell>
                             <TableCell>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>

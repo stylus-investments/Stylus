@@ -20,7 +20,7 @@ const Page = async ({ params }: Props) => {
 
     return (
         <>
-            <AdminHeader />
+            <AdminHeader currentPage='snapshot' />
             <UserSnapshotTable
                 snapshotData={userSnapshots}
                 snapshotID={snapshotID} />

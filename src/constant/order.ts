@@ -1,9 +1,8 @@
 const ORDERSTATUS = {
     'unpaid': 'unpaid',
     'invalid': 'invalid',
-    'cancelled': 'cancelled',
     'processing': 'processing',
-    'completed': 'completed',
+    'paid': 'paid',
     'upcoming': "upcoming",
     "inactive": "inactive"
 }

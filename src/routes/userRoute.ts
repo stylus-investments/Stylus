@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { generate } from 'voucher-code-generator'
+import { getAuth } from "@/lib/nextAuth";
 
 export const userRoute = {
     getCurrentUserInfo: publicProcedure.query(async () => {
@@ -134,5 +135,61 @@ export const userRoute = {
         })
 
         return true
+    }),
+    getAllUsers: publicProcedure.input(
+        z.object({
+            page: z.string().min(1).optional().default('1'),
+            status: z.enum(['PENDING', 'VERIFIED', 'INVALID']).nullable().default(null),
+        })
+    ).query(async ({ input }) => {
+
+        const { page, status } = input, limit = 10
+
+        try {
+
+            const auth = await getAuth()
+            if (!auth) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+
+            const filter = status ? { status } : {};
+
+            const users = await db.user_info.findMany({
+                where: filter,
+                orderBy: { created_at: 'desc' },
+                skip: (Number(page) - 1) * limit, // Skip records for pagination
+                take: limit,              // Limit the number of records returned
+            });
+
+            const totalUsers = await db.user_info.count({ where: filter });
+
+            const hasNextPage = (Number(page) * limit) < totalUsers;
+            const hasPreviousPage = Number(page) > 1;
+            const totalPages = Math.ceil(totalUsers / limit);
+
+            return {
+                data: users,
+                pagination: {
+                    total: totalUsers,
+                    page,
+                    hasNextPage,
+                    hasPreviousPage,
+                    totalPages
+                },
+                filter: {
+                    status,
+                }
+            };
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code || "INTERNAL_SERVER_ERROR",
+                message: error.message || "Server error"
+            })
+        } finally {
+            await db.$disconnect()
+        }
+
     })
 }

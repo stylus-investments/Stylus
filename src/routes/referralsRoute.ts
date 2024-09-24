@@ -65,7 +65,7 @@ export const referralsRoute = {
                 const totalPlans = user.investment_plans.length;
                 const unpaidPlans = user.investment_plans.reduce((total, plan) => {
                     const totalUnpaidOrder = plan.payments.reduce((total, order) => {
-                        if (order.status !== ORDERSTATUS['completed']) {
+                        if (order.status !== ORDERSTATUS['paid']) {
                             return total + 1;
                         }
                         return total;
@@ -311,7 +311,7 @@ export const referralsRoute = {
                 where: {
                     id: opts.input
                 }, data: {
-                    status: ORDERSTATUS['completed']
+                    status: ORDERSTATUS['paid']
                 }
             })
             if (!updatePayout) throw new TRPCError({

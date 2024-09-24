@@ -11,7 +11,7 @@ const AdminSnapshotPage = async () => {
 
     return (
         <>
-            <AdminHeader />
+            <AdminHeader currentPage='snapshot' />
             <SnapshotsTable snapshotData={snapshots} />
         </>
 

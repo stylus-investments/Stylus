@@ -7,7 +7,7 @@ import React from 'react'
 const Page = () => {
     return (
         <>
-            <AdminHeader />
+            <AdminHeader currentPage='package' />
             <div className='flex flex-col gap-10 py-28 padding'>
                 <div className='w-full border-b pb-2 flex items-center justify-between'>
                     <Label className='text-xl'>Package List</Label>

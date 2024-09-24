@@ -43,7 +43,6 @@ const TablePagination = ({ data }: { data: any[] }) => {
                     </Button>
                 </div>
             </div>
-
         </footer>
     )
 }

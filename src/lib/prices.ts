@@ -8,9 +8,12 @@ const getUserTokenData = async ({ tokenAddress, tokenName, chain, walletAddress 
     chain: string
 }) => {
 
+    console.log("walletAddress", walletAddress)
+
     try {
 
         await getMoralis()
+
 
         const [tokenData, userToken] = await Promise.all([
 

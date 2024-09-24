@@ -8,7 +8,11 @@ import { LogOut, Menu } from 'lucide-react'
 import Link from 'next/link'
 import { ToggleTheme } from '../ui/toggle-theme'
 
-const AdminHeader = () => {
+const pages = ['Order', 'Package', 'Referral', 'Snapshot', 'User', 'Admin']
+
+const AdminHeader = ({ currentPage }: {
+    currentPage: string
+}) => {
 
     const session = useSession({
         required: true,
@@ -19,12 +23,9 @@ const AdminHeader = () => {
 
     const largeScreen = (
         <div className='items-center gap-8 text-muted-foreground text-sm hidden lg:flex'>
-            <Link className='hover:text-foreground' href={'/admin/order'}>Orders</Link>
-            <Link className='hover:text-foreground' href={'/admin/package'}>Packages</Link>
-            <Link className='hover:text-foreground' href={'/admin/referrals'}>Referrals</Link>
-            <Link className='hover:text-foreground' href={'/admin/snapshot'}>Snapshots</Link>
-            <Link className='hover:text-foreground' href={'/admin/users'}>Users</Link>
-            <Link className='hover:text-foreground' href={'/admin/'}>Admin</Link>
+            {pages.map(link => (
+                <Link className={`hover:text-foreground ${currentPage === link.toLocaleLowerCase() && "text-foreground font-bold underline"}`} href={`/admin/${link.toLocaleLowerCase() !== 'admin' ? link.toLocaleLowerCase() : ""}`} key={link}>{link}</Link>
+            ))}
             <div className='ml-3 flex items-center gap-4'>
                 <ToggleTheme />
                 <Button onClick={() => signOut({ redirect: false })}>
@@ -44,12 +45,9 @@ const AdminHeader = () => {
                     <SheetTitle className='text-left border-b pb-2'>STYLUS</SheetTitle>
                 </SheetHeader>
                 <div className='flex flex-col gap-2 text-muted-foreground'>
-                    <Link href={'/admin/order'}>Orders</Link>
-                    <Link href={'/admin/package'}>Packages</Link>
-                    <Link href={'/admin/referrals'}>Referrals</Link>
-                    <Link href={'/admin/snapshot'}>Snapshots</Link>
-                    <Link href={'/admin/users'}>Users</Link>
-                    <Link href={'/admin/'}>Admin</Link>
+                    {pages.map(link => (
+                        <Link className={`hover:text-foreground ${currentPage === link.toLocaleLowerCase() && "text-foreground font-bold underline"}`} href={`/admin/${link.toLocaleLowerCase() !== 'admin' ? link.toLocaleLowerCase() : ""}`} key={link}>{link}</Link>
+                    ))}
                     <Button onClick={() => signOut({ redirect: false })} className='mt-5'>
                         <LogOut size={16} className='hover:text-foreground' />
                     </Button>
@@ -58,7 +56,7 @@ const AdminHeader = () => {
         </Sheet>
     )
     return (
-        <div className='fixed top-0 left-0 w-full padding h-16 border-b flex items-center justify-between'>
+        <div className='fixed top-0 left-0 w-full padding h-16 border-b flex items-center justify-between backdrop-blur z-20'>
             <h1 className='font-[1000] text-2xl'>STYLUS</h1>
             {largeScreen}
             <div className='flex items-center gap-4 lg:hidden'>

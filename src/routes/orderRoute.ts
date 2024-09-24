@@ -9,7 +9,7 @@ import axios from "axios";
 import { z } from "zod";
 
 export const orderRoute = {
-    getAllOrder: publicProcedure.query(async () => {
+    getAllOrder: publicProcedure.input(z.string()).query(async (opts) => {
 
         const auth = await getAuth()
         if (!auth) throw new TRPCError({
@@ -18,9 +18,7 @@ export const orderRoute = {
 
         return await db.user_order.findMany({
             where: {
-                status: {
-                    not: ORDERSTATUS['unpaid']
-                }
+                status: opts.input
             }
         })
 
@@ -174,12 +172,12 @@ export const orderRoute = {
 
         // if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
         //     code: 'BAD_REQUEST',
-        //     message: "This order is invalid or completed"
+        //     message: "This order is invalid or paid"
         // })
 
         const updateOrder = await db.user_order.update({
             where: { id: order.id },
-            data: { status: ORDERSTATUS['completed'] }
+            data: { status: ORDERSTATUS['paid'] }
         })
         if (!updateOrder) throw new TRPCError({
             code: "BAD_REQUEST",
@@ -206,10 +204,10 @@ export const orderRoute = {
         })
 
         //update total_invites in referral_info
-        const userCompletedOrders = await db.user_order.findMany({
+        const userpaidOrders = await db.user_order.findMany({
             where: {
                 user_id: order.user_id,
-                status: ORDERSTATUS['completed']
+                status: ORDERSTATUS['paid']
             }
         })
 
@@ -251,7 +249,7 @@ export const orderRoute = {
                 message: "Secondary User not found"
             })
 
-            if (userCompletedOrders.length === 1 && primaryUser.inviter_referral_code) {
+            if (userpaidOrders.length === 1 && primaryUser.inviter_referral_code) {
 
                 await db.referral_info.update({
                     where: {
@@ -299,7 +297,7 @@ export const orderRoute = {
                 ])
 
 
-                if (userCompletedOrders.length === 1 && secondaryUser.inviter_referral_code) {
+                if (userpaidOrders.length === 1 && secondaryUser.inviter_referral_code) {
 
                     await db.referral_info.update({
                         where: {
@@ -335,7 +333,7 @@ export const orderRoute = {
 
         // if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
         //     code: 'BAD_REQUEST',
-        //     message: "This order is invalid or completed"
+        //     message: "This order is invalid or paid"
         // })
 
         const updateOrder = await db.user_order.update({

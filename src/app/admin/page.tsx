@@ -3,7 +3,7 @@ import React from 'react'
 
 const AdminPage = () => {
     return (
-        <AdminHeader />
+        <AdminHeader currentPage='admin' />
     )
 }
 

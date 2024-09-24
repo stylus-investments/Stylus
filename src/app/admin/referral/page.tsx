@@ -11,7 +11,7 @@ const ReferralsPayoutPage = async () => {
 
     return (
         <div>
-            <AdminHeader />
+            <AdminHeader currentPage='referral' />
             <div className='pt-28 padding'>
                 <PayoutRequestTable initialData={payoutList} />
             </div>

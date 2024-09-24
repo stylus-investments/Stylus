@@ -29,6 +29,21 @@ const OrderHistory = ({ initialData, user_id }: {
     const [currentTable, setCurrentTable] = useState<user_order[] | undefined>(undefined)
     const { getCurrentData, currentPage } = usePaginationStore()
 
+    const returnStatusButton = (status: string) => {
+        switch (status) {
+            case ORDERSTATUS['inactive']:
+                return <Button className='h-7' variant={'secondary'}>Inactive</Button>
+            case ORDERSTATUS['processing']:
+                return <Button className='h-7'>Processing</Button>
+            case ORDERSTATUS['unpaid']:
+                return <Button className='h-7' variant={'destructive'}>Unpaid</Button>
+            case ORDERSTATUS['upcoming']:
+                return <Button className='h-7 bg-blue-500'>Upcoming</Button>
+            case ORDERSTATUS['paid']:
+                return <Button className='h-7 bg-green-500'>Paid</Button>
+        }
+    }
+
     useEffect(() => {
 
         socket.connect()
@@ -95,7 +110,9 @@ const OrderHistory = ({ initialData, user_id }: {
                                         }
                                     </TableCell>
                                     <TableCell>{order.amount === ORDERSTATUS['inactive'] ? "N/A" : order.amount}</TableCell>
-                                    <TableCell>{order.status}</TableCell>
+                                    <TableCell>
+                                        {returnStatusButton(order.status)}
+                                    </TableCell>
                                     <TableCell>{new Date(order.created_at).toDateString()}</TableCell>
                                     <TableCell>
                                         <AlertDialog>
