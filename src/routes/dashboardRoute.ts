@@ -22,7 +22,6 @@ export const dashboardRoute = {
 
         const user = await privy.getUser(auth)
 
-        console.log(user)
         const userWalletAddress = user.wallet?.address as string
 
         const [nextSnapshot, currentSnapshot, usdcPrice, currencyExchangeRate] = await Promise.all([

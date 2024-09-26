@@ -93,6 +93,8 @@ const UserProfile = () => {
                             Verified
                         </Button>
                     )
+                default:
+                    return null
             }
         }
     }

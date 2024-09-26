@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { generate } from 'voucher-code-generator'
 import { getAuth } from "@/lib/nextAuth";
+import { ProfileStatus } from "@prisma/client";
 
 export const userRoute = {
     getCurrentUserInfo: publicProcedure.query(async () => {
@@ -139,11 +140,14 @@ export const userRoute = {
     getAllUsers: publicProcedure.input(
         z.object({
             page: z.string().min(1).optional().default('1'),
-            status: z.enum(['PENDING', 'VERIFIED', 'INVALID']).nullable().default(null),
+            first_name: z.string().optional(),
+            last_name: z.string().optional(),
+            email: z.string().optional(),
+            status: z.string().optional(),
         })
     ).query(async ({ input }) => {
 
-        const { page, status } = input, limit = 10
+        const { page, status, first_name, last_name, email } = input, limit = 10
 
         try {
 
@@ -152,7 +156,16 @@ export const userRoute = {
                 code: "UNAUTHORIZED"
             })
 
-            const filter = status ? { status } : {};
+            // Create the filter object
+            const filter: any = {
+                NOT: { status: ProfileStatus.INCOMPLETE },
+                AND: [
+                    { status: status?.toUpperCase() },
+                    { first_name: { contains: first_name?.toLocaleLowerCase() } },
+                    { last_name: { contains: last_name?.toLocaleLowerCase() } },
+                    { email: { contains: email?.toLocaleLowerCase() } },
+                ]
+            };
 
             const users = await db.user_info.findMany({
                 where: filter,
@@ -175,9 +188,6 @@ export const userRoute = {
                     hasNextPage,
                     hasPreviousPage,
                     totalPages
-                },
-                filter: {
-                    status,
                 }
             };
 
@@ -190,6 +200,44 @@ export const userRoute = {
         } finally {
             await db.$disconnect()
         }
+
+    }),
+    updateUserStatus: publicProcedure.input(z.object({
+        user_id: z.string(),
+        status: z.string()
+    })).mutation(async ({ input }) => {
+
+        try {
+
+            const auth = await getAuth()
+            if (!auth) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+
+            //update user status
+            const updateUser = await db.user_info.update({
+                where: { user_id: input.user_id },
+                data: {
+                    status: input.status as ProfileStatus
+                }
+            })
+            if (!updateUser) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to update user"
+            })
+
+            return true
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code || "INTERNAL_SERVER_ERROR",
+                message: error.message || "Server error"
+            })
+        } finally {
+            await db.$disconnect()
+        }
+
 
     })
 }

@@ -124,7 +124,7 @@ model order_message {
 model user_info {
   user_id          String                 @id
   wallet           String
-  status           ProfileStatus          @default(PENDING)
+  status           ProfileStatus          @default(INCOMPLETE)
   first_name       String
   last_name        String
   email            String
@@ -141,6 +141,7 @@ model user_info {
 }
 
 enum ProfileStatus {
+  INCOMPLETE
   PENDING
   VERIFIED
   INVALID

@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBarsStaggered, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import DashboardLinksHeader from './dashboard-links-header'
-import { Download, LogOut } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import useBalanceStore from '@/state/balanceStore'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select'
 import { availableCurrencies } from '@/constant/availableCurrency'
@@ -18,7 +18,7 @@ import { redirect } from 'next/navigation'
 
 const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
-    const { user, logout, exportWallet, authenticated, ready } = usePrivy()
+    const { user, logout, authenticated, ready } = usePrivy()
 
     const { currency, setCurrency } = useBalanceStore()
 
@@ -73,14 +73,6 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                                 <FontAwesomeIcon icon={faWallet} width={16} height={16} />
                             </DropdownMenuShortcut>
                         </DropdownMenuItem>
-                        {user?.wallet?.walletClientType === 'privy' && <DropdownMenuItem className='flex items-center gap-2' onClick={exportWallet}>
-                            <span>
-                                Export Wallet
-                            </span>
-                            <DropdownMenuShortcut>
-                                <Download size={16} />
-                            </DropdownMenuShortcut>
-                        </DropdownMenuItem>}
                         <DropdownMenuItem className='flex items-center gap-2' onClick={() => {
                             logout()
                             redirect('/connect')
@@ -136,14 +128,6 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                     <DropdownMenuContent>
                         <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        {user?.wallet?.walletClientType === 'privy' && <DropdownMenuItem className='flex items-center gap-2' onClick={exportWallet}>
-                            <span>
-                                Export Wallet
-                            </span>
-                            <DropdownMenuShortcut>
-                                <Download size={16} />
-                            </DropdownMenuShortcut>
-                        </DropdownMenuItem>}
                         <DropdownMenuItem className='flex items-center gap-2' onClick={() => {
                             logout()
                             redirect('/connect')

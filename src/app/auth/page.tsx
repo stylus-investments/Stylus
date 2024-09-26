@@ -14,7 +14,7 @@ const AdminAuthPage = () => {
 
     useEffect(() => {
         if (session.status === 'authenticated') {
-            router.push('/admin/users')
+            router.push('/admin/user')
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session])
