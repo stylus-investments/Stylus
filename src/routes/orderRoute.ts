@@ -9,18 +9,47 @@ import axios from "axios";
 import { z } from "zod";
 
 export const orderRoute = {
-    getAllOrder: publicProcedure.input(z.string()).query(async (opts) => {
+    getAllOrder: publicProcedure.input(z.object({
+        page: z.string().min(1).optional().default('1'),
+        status: z.string().optional(),
+
+    })).query(async ({ input }) => {
+
+        const { page, status } = input, limit = 8
 
         const auth = await getAuth()
         if (!auth) throw new TRPCError({
             code: 'UNAUTHORIZED'
         })
 
-        return await db.user_order.findMany({
+        const orders = await db.user_order.findMany({
             where: {
-                status: opts.input
-            }
+                status
+            },
+            orderBy: { created_at: 'desc' },
+            skip: (Number(page) - 1) * limit, // Skip records for pagination
+            take: limit
         })
+        const totalOrders = await db.user_order.count({
+            where: {
+                status
+            }
+        });
+
+        const hasNextPage = (Number(page) * limit) < totalOrders;
+        const hasPreviousPage = Number(page) > 1;
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        return {
+            data: orders,
+            pagination: {
+                total: totalOrders,
+                page,
+                hasNextPage,
+                hasPreviousPage,
+                totalPages
+            }
+        };
 
     }),
     createOrders: publicProcedure.query(async () => {

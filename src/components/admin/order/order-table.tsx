@@ -1,25 +1,24 @@
 'use client'
-import TablePagination from '@/components/dashboard/table-pagination'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
-import usePaginationStore from '@/state/paginationStore'
-import { user_order } from '@prisma/client'
+import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import DisplayAdminMessages from './display-admin-message'
 import { socket } from '@/lib/socket'
 import { ORDERSTATUS } from '@/constant/order'
+import FilterOrderTable from './filter-order-table'
+import { caller } from '@/app/_trpc/server'
+import TableServerPagination from '@/components/dashboard/table-server-pagination'
 
-const OrderTable = ({ orders }: {
-    orders: user_order[]
+const OrderTable = ({ orders, filter }: {
+    orders: Awaited<ReturnType<typeof caller['order']['getAllOrder']>>
+    filter: {
+        status: string
+    }
 }) => {
 
-    const [ordersData, setOrdersData] = useState(orders)
-
-    const [currentTable, setCurrentTable] = useState<user_order[] | undefined>(undefined)
-
-    const { getCurrentData, currentPage } = usePaginationStore()
+    const [ordersData, setOrdersData] = useState(orders.data)
 
     useEffect(() => {
 
@@ -46,13 +45,13 @@ const OrderTable = ({ orders }: {
     }, [])
 
     useEffect(() => {
-        setCurrentTable(getCurrentData(ordersData))
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ordersData, currentPage])
+        setOrdersData(orders.data)
+    }, [orders.data])
+
     return (
-        <div className='padding py-28 flex flex-col gap-10'>
+        <div className='padding py-24 flex flex-col gap-10'>
+            <FilterOrderTable filter={filter} />
             <Table >
-                <TableCaption>A list of orders.</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Status</TableHead>
@@ -63,12 +62,12 @@ const OrderTable = ({ orders }: {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {currentTable && currentTable.map(order => (
+                    {ordersData && ordersData.map(order => (
                         <TableRow key={order.id}>
                             <TableCell>{order.status}</TableCell>
                             <TableCell>{order.amount}</TableCell>
                             <TableCell>
-                                {order.status !== (ORDERSTATUS['inactive'] || ORDERSTATUS['upcoming']) ? <DisplayAdminMessages orderID={order.id} unseen={order.admin_unread_messages} /> : order.status}
+                                {order.status === (ORDERSTATUS['processing'] || ORDERSTATUS['invalid'] || ORDERSTATUS['paid']) ? <DisplayAdminMessages orderID={order.id} unseen={order.admin_unread_messages} /> : order.status}
                             </TableCell>
                             <TableCell>
                                 <AlertDialog>
@@ -90,7 +89,7 @@ const OrderTable = ({ orders }: {
                     ))}
                 </TableBody>
             </Table>
-            <TablePagination data={ordersData || []} />
+            <TableServerPagination pagination={orders.pagination} />
         </div>
     )
 }
