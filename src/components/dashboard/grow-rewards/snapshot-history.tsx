@@ -43,7 +43,7 @@ const SnapshotHistory = () => {
     }
 
     return (
-        <>
+        <div>
             {isLoading ? <SnapshotHistorySkeleton /> :
                 <Card>
                     <CardContent className='flex flex-col gap-2'>
@@ -107,7 +107,7 @@ const SnapshotHistory = () => {
                     </CardContent>
                 </Card>
             }
-        </>
+        </div>
     )
 }
 

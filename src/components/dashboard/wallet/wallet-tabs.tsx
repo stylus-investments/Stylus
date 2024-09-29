@@ -5,7 +5,7 @@ import GuideAccordions from '../liquid-staking/guide-accordions'
 import SnapshotHistory from '../grow-rewards/snapshot-history'
 import AssetsData from './assets-data'
 import { caller } from '@/app/_trpc/server'
-
+import StatusData from './status-data'
 const tabList = ['Assets', 'Status', 'Guides']
 
 const WalletTabs = ({ assets }: {
@@ -28,7 +28,7 @@ const WalletTabs = ({ assets }: {
                 <AssetsData assets={assets} />
             </TabsContent>
             <TabsContent value="status" className='w-full'>
-                <SnapshotHistory />
+                <StatusData />
             </TabsContent>
             <TabsContent value="guides" className='w-full'>
                 <GuideAccordions />

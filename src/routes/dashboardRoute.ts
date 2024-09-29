@@ -8,100 +8,136 @@ import { calculateBalanceArray } from "@/lib/balances";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { getUserId, privy } from "@/lib/privy";
 import { BASE_CHAIN_ID, EARN_ADDRESS, SBTC, SAVE, USDC_ADDRESS, SPHP } from "@/lib/token_address";
-
-const assets = [{
-    tokenAddress: SBTC,
-}]
+import { ORDERSTATUS } from "@/constant/order";
 
 export const dashboardRoute = {
-    getWalletData: publicProcedure.query(async () => {
+    getStakingData: publicProcedure.query(async () => {
 
-        const auth = await getUserId()
-        if (!auth) throw new TRPCError({
-            code: "UNAUTHORIZED",
-            message: "Login First."
-        })
+        try {
 
-        const user = await privy.getUser(auth)
+            const [nextSnapshot, currentSnapshot] = await Promise.all([
+                db.snapshot.findMany({
+                    where: {
+                        completed: false
+                    }
+                }),
+                db.user_snapshot.findFirst({
+                    orderBy: {
+                        created_at: "desc"
+                    }
+                }),
+            ])
 
-        const userWalletAddress = user.wallet?.address as string
+            const getNext4PMUTC = () => {
+                const now = new Date();
+                const next4PM = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 16, 0, 0));
 
-        const [nextSnapshot, currentSnapshot, usdcPrice, currencyExchangeRate] = await Promise.all([
-            db.snapshot.findMany({
-                where: {
-                    completed: false
+                if (now.getTime() > next4PM.getTime()) {
+                    next4PM.setUTCDate(next4PM.getUTCDate() + 1);
                 }
-            }),
-            db.user_snapshot.findFirst({
-                orderBy: {
-                    created_at: "desc"
-                }
-            }),
-            getTokenPrice({ chain: BASE_CHAIN_ID, tokenAddress: USDC_ADDRESS }),
-            db.currency_conversion.findMany()
-        ])
 
-        const getAssets = await Promise.all([
-            getUserTokenData({
-                tokenAddress: SBTC,
-                chain: BASE_CHAIN_ID,
-                walletAddress: userWalletAddress
-            }),
-            getUserTokenData({
-                tokenAddress: USDC_ADDRESS,
-                chain: BASE_CHAIN_ID,
-                walletAddress: userWalletAddress
-
-            }),
-            getUserTokenData({
-                tokenAddress: SPHP,
-                chain: BASE_CHAIN_ID,
-                walletAddress: userWalletAddress
-
-            }),
-            getUserTokenData({
-                tokenAddress: SAVE,
-                chain: BASE_CHAIN_ID,
-                walletAddress: userWalletAddress
-            }),
-        ])
-
-        const assets = getAssets.filter(asset => asset !== null)
-
-        const currentBalance = getCurrentBalance({
-            usdcPrice: usdcPrice?.result.usdPriceFormatted as string,
-            totalUsdc: assets.find(asset => asset?.symbol === 'USDC')?.amount,
-            totalSave: assets.find(asset => asset?.symbol === 'sAVE')?.amount
-        })
-
-        const currentBalanceArray = calculateBalanceArray({ currencyExchangeRate, balance: currentBalance })
-
-        function getNext4PMUTC() {
-            const now = new Date();
-            const next4PM = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 16, 0, 0));
-
-            if (now.getTime() > next4PM.getTime()) {
-                next4PM.setUTCDate(next4PM.getUTCDate() + 1);
+                return next4PM.toISOString();
             }
 
-            return next4PM.toISOString();
-        }
-
-        const dashboardWalletData = {
-            snapshot: {
+            return {
                 next_snapshot: nextSnapshot.length > 0 ? nextSnapshot[0].end_date.toString() : getNext4PMUTC(),
-                current_stake: currentSnapshot ? currentSnapshot.stake : "0.0000",
+                stake: currentSnapshot ? {
+                    sAVE: currentSnapshot.stake,
+                    sBTC: currentSnapshot.balance
+                } : {
+                    sAVE: "0.0000",
+                    sBTC: "0.0000"
+                },
                 reward: currentSnapshot ? currentSnapshot.reward : "0.0000",
                 status: currentSnapshot ? currentSnapshot.status : 4,
-            },
-            balances: {
-                assets,
-                current_save_balance: assets.find(asset => asset?.symbol === 'SAVE')?.amount,
-                currentBalances: currentBalanceArray
             }
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
         }
 
-        return dashboardWalletData
+    }),
+    getWalletData: publicProcedure.query(async () => {
+
+        try {
+
+
+            const auth = await getUserId()
+            if (!auth) throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "Login First."
+            })
+
+            const user = await privy.getUser(auth)
+
+            const userWalletAddress = user.wallet?.address as string
+
+            const [usdcPrice, currencyExchangeRate] = await Promise.all([
+                getTokenPrice({ chain: BASE_CHAIN_ID, tokenAddress: USDC_ADDRESS }),
+                db.currency_conversion.findMany()
+            ])
+
+            const getAssets = await Promise.all([
+                getUserTokenData({
+                    tokenAddress: SBTC,
+                    chain: BASE_CHAIN_ID,
+                    walletAddress: userWalletAddress
+                }),
+                getUserTokenData({
+                    tokenAddress: USDC_ADDRESS,
+                    chain: BASE_CHAIN_ID,
+                    walletAddress: userWalletAddress
+
+                }),
+                getUserTokenData({
+                    tokenAddress: SPHP,
+                    chain: BASE_CHAIN_ID,
+                    walletAddress: userWalletAddress
+
+                }),
+                getUserTokenData({
+                    tokenAddress: SAVE,
+                    chain: BASE_CHAIN_ID,
+                    walletAddress: userWalletAddress
+                }),
+            ])
+
+            const assets = getAssets.filter(asset => asset !== null)
+
+            const currentBalance = getCurrentBalance({
+                usdcPrice: usdcPrice?.result.usdPriceFormatted as string,
+                totalUsdc: assets.find(asset => asset?.symbol === 'USDC')?.amount,
+                totalSave: assets.find(asset => asset?.symbol === 'sAVE')?.amount
+            })
+
+            const currentBalanceArray = calculateBalanceArray({ currencyExchangeRate, balance: currentBalance })
+
+            const dashboardWalletData = {
+                balances: {
+                    assets,
+                    current_save_balance: assets.find(asset => asset?.symbol === 'SAVE')?.amount,
+                    currentBalances: currentBalanceArray
+                }
+            }
+
+            return dashboardWalletData
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
+        }
+
 
     }),
     getRewardData: publicProcedure.query(async () => {
@@ -264,6 +300,61 @@ export const dashboardRoute = {
             await db.$disconnect()
         }
 
-    }
-    )
+    }),
+    getUserAccountStatus: publicProcedure.query(async () => {
+        try {
+
+            await rateLimiter.consume(1)
+            const user = await getUserId()
+
+            if (!user) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+
+            const userInfo = await db.user_info.findUnique({
+                where: { user_id: user }, select: {
+                    status: true,
+                    investment_plans: {
+                        select: {
+                            insurance: true,
+                            payments: {
+                                select: {
+                                    status: true
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+            if (!userInfo) throw new TRPCError({
+                code: "NOT_FOUND"
+            })
+
+            // Extract user status
+            const userStatus = userInfo.status;
+
+            // Check if the user has insurance
+            const hasInsurance = userInfo.investment_plans.some(plan => plan.insurance);
+
+            // Check for unpaid orders
+            const hasUnpaidOrders = userInfo.investment_plans.some(plan =>
+                plan.payments.some(payment => payment.status === ORDERSTATUS['unpaid'])
+            );
+            // Return results in an object
+            return {
+                userStatus,
+                hasInsurance,
+                hasUnpaidOrders
+            };
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code,
+                message: error.message
+            })
+        } finally {
+            await db.$disconnect()
+        }
+    })
 }
