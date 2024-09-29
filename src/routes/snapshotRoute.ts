@@ -6,7 +6,18 @@ import { TRPCError } from "@trpc/server";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { getAuth } from "@/lib/nextAuth";
 import { z } from "zod";
+import { SAVE, SBTC } from "@/lib/token_address";
+import { ProfileStatus } from "@prisma/client";
 
+interface StakeType {
+    stake: string
+    reward: string
+    status: number
+    balance: string
+    wallet: string
+    user_id: string
+    snapshot_id: number
+}
 export const snapshotRoute = {
     getAllSnapshot: publicProcedure.query(async () => {
 
@@ -173,15 +184,21 @@ export const snapshotRoute = {
             await db.$disconnect()
         }
     }),
-    reset: publicProcedure.mutation(async () => {
+    reset: publicProcedure.query(async () => {
 
         try {
             await rateLimiter.consume(1);
 
             // Retrieve token holders and users
-            const [tokenHolders, users, previousSnapshots] = await Promise.all([
-                getTokenHolders(),
+            const [sBtcTokenHolders, saveTokenHolders, users, previousSnapshots] = await Promise.all([
+                getTokenHolders(SBTC),
+                getTokenHolders(SAVE),
                 db.user_info.findMany({
+                    where: {
+                        status: {
+                            not: ProfileStatus['INCOMPLETE']
+                        }
+                    },
                     select: {
                         user_id: true,
                         wallet: true
@@ -194,7 +211,7 @@ export const snapshotRoute = {
                 })
             ])
 
-            if (!tokenHolders || !users) {
+            if (!saveTokenHolders || !users || !sBtcTokenHolders) {
                 throw new TRPCError({
                     code: 'NOT_FOUND',
                     message: "Failed to retrieve data"
@@ -203,7 +220,8 @@ export const snapshotRoute = {
 
             const userWalletMap = new Map(users.map(user => [user.wallet.toLowerCase(), user]));
             const userIdMap = new Map(users.map(user => [user.user_id, user]));
-            const tokenHolderMap = new Map(tokenHolders.map(holder => [holder.owner_address.toLowerCase(), holder]));
+            const sBtcTokenHolderMap = new Map(sBtcTokenHolders.map(holder => [holder.owner_address.toLowerCase(), holder]));
+            const saveTokenHolderMap = new Map(saveTokenHolders.map(holder => [holder.owner_address.toLowerCase(), holder]));
 
             const now = new Date();
             const previousSnapshot = previousSnapshots[0];
@@ -235,7 +253,7 @@ export const snapshotRoute = {
                     // Process user snapshots and collect IDs for bulk updates
                     updatedSnapshot.user_snapshot.map(usrSnapshot => {
                         const user = userIdMap.get(usrSnapshot.user_id);
-                        const tokenHolder = user?.wallet ? tokenHolderMap.get(user.wallet.toLowerCase()) : null;
+                        const tokenHolder = user?.wallet ? saveTokenHolderMap.get(user.wallet.toLowerCase()) : null;
 
                         if (tokenHolder) {
                             const stake = Number(usrSnapshot.stake);
@@ -283,13 +301,16 @@ export const snapshotRoute = {
                         data: { start_date: previousSnapshot.end_date, end_date }
                     });
 
-                    const userSnapshots = tokenHolders.reduce((acc, holder) => {
+                    const userSnapshots = saveTokenHolders.reduce((acc, holder) => {
                         const user = userWalletMap.get(holder.owner_address.toLowerCase());
+                        const sBTCBalance = sBtcTokenHolderMap.get(holder.owner_address.toLocaleLowerCase())?.balance_formatted || "0.00"
+
                         if (user) {
-                            const balance = Number(holder.balance_formatted).toString()
+                            const sAVEBalance = Number(holder.balance_formatted).toString()
                             const reward = (Number(holder.balance_formatted) * 0.005).toFixed(8); // 0.5% reward
                             acc.push({
-                                stake: balance,
+                                stake: sAVEBalance,
+                                balance: sBTCBalance,
                                 reward,
                                 status: 1,
                                 wallet: user.wallet,
@@ -298,14 +319,7 @@ export const snapshotRoute = {
                             });
                         }
                         return acc;
-                    }, [] as {
-                        stake: string
-                        reward: string
-                        status: number
-                        wallet: string
-                        user_id: string
-                        snapshot_id: number
-                    }[]);
+                    }, [] as StakeType[])
 
                     // Insert all user snapshots in one go
                     if (userSnapshots.length > 0) {
@@ -328,13 +342,16 @@ export const snapshotRoute = {
                     data: { start_date: now, end_date }
                 });
 
-                const userSnapshots = tokenHolders.reduce((acc, holder) => {
+                const userSnapshots = saveTokenHolders.reduce((acc, holder) => {
                     const user = userWalletMap.get(holder.owner_address.toLowerCase());
+                    const sBTCBalance = sBtcTokenHolderMap.get(holder.owner_address.toLocaleLowerCase())?.balance_formatted || "0.00"
                     if (user) {
                         const reward = (Number(holder.balance_formatted) * 0.005).toFixed(8); // 0.5% reward
+                        const sAVEBalance = Number(holder.balance_formatted).toString()
                         acc.push({
-                            stake: Number(holder.balance_formatted).toString(),
+                            stake: sAVEBalance,
                             reward,
+                            balance: sBTCBalance,
                             status: 1,
                             wallet: user.wallet,
                             user_id: user.user_id,
@@ -342,14 +359,7 @@ export const snapshotRoute = {
                         });
                     }
                     return acc;
-                }, [] as {
-                    stake: string
-                    reward: string
-                    status: number
-                    wallet: string
-                    user_id: string
-                    snapshot_id: number
-                }[]);
+                }, [] as StakeType[]);
 
                 // Insert all user snapshots in one go
                 if (userSnapshots.length > 0) {
@@ -357,7 +367,6 @@ export const snapshotRoute = {
                         data: userSnapshots
                     });
                 }
-
                 return okayRes();
             }
 

@@ -29,6 +29,7 @@ model snapshot {
 model user_snapshot {
   id          Int      @id @default(autoincrement())
   stake       String
+  balance     String
   reward      String
   status      Int
   wallet      String

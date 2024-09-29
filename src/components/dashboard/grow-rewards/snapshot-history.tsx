@@ -21,7 +21,7 @@ const SnapshotHistory = () => {
         };
         id: number;
         stake: string;
-        reward: string;
+        balance: string
         status: number;
         month: number;
     }[] | undefined | undefined>(undefined)
@@ -51,8 +51,8 @@ const SnapshotHistory = () => {
                             <TableHeader>
                                 <TableRow className='text-xs sm:text-sm'>
                                     <TableHead className='min-w-10'>Month</TableHead>
+                                    <TableHead className='min-w-16'>Balances</TableHead>
                                     <TableHead className='min-w-32'>Status</TableHead>
-                                    <TableHead className='min-w-16'>Stake</TableHead>
                                     <TableHead className='min-w-56'>Start</TableHead>
                                     <TableHead className='min-w-56'>Finish</TableHead>
                                 </TableRow>
@@ -62,8 +62,11 @@ const SnapshotHistory = () => {
                                     currentTable.map((snapshot) => (
                                         <TableRow key={(snapshot).id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
                                             <TableCell>{snapshot.month}</TableCell>
+                                            <TableCell className='flex flex-col gap-1'>
+                                                <small>sAVE: {snapshot.stake}</small>
+                                                <small>sBTC: {snapshot.balance}</small>
+                                            </TableCell>
                                             <TableCell>{returnSnapshotStatusButton(snapshot.status)}</TableCell>
-                                            <TableCell>{snapshot.stake}</TableCell>
                                             <TableCell>
                                                 {
                                                     new Date(snapshot.snapshot.start_date).toLocaleString('en-US', {
