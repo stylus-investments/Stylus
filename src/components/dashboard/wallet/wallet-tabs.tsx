@@ -4,19 +4,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import GuideAccordions from '../liquid-staking/guide-accordions'
 import SnapshotHistory from '../grow-rewards/snapshot-history'
 import AssetsData from './assets-data'
+import { caller } from '@/app/_trpc/server'
 
 const tabList = ['Assets', 'Status', 'Guides']
 
 const WalletTabs = ({ assets }: {
-    assets: {
-        symbol: string;
-        amount: string;
-        name: string;
-        price: string;
-        logo: string;
-        value: string
-        change: string;
-    }[]
+    assets: Awaited<ReturnType<typeof caller['dashboard']['getWalletData']>>['balances']['assets']
 }) => {
 
     const [currentTab, setCurrentTab] = useState('assets')

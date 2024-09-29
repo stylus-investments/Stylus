@@ -128,7 +128,10 @@ export const userRoute = {
         const updateUserInfo = await db.user_info.update({
             where: {
                 user_id: user
-            }, data
+            }, data: {
+                ...data,
+                status: ProfileStatus['PENDING']
+            }
         })
         if (!updateUserInfo) throw new TRPCError({
             code: "BAD_REQUEST",

@@ -2,42 +2,36 @@ import React from 'react'
 import Image from 'next/image';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { caller } from '@/app/_trpc/server';
 const AssetsData = ({ assets }: {
-  assets: {
-    symbol: string;
-    amount: string;
-    name: string;
-    price: string;
-    value: string
-    logo: string;
-    change: string;
-  }[]
+  assets: Awaited<ReturnType<typeof caller['dashboard']['getWalletData']>>['balances']['assets']
 }) => {
-
 
   const smallScreen = (
     <div className='flex flex-col w-full md:hidden'>
-      {assets.map((asset, i) => (
+      {assets.length > 0 ? assets.map((asset, i) => (
         <div className='flex items-center justify-between px-3 py-4 border-b w-full' key={i}>
           <div className='flex iems-start gap-3'>
-            <Image src={asset.logo} width={20} height={20} alt={asset.name} className='rounded-full max-h-[20px] max-w-[20px]' />
+            <Image src={asset?.logo || "/save.webp"} width={20} height={20} alt={asset?.name || ""} className='rounded-full max-h-[20px] max-w-[20px]' />
             <div className='flex flex-col gap-3'>
-              <Label className='text-lg -mt-1.5'>{asset.symbol}</Label>
-              <div className='text-muted-foreground text-xs -mt-2'>{asset.name}</div>
+              <Label className='text-lg -mt-1.5'>{asset?.symbol}</Label>
+              <div className='text-muted-foreground text-xs -mt-2'>{asset?.name}</div>
               <div className='text-xs'>
                 24h change
               </div>
             </div>
           </div>
           <div className='flex flex-col gap-3 text-right'>
-            <Label className='text-lg -mt-1.5'>{asset.amount}</Label>
-            <div className='text-muted-foreground text-xs -mt-2'>${asset.value}</div>
+            <Label className='text-lg -mt-1.5'>{asset?.amount}</Label>
+            <div className='text-muted-foreground text-xs -mt-2'>${asset?.value}</div>
             <div className='text-xs'>
-              {asset.change}%
+              {asset?.change}%
             </div>
           </div>
         </div>
-      ))}
+      )) :
+        <div className='flex justify-center pt-20'>No Data.</div>
+      }
     </div>
   )
 
@@ -53,23 +47,27 @@ const AssetsData = ({ assets }: {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {assets.map((asset, i) => (
+          {assets.length > 0 ? assets.map((asset, i) => (
             <TableRow key={i}>
               <TableCell className='flex gap-2 items-center'>
-                <Image src={asset.logo} alt={asset.name} width={25} height={25} className='rounded-full' />
-                <Label>{asset.symbol}</Label>
+                <Image src={asset?.logo || "/save.webp"} alt={asset?.name || ""} width={25} height={25} className='rounded-full' />
+                <Label>{asset?.symbol}</Label>
               </TableCell>
               <TableCell>
-                ${asset.value}
+                ${asset?.value}
               </TableCell>
               <TableCell>
-                {asset.change}%
+                {asset?.change}%
               </TableCell>
               <TableCell className='text-right'>
-                {asset.amount}
+                {asset?.amount}
               </TableCell>
             </TableRow>
-          ))}
+          )) :
+            <TableRow>
+              <TableCell>No Data</TableCell>
+            </TableRow>
+          }
         </TableBody>
       </Table>
     </div>

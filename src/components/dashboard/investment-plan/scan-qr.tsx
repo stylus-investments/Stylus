@@ -31,7 +31,7 @@ const ScanQr = (props: {
 
     const { setFormData, formData, currency, formBack } = props
 
-    const [show, setShow] = useState(false)
+    const [show, setShow] = useState(true)
 
     const confirmTransaction = () => {
         const { receipt } = formData

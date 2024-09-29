@@ -1,10 +1,7 @@
 'use client'
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import usePaginationStore from '@/state/paginationStore';
 import React, { useEffect, useState } from 'react'
-import TablePagination from '../table-pagination';
-import { user_order } from '@prisma/client';
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -13,21 +10,13 @@ import { ORDERSTATUS } from '@/constant/order';
 import PayInvestmentPlan from '../investment-plan/pay-investment';
 import DisplayClientMessages from '../messages/display-client-messages';
 import { socket } from '@/lib/socket';
-import { trpc } from '@/app/_trpc/client';
+import TableServerPagination from '../table-server-pagination';
 
-const OrderHistory = ({ initialData, user_id }: {
+const OrderHistory = ({ initialData }: {
     initialData: Awaited<ReturnType<typeof caller['investment']['retrieveSinglePlan']>>
-    user_id: string
 }) => {
 
-    const { data } = trpc.investment.retrieveSinglePlan.useQuery(initialData.id, {
-        enabled: false,
-        initialData: initialData
-    })
-
-    const [ordersData, setOrdersData] = useState(data.payments)
-    const [currentTable, setCurrentTable] = useState<user_order[] | undefined>(undefined)
-    const { getCurrentData, currentPage } = usePaginationStore()
+    const [currentTable, setCurrentTable] = useState(initialData.data.payments)
 
     const returnStatusButton = (status: string) => {
         switch (status) {
@@ -46,22 +35,18 @@ const OrderHistory = ({ initialData, user_id }: {
 
     useEffect(() => {
 
-        socket.connect()
-        socket.emit("stanbyOrder", { user_id })
-        socket.on("user_unseen_messages", (data) => {
-            const orderID = data
-            setOrdersData(prev =>
+        socket.on("unseen_message", ({ orderID }) => {
+            setCurrentTable(prev =>
                 prev.map(order =>
                     order.id === orderID
                         ? { ...order, user_unread_messages: order.user_unread_messages + 1 }
                         : order
                 )
-            );
+            )
         })
 
         return () => {
-            socket.off("stanbyOrder")
-            socket.off("user_unseen_messages")
+            socket.off("unseen_message")
             socket.disconnect()
         }
 
@@ -69,15 +54,10 @@ const OrderHistory = ({ initialData, user_id }: {
     }, [])
 
     useEffect(() => {
-        setOrdersData(data.payments)
-    }, [data])
 
-    useEffect(() => {
+        setCurrentTable(initialData.data.payments)
 
-        setCurrentTable(getCurrentData(ordersData))
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ordersData, currentPage])
+    }, [initialData.data.payments])
 
     return (
         <>
@@ -87,7 +67,7 @@ const OrderHistory = ({ initialData, user_id }: {
                         <TableHeader>
                             <TableRow className='text-xs md:text-sm'>
                                 <TableHead className='min-w-32'>Operation</TableHead>
-                                <TableHead className='min-w-32'>Amount (STXBTC)</TableHead>
+                                <TableHead className='min-w-32'>Amount (sBTC)</TableHead>
                                 <TableHead className='min-w-32'>Status</TableHead>
                                 <TableHead className=' min-w-52'>Date</TableHead>
                                 <TableHead className='min-w-32'>Receipt</TableHead>
@@ -99,10 +79,9 @@ const OrderHistory = ({ initialData, user_id }: {
                                     <TableCell>
                                         {order.status === ORDERSTATUS['unpaid'] ?
                                             <PayInvestmentPlan
-                                                investmentPrice={initialData.total_price}
+                                                investmentPrice={initialData.data.total_price}
                                                 orderID={order.id}
                                                 currency="PHP"
-                                                investmentPlanID={initialData.id}
                                             />
                                             :
                                             order.status === ORDERSTATUS['upcoming'] ? "upcoming" : order.status === ORDERSTATUS['inactive'] ? "inactive" :
@@ -138,14 +117,11 @@ const OrderHistory = ({ initialData, user_id }: {
                             }
                         </TableBody>
                     </Table>
-                    <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>Order History</div>
-                    <TablePagination data={ordersData || []} />
+                    <TableServerPagination pagination={initialData.pagination} />
                 </CardContent>
             </Card >
         </>
     )
 }
-
-
 
 export default OrderHistory

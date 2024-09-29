@@ -8,13 +8,11 @@ import { Eye, EyeOff } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import CreateInvestment from '../investment-plan/create-investment'
 import Link from 'next/link'
+import { caller } from '@/app/_trpc/server'
 
 
 const BalancesHeader = ({ balances }: {
-    balances: {
-        currency: string;
-        amount: string;
-    }[] | undefined
+    balances: Awaited<ReturnType<typeof caller['dashboard']['getWalletData']>>['balances']['currentBalances']
 }) => {
 
     const [showBalance, setShowBalance] = useState(true)

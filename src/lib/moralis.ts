@@ -1,6 +1,7 @@
 import axios from "axios";
 import Moralis from "moralis";
 import 'dotenv/config'
+import { BASE_CHAIN_ID, SAVE } from "./token_address";
 interface TokenHolders {
     balance: string
     balance_formatted: string
@@ -28,9 +29,9 @@ const getTokenHolders = async () => {
 
         await getMoralis()
 
-        const { data } = await axios.get(`https://deep-index.moralis.io/api/v2.2/erc20/${process.env.SAVE_ADDRESS}/owners?&order=DESC`, {
+        const { data } = await axios.get(`https://deep-index.moralis.io/api/v2.2/erc20/${SAVE}/owners?&order=DESC`, {
             params: {
-                chain: process.env.CHAIN
+                chain: BASE_CHAIN_ID
             },
             headers: {
                 'x-api-key': process.env.MORALIS_API_KEY

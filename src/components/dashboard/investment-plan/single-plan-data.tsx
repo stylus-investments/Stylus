@@ -1,37 +1,18 @@
 import React from 'react'
 import OrderHistory from '../liquid-staking/order-history'
 import { caller } from '@/app/_trpc/server'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import Link from 'next/link'
+import FilterOrderHistory from './filter-order-history'
 
-const SinglePlanData = ({ initialData, user_id }: {
-    user_id: string
+const SinglePlanData = ({ initialData, status }: {
     initialData: Awaited<ReturnType<typeof caller['investment']['retrieveSinglePlan']>>
+    status?: string
 }) => {
 
     return (
 
         <div className='py-28 padding flex flex-col gap-10'>
-            <Breadcrumb>
-                <BreadcrumbList>
-                    <BreadcrumbItem>
-                        <Link href={'/dashboard/wallet/'}>
-                            Wallet
-                        </Link>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                        <Link href={'/dashboard/wallet/plans'}>
-                            Investment Plans
-                        </Link>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                        <BreadcrumbPage>{initialData.name}</BreadcrumbPage>
-                    </BreadcrumbItem>
-                </BreadcrumbList>
-            </Breadcrumb>
-            <OrderHistory initialData={initialData} user_id={user_id} />
+            <FilterOrderHistory name={initialData.data.name} status={status} />
+            <OrderHistory initialData={initialData} />
         </div>
     )
 }

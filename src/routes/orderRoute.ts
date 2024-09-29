@@ -12,7 +12,6 @@ export const orderRoute = {
     getAllOrder: publicProcedure.input(z.object({
         page: z.string().min(1).optional().default('1'),
         status: z.string().optional(),
-
     })).query(async ({ input }) => {
 
         const { page, status } = input, limit = 8

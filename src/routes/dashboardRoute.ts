@@ -3,18 +3,20 @@ import db from "@/db/db";
 import { getMoralis } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import Moralis from "moralis";
-import { z } from "zod";
-import { getCurrentBalance, getRewardsAccumulated, getUserTokenData } from "@/lib/prices";
+import { getCurrentBalance, getRewardsAccumulated, getTokenPrice, getUserTokenData } from "@/lib/prices";
 import { calculateBalanceArray } from "@/lib/balances";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { getUserId, privy } from "@/lib/privy";
-import { BASE_CHAIN_ID, EARN_ADDRESS, SBTC, SVN_ADDRESS, USDC_ADDRESS } from "@/lib/token_address";
+import { BASE_CHAIN_ID, EARN_ADDRESS, SBTC, SAVE, USDC_ADDRESS, SPHP } from "@/lib/token_address";
+
+const assets = [{
+    tokenAddress: SBTC,
+}]
 
 export const dashboardRoute = {
-    getWalletData: publicProcedure.query(async (opts) => {
+    getWalletData: publicProcedure.query(async () => {
 
         const auth = await getUserId()
-
         if (!auth) throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "Login First."
@@ -35,50 +37,41 @@ export const dashboardRoute = {
                     created_at: "desc"
                 }
             }),
-            getUserTokenData({
-                tokenAddress: USDC_ADDRESS,
-                tokenName: "USDC",
-                chain: BASE_CHAIN_ID,
-                walletAddress: userWalletAddress
-
-            }),
+            getTokenPrice({ chain: BASE_CHAIN_ID, tokenAddress: USDC_ADDRESS }),
             db.currency_conversion.findMany()
         ])
 
-        const assets = await Promise.all([
+        const getAssets = await Promise.all([
             getUserTokenData({
                 tokenAddress: SBTC,
-                tokenName: "SAVE",
                 chain: BASE_CHAIN_ID,
                 walletAddress: userWalletAddress
-
             }),
             getUserTokenData({
                 tokenAddress: USDC_ADDRESS,
-                tokenName: "USDC",
                 chain: BASE_CHAIN_ID,
                 walletAddress: userWalletAddress
 
             }),
             getUserTokenData({
-                tokenAddress: EARN_ADDRESS,
-                tokenName: "EARN",
+                tokenAddress: SPHP,
                 chain: BASE_CHAIN_ID,
                 walletAddress: userWalletAddress
 
             }),
             getUserTokenData({
-                tokenAddress: SVN_ADDRESS,
-                tokenName: "SVN",
+                tokenAddress: SAVE,
                 chain: BASE_CHAIN_ID,
                 walletAddress: userWalletAddress
-
             }),
         ])
+
+        const assets = getAssets.filter(asset => asset !== null)
+
         const currentBalance = getCurrentBalance({
-            usdcPrice: usdcPrice.price,
-            totalUsdc: assets.find(asset => asset.symbol === 'USDC')?.amount as string,
-            totalSave: assets.find(asset => asset.symbol === 'SAVE')?.amount as string
+            usdcPrice: usdcPrice?.result.usdPriceFormatted as string,
+            totalUsdc: assets.find(asset => asset?.symbol === 'USDC')?.amount,
+            totalSave: assets.find(asset => asset?.symbol === 'sAVE')?.amount
         })
 
         const currentBalanceArray = calculateBalanceArray({ currencyExchangeRate, balance: currentBalance })
@@ -103,8 +96,7 @@ export const dashboardRoute = {
             },
             balances: {
                 assets,
-                current_save_balance: assets.find(asset => asset.symbol === 'SAVE')?.amount as string,
-                usdc_price: usdcPrice,
+                current_save_balance: assets.find(asset => asset?.symbol === 'SAVE')?.amount,
                 currentBalances: currentBalanceArray
             }
         }
@@ -112,28 +104,26 @@ export const dashboardRoute = {
         return dashboardWalletData
 
     }),
-    getRewardData: publicProcedure.input(z.object({
-        walet_address: z.string()
-    })).query(async (opts) => {
+    getRewardData: publicProcedure.query(async () => {
 
-        const userWalletAddress = opts.input.walet_address
-
-        const user = await getUserId()
-
-        if (!user || !userWalletAddress) throw new TRPCError({
-            code: "UNAUTHORIZED"
+        const auth = await getUserId()
+        if (!auth) throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Login First."
         })
+        const user = await privy.getUser(auth)
+
+        const userWalletAddress = user.wallet?.address as string
 
         const [currencyExchangeRate, usdcPrice, userSnapshots] = await Promise.all([
             db.currency_conversion.findMany(),
             getUserTokenData({
                 tokenAddress: USDC_ADDRESS,
-                tokenName: "USDC",
                 walletAddress: userWalletAddress,
                 chain: BASE_CHAIN_ID
             }),
             db.user_snapshot.findMany({
-                where: { user_id: user },
+                where: { user_id: user.id },
                 orderBy: {
                     created_at: 'desc'
                 }
@@ -143,22 +133,20 @@ export const dashboardRoute = {
         const [earn, svn] = await Promise.all([
             getUserTokenData({
                 tokenAddress: EARN_ADDRESS,
-                tokenName: "EARN",
                 walletAddress: userWalletAddress,
                 chain: BASE_CHAIN_ID
             }),
             getUserTokenData({
-                tokenAddress: SVN_ADDRESS,
-                tokenName: "SVN",
+                tokenAddress: SAVE,
                 walletAddress: userWalletAddress,
                 chain: BASE_CHAIN_ID
             }),
         ])
 
         const rewardsAccumulated = getRewardsAccumulated({
-            usdcPrice: usdcPrice.price,
-            totalEarn: earn.amount,
-            totalSvn: svn.amount
+            usdcPrice: usdcPrice?.price as string,
+            totalEarn: earn?.amount as string,
+            totalSvn: svn?.amount as string
         })
 
         const rewardsAccumulatedBalanceArray = calculateBalanceArray({ currencyExchangeRate, balance: rewardsAccumulated })
@@ -173,8 +161,8 @@ export const dashboardRoute = {
 
         const dashboardRewardData = {
             balances: {
-                current_earn_balance: earn.amount,
-                current_svn_balance: svn.amount
+                current_earn_balance: earn?.amount,
+                current_svn_balance: svn?.amount
             },
             rewardsAccumulated: rewardsAccumulatedBalanceArray,
             total_reward_received: userTotalEarnTokenRewardsReceived,

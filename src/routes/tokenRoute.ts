@@ -16,7 +16,7 @@ export const tokenRoute = {
         tokenAddress: z.string(),
         tokenName: z.string(),
     })).query(async (opts) => {
-        const { tokenAddress, tokenName } = opts.input
+        const { tokenAddress } = opts.input
 
         const session = await getUserId()
         if (!session) throw new TRPCError({
@@ -32,7 +32,6 @@ export const tokenRoute = {
 
         const price = await getUserTokenData({
             tokenAddress,
-            tokenName,
             walletAddress: user.wallet?.address as string,
             chain: BASE_CHAIN_ID
         })

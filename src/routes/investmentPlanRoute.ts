@@ -188,9 +188,12 @@ export const investmentPlanRoute = {
         }
 
     }),
-    retrieveSinglePlan: publicProcedure.input(z.string()).query(async (opts) => {
+    retrieveSinglePlan: publicProcedure.input(z.object({
+        plan_id: z.string(),
+        page: z.string().min(1).optional().default('1'),
+        status: z.string().optional(),
+    })).query(async ({ input }) => {
         try {
-
 
             await rateLimiter.consume(1)
 
@@ -199,12 +202,22 @@ export const investmentPlanRoute = {
                 code: "UNAUTHORIZED"
             })
 
+            // Pagination setup
+            const limit = 10; // Number of items per page
+            const page = Number(input.page)
+            const skip = (page - 1) * limit;
+
             const investmentPlan = await db.user_investment_plan.findUnique({
-                where: { id: opts.input },
+                where: { id: input.plan_id },
                 include: {
                     payments: {
+                        where: {
+                            status: input.status
+                        },
+                        skip,
+                        take: limit,
                         orderBy: {
-                            created_at: 'asc'
+                            updated_at: 'desc'
                         }
                     }
                 }
@@ -214,25 +227,29 @@ export const investmentPlanRoute = {
                 message: "Plan not found"
             })
 
-            // Separate unpaid order and sort the rest
-            const unpaidOrder = investmentPlan.payments.find(order => order.status === ORDERSTATUS['unpaid'])
-            const otherOrders = investmentPlan.payments.filter(order => order.status !== ORDERSTATUS['unpaid']).sort((a, b) => {
-                return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-            }).map(order => ({
-                ...order,
-                created_at: new Date(order.created_at).toISOString(),
-                updated_at: new Date(order.updated_at).toISOString(),
-            }))
+            // Retrieve the total count of payments for pagination metadata
+            const totalPayments = await db.user_order.count({
+                where: { user_investment_plan_id: investmentPlan.id, status: input.status },
+            });
+
+            const hasNextPage = skip + limit < totalPayments;
+            const hasPreviousPage = page > 1;
+            const totalPages = Math.ceil(totalPayments / limit);
+
             return {
-                ...investmentPlan,
-                created_at: new Date(investmentPlan.created_at).toISOString(),
-                next_order_creation: new Date(investmentPlan.next_order_creation).toISOString(),
-                updated_at: new Date(investmentPlan.updated_at).toISOString(),
-                payments: unpaidOrder ? [{
-                    ...unpaidOrder,
-                    created_at: new Date(unpaidOrder.created_at).toISOString(),
-                    updated_at: new Date(unpaidOrder.updated_at).toISOString(),
-                }, ...otherOrders] : otherOrders // Add unpaid first if it exists
+                data: {
+                    ...investmentPlan,
+                    created_at: new Date(investmentPlan.created_at).toISOString(),
+                    next_order_creation: new Date(investmentPlan.next_order_creation).toISOString(),
+                    updated_at: new Date(investmentPlan.updated_at).toISOString()
+                },
+                pagination: {
+                    total: totalPayments,
+                    hasNextPage,
+                    hasPreviousPage,
+                    totalPages,
+                    page: input.page
+                }
             }
 
         } catch (error) {

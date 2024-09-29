@@ -35,8 +35,8 @@ export const referralsRoute = {
                 }, select: {
                     user_info: {
                         select: {
-                            first_name: true,
-                            last_name: true,
+                            email: true,
+                            user_id: true,
                             created_at: true,
                             inviter_reward: {
                                 select: {
@@ -368,7 +368,7 @@ export const referralsRoute = {
                             not: ""
                         }
                     },
-                 
+
                 },
                 orderBy: {
                     total_invites: 'desc'

@@ -10,6 +10,7 @@ import { userRoute } from '@/routes/userRoute';
 import { investmentPlanRoute } from '@/routes/investmentPlanRoute';
 import { packageRoute } from '@/routes/packageRoute';
 import { referralsRoute } from '@/routes/referralsRoute';
+import { notificationRoute } from '@/routes/notificationRoute';
 
 export const appRouter = router({
     dashboard: dashboardRoute,
@@ -22,7 +23,8 @@ export const appRouter = router({
     user: userRoute,
     investment: investmentPlanRoute,
     package: packageRoute,
-    referral: referralsRoute
+    referral: referralsRoute,
+    notification: notificationRoute
 })
 
 export type AppRouter = typeof appRouter;

@@ -7,9 +7,13 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
-const PlanOrdersPage = async ({ params }: {
+const PlanOrdersPage = async ({ params, searchParams }: {
     params: {
         planID: string
+    },
+    searchParams: {
+        page: string | undefined
+        status: string | undefined
     }
 }) => {
 
@@ -17,16 +21,25 @@ const PlanOrdersPage = async ({ params }: {
     const user = await getUserId()
     if (!user) redirect('/connect')
 
-    const retrievePlan = await caller.investment.retrieveSinglePlan(params.planID)
-    if (!retrievePlan) redirect('/dashboard/wallet/plans')
+    try {
+        const initialData = await caller.investment.retrieveSinglePlan({
+            plan_id: params.planID,
+            page: searchParams.page,
+            status: searchParams.status
+        })
 
-    return (
-        <div>
-            <DashboardHeader currentPage='wallet' />
-            <DashboardLinksFooter currentPage='wallet' />
-            <SinglePlanData user_id={user} initialData={retrievePlan} />
-        </div>
-    )
+        return (
+            <div>
+                <DashboardHeader currentPage='wallet' />
+                <DashboardLinksFooter currentPage='wallet' />
+                <SinglePlanData initialData={initialData} status={searchParams.status} />
+            </div>
+        )
+
+    } catch (error) {
+        console.log(error);
+        redirect('/dashboard/wallet/plans')
+    }
 }
 
 export default PlanOrdersPage

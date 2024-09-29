@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import TablePagination from '../table-pagination';
 import { trpc } from '@/app/_trpc/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PaymentMethods } from '@prisma/client';
 
 const TopReferralsTable = () => {
 
@@ -61,8 +60,6 @@ const TopReferralsTable = () => {
                                 }
                             </TableBody>
                         </Table>
-                        <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>Referral Leadearboard</div>
-                        <TablePagination data={data || []} />
                     </CardContent>
                 </Card>
             }
@@ -99,8 +96,6 @@ const TopReferralsTablekeleton = () => {
                         ))}
                     </TableBody>
                 </Table>
-                <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>Referral Leaderboard</div>
-                <TablePagination data={[]} />
             </CardContent>
         </Card>
     )

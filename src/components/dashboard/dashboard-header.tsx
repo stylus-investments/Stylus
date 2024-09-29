@@ -7,20 +7,17 @@ import { faBarsStaggered, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import DashboardLinksHeader from './dashboard-links-header'
 import { LogOut } from 'lucide-react'
-import useBalanceStore from '@/state/balanceStore'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select'
-import { availableCurrencies } from '@/constant/availableCurrency'
 import { usePrivy } from '@privy-io/react-auth'
 import { toast } from 'sonner'
 import UserProfile from './user-profile'
 import { Skeleton } from '../ui/skeleton'
 import { redirect } from 'next/navigation'
+import Notifications from './notifications'
+
 
 const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
     const { user, logout, authenticated, ready } = usePrivy()
-
-    const { currency, setCurrency } = useBalanceStore()
 
     useEffect(() => {
 
@@ -33,8 +30,9 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
     const mobileScreen = (
         <nav className='lg:hidden flex items-center justify-between w-full'>
             <div className='flex items-center gap-3'>
+                <Notifications />
                 <UserProfile />
-                <Select value={currency} onValueChange={(value) => setCurrency(value)}>
+                {/* <Select value={currency} onValueChange={(value) => setCurrency(value)}>
                     <SelectTrigger className='w-20'>
                         <SelectValue />
                     </SelectTrigger>
@@ -48,7 +46,7 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                             ))}
                         </SelectGroup>
                     </SelectContent>
-                </Select>
+                </Select> */}
             </div>
 
             <div className='flex items-center gap-1 sm:gap-2'>
@@ -93,9 +91,9 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
     const largeScreen = (
         <nav className='hidden lg:flex items-center justify-between w-full'>
 
-            <div className='flex items-center gap-4'>
-
-                <Select value={currency} onValueChange={(value) => setCurrency(value)}>
+            <div className='flex items-center gap-1'>
+                <Notifications />
+                {/* <Select value={currency} onValueChange={(value) => setCurrency(value)}>
                     <SelectTrigger className='w-20'>
                         <SelectValue />
                     </SelectTrigger>
@@ -109,7 +107,7 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                             ))}
                         </SelectGroup>
                     </SelectContent>
-                </Select>
+                </Select> */}
                 <UserProfile />
             </div>
             <div className='flex items-center gap-5 justify-end w-full'>

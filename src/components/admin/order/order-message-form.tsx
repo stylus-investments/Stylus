@@ -36,6 +36,15 @@ const OrderMessageForm = ({ initialData, sender }: {
         }
     })
 
+    const pushNotif = trpc.notification.pushNotif.useMutation({
+        onSuccess: () => {
+            socket.emit("new-notif", { user_id: initialData.user_id })
+        },
+        onError: (err) => {
+            toast.error(err.message)
+        }
+    })
+
     // Scroll to bottom when messages change
     useEffect(() => {
         endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,11 +53,14 @@ const OrderMessageForm = ({ initialData, sender }: {
 
     const sendMessage = ({ content, is_image }: { content: string, is_image: boolean }) => {
         setMessages(prev => [...prev, { content, is_image, sender }])
-        socket.emit("message", { orderID: initialData.id, sender, content, is_image })
+        socket.emit("message", { orderID: initialData.id, sender, content, is_image, user_id: initialData.user_id })
         if (sender === 'admin') {
-            socket.emit("user_unseen_messages", { user_id: initialData.user_id, order_id: initialData.id })
-        } else {
-            socket.emit("admin_unseen_messages", { order_id: initialData.id })
+            pushNotif.mutate({
+                user_id: initialData.user_id,
+                from: "Admin",
+                message: "You have new message from your order.",
+                link: `/dashboard/wallet/plans/${initialData.user_investment_plan_id}`
+            })
         }
         saveMessage.mutate({
             content,

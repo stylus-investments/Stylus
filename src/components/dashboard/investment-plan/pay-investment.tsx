@@ -2,28 +2,30 @@
 import { trpc } from '@/app/_trpc/client'
 import { AlertDialog, AlertDialogContent, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ScanQr from './scan-qr'
 import VerifyOrder from './verify-order'
 import { toast } from 'sonner'
 import { Currency } from '@prisma/client'
 import SelectPaymentMethod from './select-payment-method'
 import { socket } from '@/lib/socket'
+import { useRouter } from 'next/navigation'
 
 interface Props {
     investmentPrice: number
     currency: Currency
     orderID: string
-    investmentPlanID: string
 }
 
 const PayInvestmentPlan = ({
     investmentPrice,
     currency,
     orderID,
-    investmentPlanID }: Props) => {
+}: Props) => {
 
     const [open, setOpen] = useState(false)
+
+    const router = useRouter()
 
     const [formData, setFormData] = useState({
         amount: '',
@@ -39,10 +41,6 @@ const PayInvestmentPlan = ({
     })
 
     const updateOrder = trpc.order.payOrder.useMutation()
-
-    const refetchOrder = trpc.investment.retrieveSinglePlan.useQuery(investmentPlanID, {
-        enabled: false
-    })
 
     const closeOrder = () => {
         setOpen(false)
@@ -77,9 +75,8 @@ const PayInvestmentPlan = ({
             if (data) {
                 socket.emit("newOrder", data)
                 toast.success("Success!")
-                refetchOrder.refetch()
+                router.refresh()
                 setOpen(false)
-
             }
 
         } catch (error: any) {

@@ -55,7 +55,7 @@ const OrderTable = ({ orders, filter }: {
                 <TableHeader>
                     <TableRow>
                         <TableHead>Status</TableHead>
-                        <TableHead>Amount (STXBTC)</TableHead>
+                        <TableHead>Amount (sBTC)</TableHead>
                         <TableHead>Messages</TableHead>
                         <TableHead>Receipt</TableHead>
                         <TableHead>Method</TableHead>
@@ -67,8 +67,13 @@ const OrderTable = ({ orders, filter }: {
                             <TableCell>{order.status}</TableCell>
                             <TableCell>{order.amount}</TableCell>
                             <TableCell>
-                                {order.status === (ORDERSTATUS['processing'] || ORDERSTATUS['invalid'] || ORDERSTATUS['paid']) ? <DisplayAdminMessages orderID={order.id} unseen={order.admin_unread_messages} /> : order.status}
+                                {(order.status === ORDERSTATUS['processing'] ||
+                                    order.status === ORDERSTATUS['invalid'] ||
+                                    order.status === ORDERSTATUS['paid']) ?
+                                    <DisplayAdminMessages orderID={order.id} unseen={order.admin_unread_messages} /> :
+                                    order.status}
                             </TableCell>
+
                             <TableCell>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
