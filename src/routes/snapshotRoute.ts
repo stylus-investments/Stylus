@@ -184,7 +184,7 @@ export const snapshotRoute = {
             await db.$disconnect()
         }
     }),
-    reset: publicProcedure.query(async () => {
+    reset: publicProcedure.mutation(async () => {
 
         try {
             await rateLimiter.consume(1);
@@ -226,11 +226,11 @@ export const snapshotRoute = {
             const now = new Date();
             const previousSnapshot = previousSnapshots[0];
             const end_date = new Date(previousSnapshot ? previousSnapshot.end_date : now);
-            end_date.setUTCDate(end_date.getUTCDate() + 1);
+            end_date.setMonth(end_date.getMonth() + 1);
             end_date.setUTCHours(16, 0, 0, 0); // Set end_date to 4:00 PM UTC
 
             if (previousSnapshot) {
-                if (new Date(previousSnapshot.end_date)) {
+                if (new Date(previousSnapshot.end_date) <= now) {
 
                     // Mark previous snapshot as completed
                     const updatedSnapshot = await db.snapshot.update({
