@@ -45,12 +45,14 @@ const AssetsData = ({ assets }: {
             <Label className='text-base -mt-1.5'>
               {asset?.amount ? Number(asset?.amount).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''}
             </Label>
-            <div className='text-muted-foreground text-xs -mt-2'>${asset?.value}</div>
+            <div className='text-muted-foreground text-xs -mt-2'>
+              ${asset?.value ? Number(asset?.value).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''}
+            </div>
             <div className='text-xs text-muted-foreground'>
               {asset?.change}%
             </div>
             <div className='text-md'>
-              ${asset?.total_value}
+              ${asset?.total_value ? Number(asset?.total_value).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''}
             </div>
           </div>
         </div>
@@ -80,7 +82,7 @@ const AssetsData = ({ assets }: {
                 <Label>{asset?.symbol}</Label>
               </TableCell>
               <TableCell>
-                ${asset?.value}
+                ${asset?.value ? Number(asset?.value).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''}
               </TableCell>
               <TableCell>
                 {asset?.change}%
@@ -89,7 +91,7 @@ const AssetsData = ({ assets }: {
                 {asset?.amount ? Number(asset?.amount).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''}
               </TableCell>
               <TableCell className='text-right'>
-                ${asset?.total_value}
+                ${asset?.total_value ? Number(asset?.total_value).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''}
               </TableCell>
             </TableRow>
           )) :
