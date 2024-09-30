@@ -12,7 +12,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 export const metadata: Metadata = {
   title: "Stylus",
   description: footerTexts.description,
-  icons: '/save.webp'
+  icons: '/icons/logo/logo.svg'
 };
 
 export default function RootLayout({

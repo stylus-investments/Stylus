@@ -89,21 +89,20 @@ export const dashboardRoute = {
                     walletAddress: userWalletAddress
                 }),
                 getUserTokenData({
-                    tokenAddress: USDC_ADDRESS,
-                    chain: BASE_CHAIN_ID,
-                    walletAddress: userWalletAddress
-
-                }),
-                getUserTokenData({
                     tokenAddress: SPHP,
                     chain: BASE_CHAIN_ID,
                     walletAddress: userWalletAddress
-
                 }),
                 getUserTokenData({
                     tokenAddress: SAVE,
                     chain: BASE_CHAIN_ID,
                     walletAddress: userWalletAddress
+                }),
+                getUserTokenData({
+                    tokenAddress: USDC_ADDRESS,
+                    chain: BASE_CHAIN_ID,
+                    walletAddress: userWalletAddress
+
                 }),
             ])
 
