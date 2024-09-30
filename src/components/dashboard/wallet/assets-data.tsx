@@ -11,21 +11,27 @@ const AssetsData = ({ assets }: {
     <div className='flex flex-col w-full md:hidden'>
       {assets.length > 0 ? assets.map((asset, i) => (
         <div className='flex items-center justify-between px-3 py-4 border-b w-full' key={i}>
-          <div className='flex iems-start gap-3'>
+          <div className='flex iems-start gap-2.5'>
             <Image src={asset?.logo || "/save.webp"} width={20} height={20} alt={asset?.name || ""} className='rounded-full max-h-[20px] max-w-[20px]' />
             <div className='flex flex-col gap-3'>
               <Label className='text-lg -mt-1.5'>{asset?.symbol}</Label>
               <div className='text-muted-foreground text-xs -mt-2'>{asset?.name}</div>
-              <div className='text-xs'>
+              <div className='text-xs text-muted-foreground'>
                 24h change
+              </div>
+              <div className='text-xs'>
+                Total Value
               </div>
             </div>
           </div>
-          <div className='flex flex-col gap-3 text-right'>
-            <Label className='text-lg -mt-1.5'>{asset?.amount}</Label>
+          <div className='flex flex-col gap-2.5 text-right'>
+            <Label className='text-base -mt-1.5'>{asset?.amount}</Label>
             <div className='text-muted-foreground text-xs -mt-2'>${asset?.value}</div>
-            <div className='text-xs'>
+            <div className='text-xs text-muted-foreground'>
               {asset?.change}%
+            </div>
+            <div className='text-md'>
+              ${asset?.total_value}
             </div>
           </div>
         </div>
@@ -43,6 +49,7 @@ const AssetsData = ({ assets }: {
             <TableHead>Name</TableHead>
             <TableHead>Value</TableHead>
             <TableHead>24h Change</TableHead>
+            <TableHead>Total Value</TableHead>
             <TableHead className='text-right'>Amount</TableHead>
           </TableRow>
         </TableHeader>
@@ -58,6 +65,9 @@ const AssetsData = ({ assets }: {
               </TableCell>
               <TableCell>
                 {asset?.change}%
+              </TableCell>
+              <TableCell>
+                ${asset?.total_value}
               </TableCell>
               <TableCell className='text-right'>
                 {asset?.amount}

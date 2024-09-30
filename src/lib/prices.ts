@@ -1,5 +1,70 @@
 import Moralis from "moralis";
 import { getMoralis } from "./moralis"
+import { TRPCError } from "@trpc/server";
+import axios from "axios";
+import db from "@/db/db";
+import { BASE_CHAIN_ID, USDC_ADDRESS } from "./token_address";
+
+const getTokenValue = async (tokenName: string) => {
+
+    try {
+
+        const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&precision=full`;
+
+        const [bitcoin, usdc, conversionRate] = await Promise.all([
+            axios.get(url, {
+                headers: {
+                    'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
+                }
+            }),
+            Moralis.EvmApi.token.getTokenPrice({
+                chain: BASE_CHAIN_ID,
+                address: USDC_ADDRESS
+            }),
+            db.currency_conversion.findFirst({
+                where: {
+                    currency: "PHP"
+                }
+            })
+        ])
+        if (!conversionRate) throw new TRPCError({
+            code: "NOT_FOUND"
+        })
+
+        const btc_shot = 50000
+        const btc_market = bitcoin.data.bitcoin.usd
+        const btc_delta = btc_market / btc_shot * 100
+        const btc_weight = (btc_delta - 100) / 2
+
+        const usdc_shot = 1
+        const usdc_market = usdc.raw.usdPrice
+        const usdc_delta = usdc_market / usdc_shot * 100
+        const usdc_weight = (usdc_delta - 100) / 4
+
+        const asset_weight = btc_weight + usdc_weight
+        const decimal = asset_weight / 100;
+
+        const index = (1 + 1 * decimal);
+
+        switch (tokenName) {
+            case 'sbtc':
+                return index.toFixed(6)
+            case 'usdc':
+                return usdc_market.toFixed(6)
+            case 'sphp':
+                return (1 / Number(conversionRate.conversion_rate)).toFixed(6)
+            case 'save':
+                return usdc_market.toFixed(6)
+        }
+
+        return 0
+
+    } catch (error) {
+        console.log(error);
+        return 0
+    }
+}
+
 
 const getTokenPrice = async ({ tokenAddress, chain }: {
     tokenAddress: string
@@ -44,91 +109,97 @@ const getUserTokenData = async ({ tokenAddress, chain, walletAddress }: {
             })
         ])
 
-        if (tokenData) {
-            const tokenPrice = tokenData.raw.usdPriceFormatted
-            if (userToken.raw.length > 0) {
-                const userTokenData = userToken.raw[0]
-                const totalTokenValue = Number(tokenPrice) * Number(userTokenData.balance)
+        if (userToken) {
 
-                const balance = Number(userTokenData.balance);
-                if (!balance) return null
-                const decimals = userTokenData.decimals;
-                const formatBalance = decimals > 0 ? balance / (10 ** decimals) : 0;
-                const amount = isNaN(formatBalance) ? "0.0000" : formatBalance.toFixed(6);
+            const tokenPrice = tokenData?.raw.usdPriceFormatted || "0.00"
+            const userTokenData = userToken.raw[0]
+            const balance = Number(userTokenData.balance);
+            if (!balance) return null
+            const decimals = userTokenData.decimals;
+            const formatBalance = decimals > 0 ? balance / (10 ** decimals) : 0;
+            const amount = isNaN(formatBalance) ? "0.0000" : formatBalance.toFixed(6);
+            const tokenValue = await getTokenValue(userTokenData.symbol.toLocaleLowerCase())
 
-                const formatTokenValue = decimals > 0 ? totalTokenValue / (10 ** decimals) : 0;
-                const formattedValue = formatTokenValue.toFixed(6);
-
-                return {
-                    amount,
-                    value: formattedValue,
-                    price: tokenPrice,
-                    name: tokenData.raw.tokenName,
-                    logo: tokenData.raw.tokenLogo,
-                    symbol: tokenData.raw.tokenSymbol,
-                    change:
-                        tokenData.raw["24hrPercentChange"] || "0.00"
-                }
-            } else {
-                return null
+            return {
+                amount,
+                value: tokenValue,
+                total_value: Number(tokenValue) * Number(amount),
+                price: tokenPrice,
+                name: userTokenData.name,
+                logo: userTokenData.logo,
+                symbol: userTokenData.symbol,
+                change: tokenData?.raw["24hrPercentChange"] || "0.00"
             }
+
         } else {
             return null
         }
 
 
     } catch (error) {
-
-        const userToken = await Moralis.EvmApi.token.getWalletTokenBalances({
-            chain: chain,
-            tokenAddresses: [
-                tokenAddress
-            ],
-            address: walletAddress
-        })
-
-        if (userToken.result.length > 0) {
-
-            const userTokenData = userToken.raw[0]
-
-            const tokenPrice = "0.00"
-            const totalTokenValue = Number(tokenPrice) * Number(userTokenData.balance) || 0;
-            const balance = Number(userTokenData.balance);
-            const decimals = userTokenData.decimals;
-            const formatBalance = decimals > 0 ? balance / (10 ** decimals) : 0;
-            const amount = isNaN(formatBalance) ? "0.0000" : formatBalance.toFixed(6);
-
-            const formatTokenValue = decimals > 0 ? totalTokenValue / (10 ** decimals) : 0;
-            const formattedValue = formatTokenValue.toFixed(6) || "0.000000";
-
-            return {
-                amount,
-                value: formattedValue,
-                price: "0.00",
-                name: userTokenData.name,
-                logo: `/save.webp`,
-                symbol: userTokenData.symbol,
-                change: 0.00
-            }
-
-        } else {
-            return null
-        }
+        console.log(error)
+        return null
     }
 }
 
-const getCurrentBalance = ({ usdcPrice = '1', totalUsdc = '0.00', totalSave = '0.00' }: {
-    usdcPrice: string
-    totalUsdc: string | undefined
-    totalSave: string | undefined
+const getCurrentBalance = async ({ totalUSDC = '0.00', totalSAVE = '0.00', totalSBTC = '0.00', totalSPHP = '0.00' }: {
+    totalUSDC: string | undefined
+    totalSAVE: string | undefined
+    totalSBTC: string | undefined
+    totalSPHP: string | undefined
 }) => {
 
-    const usdcConvertedPrice = Number(usdcPrice) * Number(totalUsdc)
-    const convertedSavePrice = Number(usdcPrice) * Number(totalSave)
+    try {
 
-    // const totalBalance = (usdcConvertedPrice + )
+        await getMoralis()
+        const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&precision=full`;
 
-    return (usdcConvertedPrice + convertedSavePrice).toString()
+        const [bitcoin, usdc, conversionRate] = await Promise.all([
+            axios.get(url, {
+                headers: {
+                    'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
+                }
+            }),
+            Moralis.EvmApi.token.getTokenPrice({
+                chain: BASE_CHAIN_ID,
+                address: USDC_ADDRESS
+            }),
+            db.currency_conversion.findFirst({
+                where: {
+                    currency: "PHP"
+                }
+            })
+        ])
+        if (!conversionRate) throw new TRPCError({
+            code: "NOT_FOUND"
+        })
+
+        const btc_shot = 50000
+        const btc_market = bitcoin.data.bitcoin.usd
+        const btc_delta = btc_market / btc_shot * 100
+        const btc_weight = (btc_delta - 100) / 2
+
+        const usdc_shot = 1
+        const usdc_market = usdc.raw.usdPrice
+        const usdc_delta = usdc_market / usdc_shot * 100
+        const usdc_weight = (usdc_delta - 100) / 4
+
+        const asset_weight = btc_weight + usdc_weight
+        const decimal = asset_weight / 100;
+
+        const index = (1 + 1 * decimal);
+
+        const convertedSbtcPrice = index * Number(totalSBTC)
+        const usdcConvertedPrice = Number(usdc_market) * Number(totalUSDC)
+        const convertedSavePrice = Number(usdc_market) * Number(totalSAVE)
+        const convertedSphpPrice = Number(totalSPHP) / Number(conversionRate.conversion_rate);
+
+        return (usdcConvertedPrice + convertedSavePrice + convertedSbtcPrice + convertedSphpPrice).toString()
+
+    } catch (error) {
+        console.log(error);
+        return null
+    }
 }
 
 const getRewardsAccumulated = ({ usdcPrice = '1', totalEarn = '0.00', totalSvn = '0.00' }: {

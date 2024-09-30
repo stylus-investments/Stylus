@@ -1,9 +1,9 @@
 import { currency_conversion } from "@prisma/client";
 
 // Function to calculate balance array
-const calculateBalanceArray = ({ currencyExchangeRate, balance }: {
+const calculateBalanceArray = ({ currencyExchangeRate, balance = '0.00' }: {
     currencyExchangeRate: currency_conversion[]
-    balance: string
+    balance: string | null
 }) => {
 
     // Map through currency exchange rates to calculate balances

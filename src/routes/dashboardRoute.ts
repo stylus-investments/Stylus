@@ -3,7 +3,7 @@ import db from "@/db/db";
 import { getMoralis } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import Moralis from "moralis";
-import { getCurrentBalance, getRewardsAccumulated, getTokenPrice, getUserTokenData } from "@/lib/prices";
+import { getCurrentBalance, getRewardsAccumulated, getUserTokenData } from "@/lib/prices";
 import { calculateBalanceArray } from "@/lib/balances";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { getUserId, privy } from "@/lib/privy";
@@ -78,10 +78,7 @@ export const dashboardRoute = {
 
             const userWalletAddress = user.wallet?.address as string
 
-            const [usdcPrice, currencyExchangeRate] = await Promise.all([
-                getTokenPrice({ chain: BASE_CHAIN_ID, tokenAddress: USDC_ADDRESS }),
-                db.currency_conversion.findMany()
-            ])
+            const currencyExchangeRate = await db.currency_conversion.findMany()
 
             const getAssets = await Promise.all([
                 getUserTokenData({
@@ -110,10 +107,11 @@ export const dashboardRoute = {
 
             const assets = getAssets.filter(asset => asset !== null)
 
-            const currentBalance = getCurrentBalance({
-                usdcPrice: usdcPrice?.result.usdPriceFormatted as string,
-                totalUsdc: assets.find(asset => asset?.symbol === 'USDC')?.amount,
-                totalSave: assets.find(asset => asset?.symbol === 'sAVE')?.amount
+            const currentBalance = await getCurrentBalance({
+                totalUSDC: assets.find(asset => asset?.symbol === 'USDC')?.amount,
+                totalSAVE: assets.find(asset => asset?.symbol === 'sAVE')?.amount,
+                totalSBTC: assets.find(asset => asset?.symbol === 'sBTC')?.amount,
+                totalSPHP: assets.find(asset => asset?.symbol === 'sPHP')?.amount,
             })
 
             const currentBalanceArray = calculateBalanceArray({ currencyExchangeRate, balance: currentBalance })
