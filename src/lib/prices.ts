@@ -117,7 +117,7 @@ const getUserTokenData = async ({ tokenAddress, chain, walletAddress }: {
             return {
                 amount,
                 value: tokenValue,
-                total_value: Number(tokenValue) * Number(amount),
+                total_value: (Number(tokenValue) * Number(amount)).toFixed(6),
                 price: tokenPrice,
                 name: userTokenData.name,
                 logo: userTokenData.logo,
