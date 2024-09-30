@@ -49,8 +49,8 @@ const AssetsData = ({ assets }: {
             <TableHead>Name</TableHead>
             <TableHead>Value</TableHead>
             <TableHead>24h Change</TableHead>
-            <TableHead className='text-right'>Amount</TableHead>
-            <TableHead>Total Value</TableHead>
+            <TableHead >Amount</TableHead>
+            <TableHead className='text-right'>Total Value</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -66,10 +66,10 @@ const AssetsData = ({ assets }: {
               <TableCell>
                 {asset?.change}%
               </TableCell>
-              <TableCell className='text-right'>
+              <TableCell>
                 {asset?.amount}
               </TableCell>
-              <TableCell>
+              <TableCell className='text-right'>
                 ${asset?.total_value}
               </TableCell>
             </TableRow>
