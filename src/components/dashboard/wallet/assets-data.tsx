@@ -66,10 +66,10 @@ const AssetsData = ({ assets }: {
               <TableCell>
                 {asset?.change}%
               </TableCell>
+              <TableCell className='text-right'>
+                {asset?.amount}
+              </TableCell>
               <TableCell>
-                <TableCell className='text-right'>
-                  {asset?.amount}
-                </TableCell>
                 ${asset?.total_value}
               </TableCell>
             </TableRow>
