@@ -7,9 +7,7 @@ const AssetsData = ({ assets }: {
   assets: Awaited<ReturnType<typeof caller['dashboard']['getWalletData']>>['balances']['assets']
 }) => {
 
-  const returnAssetIcon = (symbol: string) => {
-
-    console.log(symbol)
+  const returnAssetIcon = (symbol: string | undefined) => {
 
     switch (symbol) {
       case 'sPHP':
