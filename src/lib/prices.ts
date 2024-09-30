@@ -60,7 +60,6 @@ const getTokenValue = async (tokenName: string) => {
         return 0
 
     } catch (error) {
-        console.log(error);
         return 0
     }
 }
@@ -73,8 +72,6 @@ const getTokenPrice = async ({ tokenAddress, chain }: {
 
     try {
 
-        await getMoralis()
-
         const tokenData = await Moralis.EvmApi.token.getTokenPrice({
             chain: chain,
             address: tokenAddress
@@ -83,7 +80,6 @@ const getTokenPrice = async ({ tokenAddress, chain }: {
         return tokenData
 
     } catch (err) {
-        console.log(err)
         return null
     }
 }
@@ -95,8 +91,6 @@ const getUserTokenData = async ({ tokenAddress, chain, walletAddress }: {
 }) => {
 
     try {
-
-        await getMoralis()
 
         const [tokenData, userToken] = await Promise.all([
             getTokenPrice({ tokenAddress, chain }),
@@ -137,7 +131,6 @@ const getUserTokenData = async ({ tokenAddress, chain, walletAddress }: {
 
 
     } catch (error) {
-        console.log(error)
         return null
     }
 }
@@ -151,7 +144,6 @@ const getCurrentBalance = async ({ totalUSDC = '0.00', totalSAVE = '0.00', total
 
     try {
 
-        await getMoralis()
         const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&precision=full`;
 
         const [bitcoin, usdc, conversionRate] = await Promise.all([
@@ -197,7 +189,6 @@ const getCurrentBalance = async ({ totalUSDC = '0.00', totalSAVE = '0.00', total
         return (usdcConvertedPrice + convertedSavePrice + convertedSbtcPrice + convertedSphpPrice).toString()
 
     } catch (error) {
-        console.log(error);
         return null
     }
 }

@@ -80,6 +80,8 @@ export const dashboardRoute = {
 
             const currencyExchangeRate = await db.currency_conversion.findMany()
 
+            await getMoralis()
+
             const getAssets = await Promise.all([
                 getUserTokenData({
                     tokenAddress: SBTC,
@@ -149,6 +151,8 @@ export const dashboardRoute = {
 
         const userWalletAddress = user.wallet?.address as string
 
+        await getMoralis()
+
         const [currencyExchangeRate, usdcPrice, userSnapshots] = await Promise.all([
             db.currency_conversion.findMany(),
             getUserTokenData({
@@ -191,7 +195,6 @@ export const dashboardRoute = {
             }
             return total
         }, 0).toFixed(10)
-
 
         const dashboardRewardData = {
             balances: {
