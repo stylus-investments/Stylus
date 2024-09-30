@@ -171,7 +171,7 @@ const OrderMessageForm = ({ initialData, sender }: {
 
                             return (
                                 <div key={i} className='flex self-start items-start gap-2'>
-                                    <Image src={'/save.webp'} alt='Stylus Logo' width={30} height={30} className='rounded-full pt-1' />
+                                    <Image src={'/icons/logo/logo.svg'} alt='Stylus Logo' width={30} height={30} className='rounded-full pt-1' />
                                     <div key={i} className='bg-muted rounded-md px-4 py-3'>
                                         {message.is_image ?
                                             <Link href={message.content} target='_blank'>
