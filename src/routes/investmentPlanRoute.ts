@@ -34,7 +34,7 @@ export const investmentPlanRoute = {
         //need to be changed
         if (user.status !== 'VERIFIED') throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Setup your profile first."
+            message: "Please complete your profile and wait for verification before proceeding."
         })
 
         const { name, package_id, base_price, profit_protection, insurance, total_price } = opts.input
