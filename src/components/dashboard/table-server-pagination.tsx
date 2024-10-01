@@ -33,7 +33,7 @@ const TableServerPagination = ({ pagination }: {
                 <div className='font-medium md:text-base'>
                     Page {page} of {totalPages}
                 </div>
-                <div className='relative w-1/4'>
+                <div className='relative w-44'>
                     <Input
                         type='number'
                         className='outline-none border px-3 py-1 w-full'

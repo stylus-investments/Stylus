@@ -11,10 +11,16 @@ const CompleteOrder = ({ orderID }: {
     orderID: string,
 }) => {
 
+    const { refetch } = trpc.message.getOrderMessages.useQuery({ sender: 'admin', orderID }, {
+        enabled: false,
+        refetchOnMount: false
+    })
+
     const [open, setOpen] = useState(false)
 
     const { mutateAsync, isPending } = trpc.order.completeOrder.useMutation({
         onSuccess: () => {
+            refetch()
             socket.emit("update", { orderID, status: "completed" })
             toast.success("Success! Order updated")
             setOpen(false)

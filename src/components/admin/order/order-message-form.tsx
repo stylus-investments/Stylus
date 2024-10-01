@@ -18,6 +18,7 @@ const OrderMessageForm = ({ initialData, sender }: {
     sender: 'admin' | 'user',
 }) => {
 
+
     const [orderStatus, setOrderStatus] = useState(initialData.status)
     const [isClosed, setIsClosed] = useState(initialData.closed)
     const endOfMessagesRef = useRef<any>(null);
@@ -48,7 +49,8 @@ const OrderMessageForm = ({ initialData, sender }: {
     // Scroll to bottom when messages change
     useEffect(() => {
         endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        setIsClosed(initialData.closed)
+    }, [messages, initialData.closed]);
 
 
     const sendMessage = ({ content, is_image }: { content: string, is_image: boolean }) => {

@@ -10,6 +10,7 @@ import { caller } from '@/app/_trpc/server';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { ORDERSTATUS } from '@/constant/order';
 
 const UserPlansTable = ({ initialData }: {
     initialData: Awaited<ReturnType<typeof caller['investment']['getUserInvestmentPlans']>>
@@ -62,7 +63,7 @@ const UserPlansTable = ({ initialData }: {
                             {currentTable && currentTable.length > 0 ? currentTable.map((plan, i) => (
                                 <TableRow key={plan.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
                                     <TableCell>
-                                        <Link href={`/dashboard/wallet/plans/${plan.id}`}>
+                                        <Link href={`/dashboard/wallet/plans/${plan.id}?status=${ORDERSTATUS['unpaid']}`}>
                                             <Button className='h-7'>View</Button>
                                         </Link>
                                     </TableCell>

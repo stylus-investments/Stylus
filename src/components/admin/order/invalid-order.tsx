@@ -12,10 +12,16 @@ const InvalidOrder = ({ orderID }: {
 
 }) => {
 
+    const { refetch } = trpc.message.getOrderMessages.useQuery({ sender: 'admin', orderID }, {
+        enabled: false,
+        refetchOnMount: false
+    })
+
     const [open, setOpen] = useState(false)
 
     const { mutateAsync, isPending } = trpc.order.invalidOrder.useMutation({
         onSuccess: () => {
+            refetch()
             socket.emit("update", { orderID, status: "invalid" })
             toast.success("Success! Order updated")
             setOpen(false)

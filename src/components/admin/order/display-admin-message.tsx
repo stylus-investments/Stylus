@@ -21,6 +21,8 @@ const DisplayAdminMessages = ({ orderID, unseen }: {
         enabled: open
     })
 
+    console.log(order)
+
     useEffect(() => {
 
         if (open) {

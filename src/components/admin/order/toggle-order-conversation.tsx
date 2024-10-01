@@ -13,10 +13,17 @@ const ToggleOrderConversation = ({ orderID, closed }:
         closed?: boolean
     }) => {
 
+
+    const { refetch } = trpc.message.getOrderMessages.useQuery({ sender: 'admin', orderID }, {
+        enabled: false,
+        refetchOnMount: false
+    })
+
     const [open, setOpen] = useState(false)
 
     const { mutateAsync, isPending } = trpc.order.toggleOrderConversation.useMutation({
         onSuccess: () => {
+            refetch()
             socket.emit("update", { orderID, status: "closed" })
             toast.success("Success! Order updated")
             setOpen(false)
