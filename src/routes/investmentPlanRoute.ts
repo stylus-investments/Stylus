@@ -31,7 +31,8 @@ export const investmentPlanRoute = {
             message: "User not found"
         })
 
-        if (!user.first_name) throw new TRPCError({
+        //need to be changed
+        if (user.status !== 'VERIFIED') throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Setup your profile first."
         })

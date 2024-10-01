@@ -204,7 +204,6 @@ const CreateInvestment = () => {
                                 )
                             }
                         }
-
                     })}
                     <div className='flex items-center justify-between w-full pt-5 border-t'>
                         <Label>{data && data.map(obj => {
@@ -220,7 +219,7 @@ const CreateInvestment = () => {
                     <Separator />
                     {formData.base_price ? <div className='flex w-full items-center gap-5'>
                         <Checkbox id='agree' required className='w-5 h-5' />
-                        <Label htmlFor='agree'>With this plan, I agree to be paying {formData.total_price} PHP per month for the next {selectedDuration} years with the agreed benefits previewed on the plan creation</Label>
+                        <Label htmlFor='agree'>With this plan, I agree to be paying {formData.total_price} PHP per month for the next {selectedDuration} years with the agreed benefits previewed on the plan creation.</Label>
                     </div> : null}
                     <AlertDialogFooter className=' w-full flex-row flex items-center gap-10'>
                         <Button className='w-full' variant={'secondary'} type='button' onClick={() => setOpen(false)}>Close</Button>
