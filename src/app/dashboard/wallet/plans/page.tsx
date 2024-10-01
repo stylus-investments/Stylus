@@ -9,6 +9,7 @@ import React from 'react'
 
 const InvestmentPlanPage = async () => {
 
+    console.log("Test")
     cookies()
     const user = await getUserId()
     if (!user) redirect('/connect')

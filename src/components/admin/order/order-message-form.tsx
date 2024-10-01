@@ -115,7 +115,7 @@ const OrderMessageForm = ({ initialData, sender }: {
                 <div className='flex items-center w-full text-muted-foreground'>
                     <div className='flex flex-col gap-2 w-full'>
                         <small className='text-foreground font-bold'>PRICE: {initialData.user_investment_plan.total_price}</small>
-                        <small className='text-foreground font-bold'>STXBTC: {initialData.amount}</small>
+                        <small className='text-foreground font-bold'>SBTC: {initialData.amount}</small>
                     </div>
                     <div className='flex flex-col gap-2 w-full items-end'>
                         <small>METHOD: {initialData.method}</small>
