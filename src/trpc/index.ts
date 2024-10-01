@@ -27,4 +27,4 @@ export const appRouter = router({
     notification: notificationRoute
 })
 
-export type AppRouter = typeof appRouter;
+export type AppRouter = typeof appRouter

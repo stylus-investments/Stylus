@@ -102,7 +102,7 @@ const SelectPaymentMethod = (props: {
                 </Popover>
             </div>
             <div className='flex flex-col gap-2'>
-                <Label>Amount (STXBTC)</Label>
+                <Label>Amount (sBTC)</Label>
                 <Input type="number" value={formData.amount} readOnly />
             </div>
             <div className='flex flex-col gap-2'>
