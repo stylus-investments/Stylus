@@ -90,8 +90,7 @@ export const tokenRoute = {
             //index price
             const index = 1 + 1 * decimal;
 
-            return index * Number(conversionRate.conversion_rate)
-
+            return index 
         } catch (error: any) {
             console.log(error);
             throw new TRPCError({

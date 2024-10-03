@@ -24,7 +24,7 @@ export const ourFileRouter = {
             // This code RUNS ON YOUR SERVER after upload
             // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
         }),
-    profileIdUploader: f({ image: { maxFileCount: 2, maxFileSize: "8MB" } })
+    profileIdUploader: f({ image: { maxFileCount: 1, maxFileSize: "8MB" } })
         .middleware(async () => {
 
             const user = await getUserId();

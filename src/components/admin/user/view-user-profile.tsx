@@ -4,20 +4,19 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenuShortcut } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { socket } from '@/lib/socket'
 import useGlobalStore from '@/state/globalStore'
 import { ProfileStatus, user_info } from '@prisma/client'
 import { Ban, CircleCheckBig, CircleOff, Clock, LoaderCircle, User } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 const ViewUserProfile = ({ user }: {
   user: user_info
 }) => {
-
-  const user_id_images = user.id_image as string[]
 
   const [open, setOpen] = useState(false)
 
@@ -50,6 +49,13 @@ const ViewUserProfile = ({ user }: {
       }
     }
   }
+
+  useEffect(() => {
+    socket.connect()
+    return () => {
+      socket.disconnect()
+    }
+  }, [])
 
   const { copyText } = useGlobalStore()
 
@@ -104,12 +110,12 @@ const ViewUserProfile = ({ user }: {
           </div>
           <div className='flex flex-col w-full gap-1.5'>
             <Label>Uploaded ID</Label>
-            <div className='flex items-center gap-3 overflow-x-auto py-2'>
-              <Link href={user_id_images[0] || '/admin/user'} target='_blank'>
-                <Image src={user_id_images[0] || '/qrpay.jpeg'} alt='Image' width={100} height={50} className='max-w-[300px] object-scale-down w-full min-h-24 cursor-pointer rounded-md border border-primary' />
+            <div className='flex items-center gap-3 overflow-x-auto py-2 w-full'>
+              <Link href={user.front_id || '/admin/user'} target='_blank' className='w-full'>
+                <Image src={user.front_id || '/qrpay.jpeg'} alt='Image' width={300} height={50} className='w-full object-contain h-32 cursor-pointer rounded-md border border-primary' />
               </Link>
-              <Link href={user_id_images[1] || '/admin/user'} target='_blank'>
-                <Image src={user_id_images[1] || '/qrpay.jpeg'} alt='Image' width={100} height={50} className='max-w-[300px] object-scale-down w-full min-h-24 cursor-pointer rounded-md border border-primary' />
+              <Link href={user.back_id || '/admin/user'} target='_blank' className='w-full'>
+                <Image src={user.back_id || '/qrpay.jpeg'} alt='Image' width={300} height={50} className='object-contain w-full h-32 cursor-pointer rounded-md border border-primary' />
               </Link>
             </div>
           </div>
@@ -136,6 +142,7 @@ const UpdateUserStatus = ({ user_id, status }: {
 
   const { mutateAsync, isPending } = trpc.user.updateUserStatus.useMutation({
     onSuccess: () => {
+      socket.emit("new-notif", { user_id })
       toast.success(`Success! this user is ${status.toLocaleLowerCase()}.`)
       router.refresh()
       setOpen(false)
@@ -144,6 +151,7 @@ const UpdateUserStatus = ({ user_id, status }: {
       toast.error(error.message)
     },
   })
+
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>

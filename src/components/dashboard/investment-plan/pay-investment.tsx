@@ -10,6 +10,7 @@ import { Currency } from '@prisma/client'
 import SelectPaymentMethod from './select-payment-method'
 import { socket } from '@/lib/socket'
 import { useRouter } from 'next/navigation'
+import { ORDERSTATUS } from '@/constant/order'
 
 interface Props {
     investmentPrice: number
@@ -75,8 +76,10 @@ const PayInvestmentPlan = ({
             if (data) {
                 socket.emit("newOrder", data)
                 toast.success("Success!")
-                router.refresh()
                 setOpen(false)
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('status', ORDERSTATUS['processing']);
+                router.push(currentUrl.toString())
             }
 
         } catch (error: any) {

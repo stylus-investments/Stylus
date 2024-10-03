@@ -123,23 +123,27 @@ model order_message {
 }
 
 model user_info {
-  user_id           String                 @id
-  wallet            String
-  status            ProfileStatus          @default(INCOMPLETE)
-  first_name        String
-  last_name         String
-  email             String
-  mobile            String
-  age               String
-  id_image          Json
-  birth_date        DateTime
-  created_at        DateTime               @default(now())
-  updated_at        DateTime               @updatedAt
-  investment_plans  user_investment_plan[]
-  referral_payout   referral_payout[]
-  inviter_reward    referral_reward[]
-  referral_info     referral_info[]
-  user_notification user_notification[]
+  user_id              String                 @id
+  wallet               String
+  status               ProfileStatus          @default(INCOMPLETE)
+  first_name           String
+  last_name            String
+  email                String
+  mobile               String
+  age                  String
+  id_image             Json?
+  front_id             String?
+  back_id              String?
+  verification_message String?
+  verified_attemp      Int                    @default(0)
+  birth_date           DateTime
+  created_at           DateTime               @default(now())
+  updated_at           DateTime               @updatedAt
+  investment_plans     user_investment_plan[]
+  referral_payout      referral_payout[]
+  inviter_reward       referral_reward[]
+  referral_info        referral_info[]
+  user_notification    user_notification[]
 }
 
 model user_notification {

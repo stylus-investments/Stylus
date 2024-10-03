@@ -84,7 +84,10 @@ export const userRoute = {
             const data = {
                 ...createInitialInfo,
                 birth_date: createInitialInfo.birth_date.toISOString(),
-                id_image: createInitialInfo.id_image as string[]
+                id_image: undefined,
+                created_at: createInitialInfo.created_at.toISOString(),
+                updated_at: createInitialInfo.updated_at.toISOString(),
+                status: createInitialInfo.status as string
             }
 
             return data
@@ -95,7 +98,10 @@ export const userRoute = {
         const data = {
             ...userInfo,
             birth_date: userInfo.birth_date.toISOString(),
-            id_image: userInfo.id_image as string[]
+            id_image: undefined,
+            created_at: userInfo.created_at.toISOString(),
+            updated_at: userInfo.updated_at.toISOString(),
+            status: userInfo.status as string
         }
 
         return data
@@ -107,7 +113,6 @@ export const userRoute = {
         email: z.string(),
         mobile: z.string(),
         age: z.string(),
-        id_image: z.string().array(),
         birth_date: z.string(),
     })).mutation(async (opts) => {
 
@@ -203,7 +208,6 @@ export const userRoute = {
         } finally {
             await db.$disconnect()
         }
-
     }),
     updateUserStatus: publicProcedure.input(z.object({
         user_id: z.string(),
@@ -229,6 +233,28 @@ export const userRoute = {
                 message: "Failed to update user"
             })
 
+            const getProfileStatusMessage = (profileStatus: string) => {
+                if (profileStatus === ProfileStatus['VERIFIED']) {
+                    return 'Awesome! Your profile is all set and verified! 🎉';
+                }
+                return 'Your profile status is invalid. Please check your information.';
+            }
+
+            const message = getProfileStatusMessage(input.status)
+
+            await db.user_notification.create({
+                data: {
+                    user: {
+                        connect: {
+                            user_id: updateUser.user_id
+                        }
+                    },
+                    message: message,
+                    link: "/dashboard/profile",
+                    from: "Stylus Investments"
+                }
+            })
+
             return true
 
         } catch (error: any) {
@@ -240,7 +266,37 @@ export const userRoute = {
         } finally {
             await db.$disconnect()
         }
+    }),
+    updateProfileID: publicProcedure.input(z.object({
+        front_id: z.string().optional(),
+        back_id: z.string().optional(),
+    })).mutation(async ({ input }) => {
+        try {
 
+            const auth = await getUserId()
+            if (!auth) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
 
+            await db.user_info.update({
+                where: {
+                    user_id: auth
+                }, data: {
+                    front_id: input.front_id,
+                    back_id: input.back_id
+                }
+            })
+
+            return true
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code || "INTERNAL_SERVER_ERROR",
+                message: error.message || "Server error"
+            })
+        } finally {
+            await db.$disconnect()
+        }
     })
 }
