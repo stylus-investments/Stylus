@@ -18,9 +18,6 @@ const OrderMessageForm = ({ initialData, sender }: {
     sender: 'admin' | 'user',
 }) => {
 
-
-    const [orderStatus, setOrderStatus] = useState(initialData.status)
-    const [isClosed, setIsClosed] = useState(initialData.closed)
     const endOfMessagesRef = useRef<any>(null);
 
     const [messages, setMessages] = useState<{
@@ -49,9 +46,8 @@ const OrderMessageForm = ({ initialData, sender }: {
     // Scroll to bottom when messages change
     useEffect(() => {
         endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-        setIsClosed(initialData.closed)
-    }, [messages, initialData.closed]);
 
+    }, [messages]);
 
     const sendMessage = ({ content, is_image }: { content: string, is_image: boolean }) => {
         setMessages(prev => [...prev, { content, is_image, sender }])
@@ -80,25 +76,9 @@ const OrderMessageForm = ({ initialData, sender }: {
             setMessages((prevMessages) => [...prevMessages, data]);
         });
 
-        socket.on('update', (data) => {
-            if (data === 'closed') {
-                setIsClosed(prev => !prev)
-                return toast(isClosed ? "Conversation has been open." : "Conversation has been closed.")
-            }
-            if (data === 'completed') {
-                setOrderStatus(data)
-                return toast.success("Success! Order has been completed.")
-            }
-
-            setOrderStatus(data)
-            return toast.error("This order has been marked as invalid by the admin.");
-        })
-
         return () => {
             socket.off("message")
-            socket.off("update")
         }
-
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -111,7 +91,7 @@ const OrderMessageForm = ({ initialData, sender }: {
             }
         }>
             <div className='flex flex-col gap-5 border-b pb-5 relative'>
-                <OrderTimer created_at={initialData.created_at} status={orderStatus} />
+                <OrderTimer created_at={initialData.created_at} status={initialData.status} />
                 <div className='flex items-center w-full text-muted-foreground'>
                     <div className='flex flex-col gap-2 w-full'>
                         <small className='text-foreground font-bold'>PRICE: {initialData.user_investment_plan.total_price}</small>
@@ -190,7 +170,7 @@ const OrderMessageForm = ({ initialData, sender }: {
                 <div ref={endOfMessagesRef} />
             </div>
             <div className='w-full'>
-                {!isClosed ? <div className='flex items-center gap-2  w-full'>
+                {!initialData.closed ? <div className='flex items-center gap-2  w-full'>
                     <UploadButton
                         endpoint='orderReceiptUploader'
                         onClientUploadComplete={(res) => {

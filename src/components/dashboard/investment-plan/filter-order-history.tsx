@@ -66,7 +66,6 @@ const FilterOrderHistory = ({ name, status }: {
                             <SelectItem value={ORDERSTATUS['unpaid']}>Unpaid</SelectItem>
                             <SelectItem value={ORDERSTATUS['upcoming']}>Upcoming</SelectItem>
                             <SelectItem value={ORDERSTATUS['invalid']}>Invalid</SelectItem>
-                            <SelectItem value={ORDERSTATUS['inactive']}>Inactive</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

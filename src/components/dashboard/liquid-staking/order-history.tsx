@@ -20,8 +20,6 @@ const OrderHistory = ({ initialData }: {
 
     const returnStatusButton = (status: string) => {
         switch (status) {
-            case ORDERSTATUS['inactive']:
-                return <Button className='h-7' variant={'secondary'}>Inactive</Button>
             case ORDERSTATUS['processing']:
                 return <Button className='h-7'>Processing</Button>
             case ORDERSTATUS['unpaid']:
@@ -84,11 +82,11 @@ const OrderHistory = ({ initialData }: {
                                                 currency="PHP"
                                             />
                                             :
-                                            order.status === ORDERSTATUS['upcoming'] ? "upcoming" : order.status === ORDERSTATUS['inactive'] ? "inactive" :
+                                            order.status === ORDERSTATUS['upcoming'] ? "upcoming" :
                                                 <DisplayClientMessages orderID={order.id} unseen={order.user_unread_messages} />
                                         }
                                     </TableCell>
-                                    <TableCell>{order.amount === ORDERSTATUS['inactive'] ? "N/A" : order.amount}</TableCell>
+                                    <TableCell>{order.amount}</TableCell>
                                     <TableCell>
                                         {returnStatusButton(order.status)}
                                     </TableCell>

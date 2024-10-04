@@ -3,8 +3,7 @@ const ORDERSTATUS = {
     'invalid': 'invalid',
     'processing': 'processing',
     'paid': 'paid',
-    'upcoming': "upcoming",
-    "inactive": "inactive"
+    'upcoming': "upcoming"
 }
 const PAYMENT_METHOD = {
     'GCASH': 'GCASH',

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { PAYMENT_METHOD } from '@/constant/order'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -56,50 +56,33 @@ const SelectPaymentMethod = (props: {
             <h1 className='border-b pb-5 text-lg'>Order Form</h1>
             <div className='flex flex-col gap-2'>
                 <Label>Payment Method</Label>
-                <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={open}
-                            className="w-full justify-between uppercase"
-                        >
-                            {formData.method
-                                ? formData.method
-                                : "Select Payment Method"}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
-                        <Command>
-                            <CommandInput placeholder="Search Payment Method" />
-                            <CommandList>
-                                <CommandEmpty>No method found.</CommandEmpty>
-                                <CommandGroup>
-                                    {Object.keys(PAYMENT_METHOD).map((method, i) => (
-                                        <CommandItem
-                                            key={i}
-                                            value={method}
-                                            onSelect={(currentValue) => {
-                                                setFormData(prev => ({ ...prev, method: currentValue }))
-                                                setOpen(false)
-                                            }}
-                                            className='uppercase'
-                                        >
-                                            <Check
-                                                className={cn(
-                                                    "mr-2 h-4 w-4",
-                                                    formData.method === method ? "opacity-100" : "opacity-0"
-                                                )}
-                                            />
-                                            {method}
-                                        </CommandItem>
-                                    ))}
-                                </CommandGroup>
-                            </CommandList>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
+                <Command>
+                    <CommandInput placeholder="Search Payment Method" />
+                    <CommandList>
+                        <CommandEmpty>No method found.</CommandEmpty>
+                        <CommandGroup className='max-h-16 overflow-y-auto'>
+                            {Object.keys(PAYMENT_METHOD).map((method, i) => (
+                                <CommandItem
+                                    key={i}
+                                    value={method}
+                                    onSelect={(currentValue) => {
+                                        setFormData(prev => ({ ...prev, method: currentValue }))
+                                        setOpen(false)
+                                    }}
+                                    className='uppercase'
+                                >
+                                    <Check
+                                        className={cn(
+                                            "mr-2 h-4 w-4",
+                                            formData.method === method ? "opacity-100" : "opacity-0"
+                                        )}
+                                    />
+                                    {method}
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
             </div>
             <div className='flex flex-col gap-2'>
                 <Label>Amount (sBTC)</Label>

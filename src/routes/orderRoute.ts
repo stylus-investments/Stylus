@@ -51,66 +51,6 @@ export const orderRoute = {
         };
 
     }),
-    createOrders: publicProcedure.query(async () => {
-        try {
-
-            await rateLimiter.consume(1)
-
-            const now = new Date()
-
-            const plans = await db.user_investment_plan.findMany({
-                where: {
-                    next_order_creation: {
-                        lte: now
-                    },
-                },
-                select: {
-                    id: true,
-                    user_id: true
-                }
-            })
-
-            if (plans.length > 0) {
-
-                const ordersData = plans.map(plan => ({
-                    amount: 'Pay First.',
-                    user_id: plan.user_id,
-                    status: ORDERSTATUS['unpaid'],
-                    receipt: '/qrpay.webp',
-                    method: PAYMENT_METHOD['GCASH'],
-                    user_investment_plan_id: plan.id
-                }));
-
-                const nextMonth = new Date(now.setMonth(now.getMonth() + 1));
-                nextMonth.setHours(0, 0, 0, 0);
-                await db.user_order.createMany({
-                    data: ordersData
-                })
-
-                await db.user_investment_plan.updateMany({
-                    where: {
-                        id: {
-                            in: plans.map(plan => plan.id)
-                        }
-                    },
-                    data: {
-                        next_order_creation: nextMonth
-                    }
-                })
-            }
-
-            return true
-
-        } catch (error: any) {
-            console.log(error);
-            throw new TRPCError({
-                code: error.code || "INTERNAL_SERVER_ERROR",
-                message: error.message || "Server error"
-            })
-        } finally {
-            await db.$disconnect()
-        }
-    }),
     payOrder: publicProcedure.input(z.object({
         data: z.object({
             receipt: z.string(),
@@ -185,6 +125,7 @@ export const orderRoute = {
             where: { id: orderID }, select: {
                 id: true,
                 user_id: true,
+                status: true,
                 user_investment_plan: {
                     select: {
                         id: true,
@@ -198,14 +139,28 @@ export const orderRoute = {
             message: "Order not found"
         })
 
-        // if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
-        //     code: 'BAD_REQUEST',
-        //     message: "This order is invalid or paid"
-        // })
+        if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: "This order is invalid or paid"
+        })
 
         const updateOrder = await db.user_order.update({
             where: { id: order.id },
-            data: { status: ORDERSTATUS['paid'] }
+            data: {
+                status: ORDERSTATUS['paid'],
+                user_investment_plan: {
+                    update: {
+                        where: {
+                            id: order.user_investment_plan.id
+                        },
+                        data: {
+                            payment_count: {
+                                decrement: 1
+                            }
+                        }
+                    }
+                }
+            }
         })
         if (!updateOrder) throw new TRPCError({
             code: "BAD_REQUEST",
@@ -291,7 +246,6 @@ export const orderRoute = {
                 })
             }
 
-
             if (secondaryUser.inviter_referral_code) {
 
                 // Update their unclaimed_reward based on order.base_price
@@ -311,7 +265,6 @@ export const orderRoute = {
                             }
                         }
                     }),
-
                     // Increase the secondary inviter's user referral reward
                     db.referral_reward.update({
                         where: {
@@ -324,9 +277,7 @@ export const orderRoute = {
                     }),
                 ])
 
-
                 if (userpaidOrders.length === 1 && secondaryUser.inviter_referral_code) {
-
                     await db.referral_info.update({
                         where: {
                             referral_code: secondaryUser.inviter_referral_code
@@ -339,7 +290,6 @@ export const orderRoute = {
                     })
                 }
             }
-
         }
 
         return true
@@ -359,10 +309,10 @@ export const orderRoute = {
             message: "Order not found"
         })
 
-        // if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
-        //     code: 'BAD_REQUEST',
-        //     message: "This order is invalid or paid"
-        // })
+        if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: "This order is invalid or paid"
+        })
 
         const updateOrder = await db.user_order.update({
             where: { id: order.id },
@@ -405,6 +355,56 @@ export const orderRoute = {
                 data: {
                     closed: true
                 }
+            }),
+
+        ])
+
+        const upcomingOrders = await db.user_order.findMany({
+            where: {
+                created_at: {
+                    lte: now
+                },
+                user_investment_plan: {
+                    payment_count: {
+                        not: 0
+                    }
+                },
+                status: ORDERSTATUS['upcoming']
+            },
+        })
+
+        await Promise.all([
+            db.user_order.updateMany({
+                where: {
+                    created_at: {
+                        lte: now
+                    },
+                    user_investment_plan: {
+                        payment_count: {
+                            not: 0
+                        }
+                    },
+                    status: ORDERSTATUS['upcoming']
+                }, data: {
+                    status: ORDERSTATUS['unpaid'],
+                    amount: ORDERSTATUS['unpaid']
+                }
+            }),
+            db.user_order.createMany({
+                data: upcomingOrders.map(order => {
+                    const orderDate = new Date(order.created_at)
+                    const nextMonth = new Date(orderDate);
+                    nextMonth.setMonth(orderDate.getMonth() + 1);
+                    return {
+                        amount: ORDERSTATUS['upcoming'], // Second order
+                        user_id: order.user_id,
+                        status: ORDERSTATUS['upcoming'],
+                        receipt: '/qrpay.webp',
+                        method: PAYMENT_METHOD['GCASH'],
+                        user_investment_plan_id: order.user_investment_plan_id,
+                        created_at: nextMonth
+                    }
+                })
             })
         ])
 
@@ -415,6 +415,8 @@ export const orderRoute = {
     toggleOrderConversation: publicProcedure.input(z.string()).mutation(async (opts) => {
 
         try {
+
+            await rateLimiter.consume(1)
 
             const auth = await getAuth()
             if (!auth) throw new TRPCError({

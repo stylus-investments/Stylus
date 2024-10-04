@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { trpc } from '@/app/_trpc/client';
 import { LoaderCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 const DisplayClientMessages = ({ orderID, unseen }: {
     orderID: string
@@ -15,8 +16,9 @@ const DisplayClientMessages = ({ orderID, unseen }: {
 
     const router = useRouter()
     const [open, setOpen] = useState(false)
-    const { data: order } = trpc.message.getOrderMessages.useQuery({ orderID, sender: "user" }, {
-        enabled: open
+    const { data: order, refetch } = trpc.message.getOrderMessages.useQuery({ orderID, sender: "user" }, {
+        enabled: open,
+        refetchOnMount: false
     })
 
     const seenMessage = trpc.message.updateUnreadMessage.useMutation({
@@ -28,17 +30,19 @@ const DisplayClientMessages = ({ orderID, unseen }: {
     useEffect(() => {
 
         if (open) {
-
             // Join the order room when the component mounts
             socket.emit('joinOrder', { orderID })
             // eslint-disable-next-line react-hooks/exhaustive-deps
-
-            return () => {
-                socket.off("message")
-                socket.off('joinOrder')
-                socket.off("update")
-                socket.disconnect()
-            }
+            socket.on("update", async (data) => {
+                await refetch()
+                if (data === 'closed') {
+                    return toast("Admin closed the conversation.")
+                }
+                if (data === 'completed') {
+                    return toast.success("Success! this order has been completed.")
+                }
+                toast.error("Admin marked this order as invalid.")
+            })
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps

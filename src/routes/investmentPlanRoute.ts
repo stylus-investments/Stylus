@@ -18,133 +18,146 @@ export const investmentPlanRoute = {
         insurance: z.boolean(),
     })).mutation(async (opts) => {
 
-        await rateLimiter.consume(1)
+        try {
 
-        const auth = await getUserId()
-        if (!auth) throw new TRPCError({
-            code: "UNAUTHORIZED"
-        })
 
-        const user = await db.user_info.findUnique({ where: { user_id: auth } })
-        if (!user) throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "User not found"
-        })
 
-        //need to be changed
-        if (user.status !== 'VERIFIED') throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Please complete your profile and wait for verification before proceeding."
-        })
+            await rateLimiter.consume(1)
 
-        const { name, package_id, base_price, profit_protection, insurance, total_price } = opts.input
+            const auth = await getUserId()
+            if (!auth) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
 
-        //retrieve package
+            const user = await db.user_info.findUnique({ where: { user_id: auth } })
+            if (!user) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "User not found"
+            })
 
-        const investmentPackage = await db.investment_plan_package.findUnique({ where: { id: package_id } })
-        if (!investmentPackage) throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Package not found"
-        })
-        if (investmentPackage.duration === 5 && (profit_protection || insurance)) throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Something is not right"
-        })
+            //need to be changed
+            if (user.status !== 'VERIFIED') throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Please complete your profile and wait for verification before proceeding."
+            })
 
-        const prices = investmentPackage.prices as number[]
+            const { name, package_id, base_price, profit_protection, insurance, total_price } = opts.input
 
-        if (!prices.includes(base_price)) throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Base price does not exist in package"
-        })
+            //retrieve package
 
-        let recalculateTotalPrice: number = base_price
+            const investmentPackage = await db.investment_plan_package.findUnique({ where: { id: package_id } })
+            if (!investmentPackage) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Package not found"
+            })
+            if (investmentPackage.duration === 5 && (profit_protection || insurance)) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Something is not right"
+            })
 
-        if (investmentPackage.duration === 10) {
+            const prices = investmentPackage.prices as number[]
 
-            if (profit_protection && insurance) {
-                recalculateTotalPrice = (base_price * 1.25) + INSURANCE_PRICE;
+            if (!prices.includes(base_price)) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Base price does not exist in package"
+            })
 
-            } else if (profit_protection && !insurance) {
+            let recalculateTotalPrice: number = base_price
 
-                recalculateTotalPrice = base_price * 1.25;
-            } else if (insurance && !profit_protection) {
+            if (investmentPackage.duration === 10) {
 
+                if (profit_protection && insurance) {
+                    recalculateTotalPrice = (base_price * 1.25) + INSURANCE_PRICE;
+
+                } else if (profit_protection && !insurance) {
+
+                    recalculateTotalPrice = base_price * 1.25;
+                } else if (insurance && !profit_protection) {
+
+                    recalculateTotalPrice = base_price + INSURANCE_PRICE;
+                }
+
+            } else if (investmentPackage.duration === 20 && insurance) {
                 recalculateTotalPrice = base_price + INSURANCE_PRICE;
             }
 
-        } else if (investmentPackage.duration === 20 && insurance) {
-            recalculateTotalPrice = base_price + INSURANCE_PRICE;
+            if (recalculateTotalPrice !== total_price) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Prices are not matched"
+            })
+
+            //create the user investment plan
+            const now = new Date()
+            const nextMonth = new Date(now.setMonth(now.getMonth() + 1))
+            nextMonth.setHours(0, 0, 0, 0);
+
+            const investmentPlan = await db.user_investment_plan.create({
+                data: {
+                    user: {
+                        connect: {
+                            user_id: user.user_id
+                        }
+                    },
+                    name, total_price: recalculateTotalPrice,
+                    payment_count: (investmentPackage.duration * 12),
+                    next_order_creation: nextMonth,
+                    profit_protection, insurance,
+                    package: {
+                        connect: {
+                            id: investmentPackage.id
+                        }
+                    },
+                    base_price
+                }
+            })
+            if (!investmentPlan) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Faild to create investment plan"
+            })
+
+            // Create an array with only unpaid and upcoming orders
+            const ordersData = [
+                {
+                    amount: ORDERSTATUS['unpaid'], // First order
+                    user_id: user.user_id,
+                    status: ORDERSTATUS['unpaid'],
+                    receipt: '/qrpay.webp',
+                    method: PAYMENT_METHOD['GCASH'],
+                    user_investment_plan_id: investmentPlan.id,
+                    created_at: new Date(new Date().setMonth(new Date().getMonth())) // Current month
+                },
+                {
+                    amount: ORDERSTATUS['upcoming'], // Second order
+                    user_id: user.user_id,
+                    status: ORDERSTATUS['upcoming'],
+                    receipt: '/qrpay.webp',
+                    method: PAYMENT_METHOD['GCASH'],
+                    user_investment_plan_id: investmentPlan.id,
+                    created_at: new Date(new Date().setMonth(new Date().getMonth() + 1)) // Next month
+                }
+            ];
+            // Use createMany for batch insertion
+            const createOrders = await db.user_order.createMany({
+                data: ordersData,
+            });
+            if (!createOrders) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to create orders"
+            })
+
+            await db.$disconnect()
+
+            return true
+
+        } catch (error: any) {
+            console.log(error)
+            throw new TRPCError({
+                code: error.code || "INTERNAL_SERVER_ERROR",
+                message: error.message || "Server Error"
+            })
+        } finally {
+            await db.$disconnect()
         }
-
-        if (recalculateTotalPrice !== total_price) throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Prices are not matched"
-        })
-
-        //create the user investment plan
-        const now = new Date()
-        const nextMonth = new Date(now.setMonth(now.getMonth() + 1))
-        nextMonth.setHours(0, 0, 0, 0);
-
-        const investmentPlan = await db.user_investment_plan.create({
-            data: {
-                user: {
-                    connect: {
-                        user_id: user.user_id
-                    }
-                },
-                name, total_price: recalculateTotalPrice,
-                payment_count: (investmentPackage.duration * 12),
-                next_order_creation: nextMonth,
-                profit_protection, insurance,
-                package: {
-                    connect: {
-                        id: investmentPackage.id
-                    }
-                },
-                base_price
-            }
-        })
-        if (!investmentPlan) throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Faild to create investment plan"
-        })
-
-        const durationInYears = investmentPackage.duration;
-        const totalMonths = durationInYears * 12;
-        const ordersData = Array.from({ length: totalMonths }, (_, i) => {
-            const orderDate = new Date();
-            orderDate.setMonth(orderDate.getMonth() + i);
-            orderDate.setHours(0, 0, 0, 0);
-
-            let status;
-            if (i === 0) {
-                status = ORDERSTATUS['unpaid']; // First order
-            } else if (i === 1) {
-                status = ORDERSTATUS['upcoming']; // Second order
-            } else {
-                status = ORDERSTATUS['inactive']; // All other orders
-            }
-
-            return {
-                amount: status, // Adjust as needed
-                user_id: user.user_id,
-                status,
-                receipt: '/qrpay.webp',
-                method: PAYMENT_METHOD['GCASH'],
-                user_investment_plan_id: investmentPlan.id,
-                created_at: orderDate
-            };
-        });
-        // Use createMany for batch insertion
-        await db.user_order.createMany({
-            data: ordersData,
-        });
-
-        await db.$disconnect()
-
-        return true
 
     }),
     getUserInvestmentPlans: publicProcedure.query(async () => {
@@ -213,12 +226,12 @@ export const investmentPlanRoute = {
                 include: {
                     payments: {
                         where: {
-                            status: input.status
+                            status: input.status  // Include specific status
                         },
                         skip,
                         take: limit,
                         orderBy: {
-                            updated_at: 'desc'
+                            created_at: 'asc'
                         }
                     }
                 }
