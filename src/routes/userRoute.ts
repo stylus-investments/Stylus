@@ -8,6 +8,7 @@ import { generate } from 'voucher-code-generator'
 import { getAuth } from "@/lib/nextAuth";
 import { ProfileStatus } from "@prisma/client";
 import { rateLimiter } from "@/lib/ratelimiter";
+import { UTApi } from "uploadthing/server";
 
 export const userRoute = {
     getCurrentUserInfo: publicProcedure.query(async () => {
@@ -312,7 +313,12 @@ export const userRoute = {
                 code: "UNAUTHORIZED"
             })
 
-            await db.user_info.update({
+            const user = await db.user_info.findUnique({ where: { user_id: auth } })
+            if (!user) throw new TRPCError({
+                code: 'NOT_FOUND',
+                message: "User not found"
+            })
+            const updateUser = await db.user_info.update({
                 where: {
                     user_id: auth
                 }, data: {
@@ -320,6 +326,22 @@ export const userRoute = {
                     back_id: input.back_id
                 }
             })
+            if (!updateUser) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "Failed to update profile ID"
+            })
+            const utapi = new UTApi()
+
+            if (input.front_id && user.front_id) {
+                const urlParts = user.front_id.split('/');
+                const key = urlParts[urlParts.length - 1];
+                await utapi.deleteFiles(key);
+            }
+            if (input.back_id && user.back_id) {
+                const urlParts = user.back_id.split('/');
+                const key = urlParts[urlParts.length - 1];
+                await utapi.deleteFiles(key);
+            }
 
             return true
 
