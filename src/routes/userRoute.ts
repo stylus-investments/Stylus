@@ -7,6 +7,7 @@ import { z } from "zod";
 import { generate } from 'voucher-code-generator'
 import { getAuth } from "@/lib/nextAuth";
 import { ProfileStatus } from "@prisma/client";
+import { rateLimiter } from "@/lib/ratelimiter";
 
 export const userRoute = {
     getCurrentUserInfo: publicProcedure.query(async () => {
@@ -116,34 +117,58 @@ export const userRoute = {
         birth_date: z.string(),
     })).mutation(async (opts) => {
 
-        const data = opts.input
+        try {
 
-        const user = await getUserId()
-        if (!user) throw new TRPCError({
-            code: "UNAUTHORIZED"
-        })
 
-        const getUser = await db.user_info.findUnique({ where: { user_id: user } })
-        if (!getUser) throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "User not found"
-        })
+            const data = opts.input
 
-        //update userinfo
-        const updateUserInfo = await db.user_info.update({
-            where: {
-                user_id: user
-            }, data: {
-                ...data,
-                status: ProfileStatus['PENDING']
-            }
-        })
-        if (!updateUserInfo) throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Failed to create or update user info"
-        })
+            await rateLimiter.consume(1)
 
-        return true
+            const user = await getUserId()
+            if (!user) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+
+            const getUser = await db.user_info.findUnique({ where: { user_id: user } })
+            if (!getUser) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "User not found"
+            })
+
+            if (getUser.verified_attemp > 2) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "You have reached your max revalidation attempt."
+            })
+
+            //update userinfo
+            const updateUserInfo = await db.user_info.update({
+                where: {
+                    user_id: user
+                }, data: {
+                    ...data,
+                    status: ProfileStatus['PENDING'],
+                    verified_attemp: {
+                        increment: 1
+                    },
+                    verification_message: ""
+                }
+            })
+            if (!updateUserInfo) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to create or update user info"
+            })
+
+            return true
+
+        } catch (error: any) {
+            throw new TRPCError({
+                code: error.code || "INTERNAL_SERVER_ERROR",
+                message: error.message || "Server Error"
+            })
+        } finally {
+            await db.$disconnect()
+        }
+
     }),
     getAllUsers: publicProcedure.input(
         z.object({
@@ -211,26 +236,18 @@ export const userRoute = {
     }),
     updateUserStatus: publicProcedure.input(z.object({
         user_id: z.string(),
-        status: z.string()
+        status: z.string(),
+        message: z.string().optional()
+
     })).mutation(async ({ input }) => {
 
         try {
 
+            await rateLimiter.consume(1)
+
             const auth = await getAuth()
             if (!auth) throw new TRPCError({
                 code: "UNAUTHORIZED"
-            })
-
-            //update user status
-            const updateUser = await db.user_info.update({
-                where: { user_id: input.user_id },
-                data: {
-                    status: input.status as ProfileStatus
-                }
-            })
-            if (!updateUser) throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: "Failed to update user"
             })
 
             const getProfileStatusMessage = (profileStatus: string) => {
@@ -242,17 +259,32 @@ export const userRoute = {
 
             const message = getProfileStatusMessage(input.status)
 
-            await db.user_notification.create({
-                data: {
-                    user: {
-                        connect: {
-                            user_id: updateUser.user_id
-                        }
-                    },
-                    message: message,
-                    link: "/dashboard/profile",
-                    from: "Stylus Investments"
-                }
+            //update user status
+            const [updateUser, _] = await Promise.all([
+
+                db.user_info.update({
+                    where: { user_id: input.user_id },
+                    data: {
+                        status: input.status as ProfileStatus,
+                        verification_message: input.message
+                    }
+                }),
+                db.user_notification.create({
+                    data: {
+                        user: {
+                            connect: {
+                                user_id: input.user_id
+                            }
+                        },
+                        message: message,
+                        link: "/dashboard/profile",
+                        from: "Stylus Investments"
+                    }
+                })
+            ])
+            if (!updateUser) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to update user"
             })
 
             return true
@@ -272,6 +304,8 @@ export const userRoute = {
         back_id: z.string().optional(),
     })).mutation(async ({ input }) => {
         try {
+
+            await rateLimiter.consume(1)
 
             const auth = await getUserId()
             if (!auth) throw new TRPCError({

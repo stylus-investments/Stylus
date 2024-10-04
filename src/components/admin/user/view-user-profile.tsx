@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenuShortcut } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { socket } from '@/lib/socket'
 import useGlobalStore from '@/state/globalStore'
 import { ProfileStatus, user_info } from '@prisma/client'
@@ -139,6 +140,7 @@ const UpdateUserStatus = ({ user_id, status }: {
 
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [message, setMessage] = useState('')
 
   const { mutateAsync, isPending } = trpc.user.updateUserStatus.useMutation({
     onSuccess: () => {
@@ -151,7 +153,6 @@ const UpdateUserStatus = ({ user_id, status }: {
       toast.error(error.message)
     },
   })
-
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -172,14 +173,23 @@ const UpdateUserStatus = ({ user_id, status }: {
             Are you user to {status === 'VERIFIED' ? "verify" : "invalid"} this user?
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <Button disabled={isPending} onClick={async () => {
+        {status === ProfileStatus['INVALID'] && <div className='flex flex-col gap-2 pt-4'>
+          <Label>Reason for invalidation:</Label>
+          <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder='Message...' />
+          <small className='text-muted-foreground'>Please provide a brief reason for the invalidation.</small>
+        </div>
+
+        }
+        <AlertDialogFooter className='flex flex-row items-center gap-5 w-full'>
+          <Button className='w-full' disabled={isPending} onClick={async () => {
+            if (status === ProfileStatus.INVALID && !message) return toast.error("You must provide a reason why this user is not valid.")
             await mutateAsync({
               user_id,
-              status
+              status,
+              message: status === ProfileStatus.INVALID ? message : ""
             })
           }} variant={status === 'VERIFIED' ? "default" : "destructive"}>{isPending ? <LoaderCircle className='animate-spin' size={18} /> : "Yes I'm Sure"}</Button>
-          <AlertDialogCancel>No Cancel</AlertDialogCancel>
+          <Button variant={'secondary'} className='w-full' onClick={() => setOpen(false)}>No Cancel</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

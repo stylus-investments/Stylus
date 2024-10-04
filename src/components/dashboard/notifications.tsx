@@ -9,12 +9,14 @@ import { trpc } from '@/app/_trpc/client'
 import { toast } from 'sonner'
 import { socket } from '@/lib/socket'
 import { usePrivy } from '@privy-io/react-auth'
+import { useRouter } from 'next/navigation'
 
+//notification need improvements to prevent refetching
 
 const Notifications = () => {
 
     const { user } = usePrivy()
-
+    const router = useRouter()
     const { data, refetch } = trpc.notification.getNotifications.useQuery()
 
     const { mutateAsync } = trpc.notification.readAllNotif.useMutation({
@@ -39,11 +41,9 @@ const Notifications = () => {
                 notif_id: id
             })
         }
-
+        refetch()
         if (link) {
-            window.location.href = (link)
-        } else {
-            refetch()
+            router.push(link)
         }
     }
 
@@ -60,7 +60,6 @@ const Notifications = () => {
     }, [user])
 
     const unseenCount = data ? data.filter(item => !item.seen).length : 0;
-
 
     return (
         <DropdownMenu>
