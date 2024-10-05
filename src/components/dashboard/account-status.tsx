@@ -29,14 +29,14 @@ const AccountStatus = () => {
                                     <FontAwesomeIcon icon={faCircleInfo} width={16} height={16} className='hover:text-muted-foreground text-muted' />
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    Your active stake in sBTC & sAVE tokens as recorded in the last snapshot.
+                                    Your profile status
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
                     </div>
                     <div className='w-full'>
                         <h1 className='font-black md:text-lg '>
-                            {status.userStatus}
+                            {status.userStatus.toLocaleLowerCase()}
                         </h1>
                     </div>
                     <small className='text-muted-foreground'>Profile information</small>
