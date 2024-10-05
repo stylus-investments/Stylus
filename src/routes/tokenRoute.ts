@@ -23,6 +23,8 @@ export const tokenRoute = {
             code: "UNAUTHORIZED"
         })
 
+        const currencyExchangeRate = await db.currency_conversion.findMany()
+
         const user = await privy.getUser(session)
 
         if (!user) throw new TRPCError({
@@ -33,7 +35,8 @@ export const tokenRoute = {
         const price = await getUserTokenData({
             tokenAddress,
             walletAddress: user.wallet?.address as string,
-            chain: BASE_CHAIN_ID
+            chain: BASE_CHAIN_ID,
+            currencyExchangeRate
         })
 
         if (!price) throw new TRPCError({
@@ -51,7 +54,7 @@ export const tokenRoute = {
 
             const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&precision=full`;
 
-            const [bitcoin, usdc, conversionRate] = await Promise.all([
+            const [bitcoin, usdc] = await Promise.all([
                 axios.get(url, {
                     headers: {
                         'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
@@ -60,16 +63,8 @@ export const tokenRoute = {
                 Moralis.EvmApi.token.getTokenPrice({
                     chain: BASE_CHAIN_ID,
                     address: USDC_ADDRESS
-                }),
-                db.currency_conversion.findFirst({
-                    where: {
-                        currency: "PHP"
-                    }
                 })
             ])
-            if (!conversionRate) throw new TRPCError({
-                code: "NOT_FOUND"
-            })
 
             //BITCOIN
             const btc_shot = 50000
@@ -90,7 +85,7 @@ export const tokenRoute = {
             //index price
             const index = 1 + 1 * decimal;
 
-            return index 
+            return index
         } catch (error: any) {
             console.log(error);
             throw new TRPCError({

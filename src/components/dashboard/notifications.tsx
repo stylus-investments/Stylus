@@ -89,7 +89,7 @@ const Notifications = () => {
                             link: notif.link
                         })
                     }}>
-                        <div className='flex flex-col gap-2'>
+                        <div className='flex flex-col gap-2 w-full'>
                             <Label>{notif.message}</Label>
                             <div className='w-full flex items-center justify-between'>
                                 <small>{notif.from}</small>

@@ -67,7 +67,8 @@ const OrderHistory = ({ initialData }: {
                                 <TableHead className='min-w-32'>Operation</TableHead>
                                 <TableHead className='min-w-32'>Amount (sBTC)</TableHead>
                                 <TableHead className='min-w-32'>Status</TableHead>
-                                <TableHead className=' min-w-52'>Date</TableHead>
+                                <TableHead className=' min-w-52'>Due Date</TableHead>
+                                <TableHead className=' min-w-52'>Paid At</TableHead>
                                 <TableHead className='min-w-32'>Receipt</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -91,13 +92,14 @@ const OrderHistory = ({ initialData }: {
                                         {returnStatusButton(order.status)}
                                     </TableCell>
                                     <TableCell>{new Date(order.created_at).toDateString()}</TableCell>
+                                    <TableCell>{order.status === ORDERSTATUS['paid'] ? new Date(order.updated_at).toLocaleString() : ""}</TableCell>
                                     <TableCell>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
                                                 <Button className='h-7' variant={'secondary'}>View</Button>
                                             </AlertDialogTrigger>
                                             <AlertDialogContent className='w-full max-w-96'>
-                                                <Image src={order.receipt} alt='Order Receipt' width={200} height={50} className='w-full h-auto' />
+                                                {order.receipt ? <Image src={order.receipt} alt='Order Receipt' width={200} height={50} className='w-full h-auto' /> : "No Receipt"}
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel className='w-full'>
                                                         Close

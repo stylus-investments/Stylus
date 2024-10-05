@@ -58,6 +58,7 @@ const OrderTable = ({ orders, filter }: {
                         <TableHead>Amount (sBTC)</TableHead>
                         <TableHead>Messages</TableHead>
                         <TableHead>Receipt</TableHead>
+                        <TableHead>Paid At</TableHead>
                         <TableHead>Method</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -73,14 +74,13 @@ const OrderTable = ({ orders, filter }: {
                                     <DisplayAdminMessages orderID={order.id} unseen={order.admin_unread_messages} /> :
                                     order.status}
                             </TableCell>
-
                             <TableCell>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <Button className='h-7' variant={'secondary'}>View</Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent className='w-full max-h-[600px] overflow-y-auto'>
-                                        <Image src={order.receipt} alt='Order Receipt' width={200} height={50} className='w-full h-auto' />
+                                        {order.receipt ? <Image src={order.receipt} alt='Order Receipt' width={200} height={50} className='w-full h-auto' /> : "No Receipt"}
                                         <AlertDialogFooter>
                                             <AlertDialogCancel className='w-full'>
                                                 Close
@@ -89,6 +89,7 @@ const OrderTable = ({ orders, filter }: {
                                     </AlertDialogContent>
                                 </AlertDialog>
                             </TableCell>
+                            <TableCell>{order.status === ORDERSTATUS['paid'] ? new Date(order.updated_at).toLocaleString() : ""}</TableCell>
                             <TableCell>{order.method}</TableCell>
                         </TableRow>
                     ))}

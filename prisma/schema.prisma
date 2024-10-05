@@ -47,7 +47,7 @@ model user_order {
   amount                  String
   user_id                 String
   status                  String
-  receipt                 String
+  receipt                 String?
   method                  String
   active                  Boolean              @default(false)
   user_unread_messages    Int                  @default(0)

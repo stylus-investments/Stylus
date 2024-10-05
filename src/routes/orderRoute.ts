@@ -25,7 +25,7 @@ export const orderRoute = {
             where: {
                 status
             },
-            orderBy: { created_at: 'desc' },
+            orderBy: { updated_at: 'desc' },
             skip: (Number(page) - 1) * limit, // Skip records for pagination
             take: limit
         })
@@ -399,7 +399,6 @@ export const orderRoute = {
                         amount: ORDERSTATUS['upcoming'], // Second order
                         user_id: order.user_id,
                         status: ORDERSTATUS['upcoming'],
-                        receipt: '/qrpay.webp',
                         method: PAYMENT_METHOD['GCASH'],
                         user_investment_plan_id: order.user_investment_plan_id,
                         created_at: nextMonth

@@ -21,7 +21,6 @@ export const investmentPlanRoute = {
         try {
 
 
-
             await rateLimiter.consume(1)
 
             const auth = await getUserId()
@@ -121,7 +120,6 @@ export const investmentPlanRoute = {
                     amount: ORDERSTATUS['unpaid'], // First order
                     user_id: user.user_id,
                     status: ORDERSTATUS['unpaid'],
-                    receipt: '/qrpay.webp',
                     method: PAYMENT_METHOD['GCASH'],
                     user_investment_plan_id: investmentPlan.id,
                     created_at: new Date(new Date().setMonth(new Date().getMonth())) // Current month
@@ -130,7 +128,6 @@ export const investmentPlanRoute = {
                     amount: ORDERSTATUS['upcoming'], // Second order
                     user_id: user.user_id,
                     status: ORDERSTATUS['upcoming'],
-                    receipt: '/qrpay.webp',
                     method: PAYMENT_METHOD['GCASH'],
                     user_investment_plan_id: investmentPlan.id,
                     created_at: new Date(new Date().setMonth(new Date().getMonth() + 1)) // Next month

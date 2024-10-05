@@ -1,11 +1,18 @@
+'use client'
 import React from 'react'
 import Image from 'next/image';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { caller } from '@/app/_trpc/server';
+import useBalanceStore from '@/state/balanceStore';
+import { availableCurrencies } from '@/constant/availableCurrency';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 const AssetsData = ({ assets }: {
   assets: Awaited<ReturnType<typeof caller['dashboard']['getWalletData']>>['balances']['assets']
 }) => {
+
+  const { currency, showBalance } = useBalanceStore()
+
 
   const returnAssetIcon = (symbol: string | undefined) => {
 
@@ -41,16 +48,50 @@ const AssetsData = ({ assets }: {
           </div>
           <div className='flex flex-col gap-2.5 text-right'>
             <Label className='text-base -mt-1.5'>
-              {asset?.amount ? Number(asset?.amount).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''}
+              {!showBalance ? "******" :
+                asset?.amount ? Number(asset?.amount).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''
+              }
             </Label>
             <div className='text-muted-foreground text-xs -mt-2'>
-              ${asset?.value ? Number(asset?.value).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''}
+              {asset?.value_array.map((obj, i) => {
+                if (obj.currency === currency) {
+                  // Find the matching currency object
+                  const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
+                  if (!showBalance) return "******"
+                  return (
+                    <div className='flex items-center w-full justify-end' key={i}>
+                      {matchingCurrency && (
+                        <FontAwesomeIcon icon={matchingCurrency.icon} width={15} height={15} />
+                      )}
+                      <div>
+                        {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })}
+                      </div>
+                    </div>
+                  );
+                }
+              })}
             </div>
-            <div className='text-xs text-muted-foreground'>
-              {asset?.change}%
+            <div className={`text-xs ${Number(asset?.change) > 0 ? "text-green-500" : "text-red-500"}`}>
+              {Number(asset?.change) > 0 ? "+" : ""}{asset?.change}%
             </div>
             <div className='text-md'>
-              ${asset?.total_value ? Number(asset?.total_value).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''}
+              {asset?.total_value_array.map((obj, i) => {
+                if (obj.currency === currency) {
+                  // Find the matching currency object
+                  const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
+                  if (!showBalance) return "********"
+                  return (
+                    <div className='flex items-center w-full' key={i}>
+                      {matchingCurrency && (
+                        <FontAwesomeIcon icon={matchingCurrency.icon} width={15} height={15} />
+                      )}
+                      <div>
+                        {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })}
+                      </div>
+                    </div>
+                  );
+                }
+              })}
             </div>
           </div>
         </div>
@@ -68,8 +109,8 @@ const AssetsData = ({ assets }: {
             <TableHead>Name</TableHead>
             <TableHead>Value</TableHead>
             <TableHead>24h Change</TableHead>
-            <TableHead >Amount</TableHead>
-            <TableHead className='text-right'>Total Value</TableHead>
+            <TableHead>Amount</TableHead>
+            <TableHead>Total Value</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -80,16 +121,52 @@ const AssetsData = ({ assets }: {
                 <Label>{asset?.symbol}</Label>
               </TableCell>
               <TableCell>
-                ${asset?.value ? Number(asset?.value).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''}
+                {asset?.value_array.map((obj, i) => {
+                  if (obj.currency === currency) {
+                    // Find the matching currency object
+                    const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
+                    if (!showBalance) return "********"
+
+                    return (
+                      <div className='flex items-center' key={i}>
+                        {matchingCurrency && (
+                          <FontAwesomeIcon icon={matchingCurrency.icon} width={15} height={15} />
+                        )}
+                        <div>
+                          {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })}
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+              </TableCell>
+              <TableCell className={`${Number(asset?.change) > 0 ? "text-green-500" : "text-red-500"}`}>
+                {Number(asset?.change) > 0 ? "+" : ""}{asset?.change}%
               </TableCell>
               <TableCell>
-                {asset?.change}%
+                {!showBalance ? "********" :
+                  asset?.amount ? Number(asset?.amount).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''
+                }
               </TableCell>
               <TableCell>
-                {asset?.amount ? Number(asset?.amount).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''}
-              </TableCell>
-              <TableCell className='text-right'>
-                ${asset?.total_value ? Number(asset?.total_value).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''}
+                {asset?.total_value_array.map((obj, i) => {
+                  if (obj.currency === currency) {
+                    // Find the matching currency object
+                    const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
+                    if (!showBalance) return "********"
+
+                    return (
+                      <div className='flex items-center w-full' key={i}>
+                        {matchingCurrency && (
+                          <FontAwesomeIcon icon={matchingCurrency.icon} width={15} height={15} />
+                        )}
+                        <div>
+                          {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })}
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
               </TableCell>
             </TableRow>
           )) :

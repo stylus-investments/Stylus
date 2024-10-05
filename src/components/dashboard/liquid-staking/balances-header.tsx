@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React from 'react'
 import { availableCurrencies } from '@/constant/availableCurrency'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '../../ui/button'
@@ -15,9 +15,7 @@ const BalancesHeader = ({ balances }: {
     balances: Awaited<ReturnType<typeof caller['dashboard']['getWalletData']>>['balances']['currentBalances']
 }) => {
 
-    const [showBalance, setShowBalance] = useState(true)
-
-    const { currency } = useBalanceStore()
+    const { currency, showBalance, setShowBalance } = useBalanceStore()
 
     return (
         <div className='flex flex-col gap-5 lg:pt-10 padding'>
@@ -26,7 +24,7 @@ const BalancesHeader = ({ balances }: {
                     <Label className='font-normal'>
                         Total Balance
                     </Label>
-                    <div className='cursor-pointer' onClick={() => setShowBalance(prev => !prev)}>
+                    <div className='cursor-pointer' onClick={setShowBalance}>
                         {showBalance ? <Eye size={18} /> : <EyeOff size={18} />}
                     </div>
                 </div>

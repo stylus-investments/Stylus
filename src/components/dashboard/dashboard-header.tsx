@@ -13,11 +13,16 @@ import UserProfile from './user-profile'
 import { Skeleton } from '../ui/skeleton'
 import { redirect } from 'next/navigation'
 import Notifications from './notifications'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select'
+import { availableCurrencies } from '@/constant/availableCurrency'
+import useBalanceStore from '@/state/balanceStore'
 
 
 const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
     const { user, logout, authenticated, ready } = usePrivy()
+
+    const { currency, setCurrency } = useBalanceStore()
 
     useEffect(() => {
 
@@ -29,10 +34,13 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
     const mobileScreen = (
         <nav className='lg:hidden flex items-center justify-between w-full'>
-            <div className='flex items-center gap-3'>
+            <div className='flex items-center'>
                 <Notifications />
                 <UserProfile />
-                {/* <Select value={currency} onValueChange={(value) => setCurrency(value)}>
+
+            </div>
+            <div className='flex items-center gap-1 sm:gap-2'>
+                <Select value={currency} onValueChange={(value) => setCurrency(value)}>
                     <SelectTrigger className='w-20'>
                         <SelectValue />
                     </SelectTrigger>
@@ -46,10 +54,7 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                             ))}
                         </SelectGroup>
                     </SelectContent>
-                </Select> */}
-            </div>
-
-            <div className='flex items-center gap-1 sm:gap-2'>
+                </Select>
                 <ToggleTheme />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -93,7 +98,8 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
             <div className='flex items-center gap-1'>
                 <Notifications />
-                {/* <Select value={currency} onValueChange={(value) => setCurrency(value)}>
+                <UserProfile />
+                <Select value={currency} onValueChange={(value) => setCurrency(value)}>
                     <SelectTrigger className='w-20'>
                         <SelectValue />
                     </SelectTrigger>
@@ -107,8 +113,7 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                             ))}
                         </SelectGroup>
                     </SelectContent>
-                </Select> */}
-                <UserProfile />
+                </Select>
             </div>
             <div className='flex items-center gap-5 justify-end w-full'>
                 <DashboardLinksHeader currentPage={currentPage} />

@@ -63,7 +63,7 @@ const UserPlansTable = ({ initialData }: {
                             {currentTable && currentTable.length > 0 ? currentTable.map((plan, i) => (
                                 <TableRow key={plan.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
                                     <TableCell>
-                                        <Link href={`/dashboard/wallet/plans/${plan.id}?status=${ORDERSTATUS['unpaid']}`}>
+                                        <Link href={`/dashboard/wallet/plans/${plan.id}`}>
                                             <Button className='h-7'>View</Button>
                                         </Link>
                                     </TableCell>

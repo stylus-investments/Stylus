@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import usePaginationStore from '@/state/paginationStore';
 import { Card, CardContent } from '@/components/ui/card';
-import TablePagination from '../table-pagination';
 import { trpc } from '@/app/_trpc/client';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -31,6 +30,15 @@ const TopReferralsTable = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, currentPage])
 
+    const returnFullName = (firstName: string, lastName: string) => {
+
+        const obscure = (name: string) => {
+            return name.charAt(0) + '*'.repeat(name.length - 1);
+        };
+
+        return `${obscure(firstName)} ${obscure(lastName)}`
+    }
+
     return (
         <>
             {isLoading ? <TopReferralsTablekeleton /> :
@@ -48,7 +56,7 @@ const TopReferralsTable = () => {
                                 {currentTable && currentTable.length > 0 ?
                                     currentTable.map((user, i) => (
                                         <TableRow key={i} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
-                                            <TableCell>{user.user_info.first_name} {user.user_info.last_name}</TableCell>
+                                            <TableCell>{returnFullName(user.user_info.first_name, user.user_info.last_name)}</TableCell>
                                             <TableCell>{user.total_invites}</TableCell>
                                             <TableCell>{user.total_reward}</TableCell>
                                         </TableRow>

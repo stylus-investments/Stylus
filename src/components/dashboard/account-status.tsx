@@ -36,7 +36,7 @@ const AccountStatus = () => {
                     </div>
                     <div className='w-full'>
                         <h1 className='font-black md:text-lg '>
-                            {status.userStatus.toLocaleLowerCase()}
+                            {status.userStatus.charAt(0).toUpperCase() + status.userStatus.slice(1).toLowerCase()}
                         </h1>
                     </div>
                     <small className='text-muted-foreground'>Profile information</small>

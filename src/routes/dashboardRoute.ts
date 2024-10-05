@@ -86,22 +86,26 @@ export const dashboardRoute = {
                 getUserTokenData({
                     tokenAddress: SBTC,
                     chain: BASE_CHAIN_ID,
-                    walletAddress: userWalletAddress
+                    walletAddress: userWalletAddress,
+                    currencyExchangeRate
                 }),
                 getUserTokenData({
                     tokenAddress: SPHP,
                     chain: BASE_CHAIN_ID,
-                    walletAddress: userWalletAddress
+                    walletAddress: userWalletAddress,
+                    currencyExchangeRate
                 }),
                 getUserTokenData({
                     tokenAddress: SAVE,
                     chain: BASE_CHAIN_ID,
-                    walletAddress: userWalletAddress
+                    walletAddress: userWalletAddress,
+                    currencyExchangeRate
                 }),
                 getUserTokenData({
                     tokenAddress: USDC_ADDRESS,
                     chain: BASE_CHAIN_ID,
-                    walletAddress: userWalletAddress
+                    walletAddress: userWalletAddress,
+                    currencyExchangeRate
 
                 }),
             ])
@@ -151,13 +155,14 @@ export const dashboardRoute = {
         const userWalletAddress = user.wallet?.address as string
 
         await getMoralis()
+        const currencyExchangeRate = await db.currency_conversion.findMany()
 
-        const [currencyExchangeRate, usdcPrice, userSnapshots] = await Promise.all([
-            db.currency_conversion.findMany(),
+        const [usdcPrice, userSnapshots] = await Promise.all([
             getUserTokenData({
                 tokenAddress: USDC_ADDRESS,
                 walletAddress: userWalletAddress,
-                chain: BASE_CHAIN_ID
+                chain: BASE_CHAIN_ID,
+                currencyExchangeRate
             }),
             db.user_snapshot.findMany({
                 where: { user_id: user.id },
@@ -171,12 +176,14 @@ export const dashboardRoute = {
             getUserTokenData({
                 tokenAddress: EARN_ADDRESS,
                 walletAddress: userWalletAddress,
-                chain: BASE_CHAIN_ID
+                chain: BASE_CHAIN_ID,
+                currencyExchangeRate
             }),
             getUserTokenData({
                 tokenAddress: SAVE,
                 walletAddress: userWalletAddress,
-                chain: BASE_CHAIN_ID
+                chain: BASE_CHAIN_ID,
+                currencyExchangeRate
             }),
         ])
 

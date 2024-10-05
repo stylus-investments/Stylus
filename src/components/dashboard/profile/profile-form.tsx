@@ -183,7 +183,7 @@ const ProfileForm = ({ profileInfo }: {
                     </Popover>
                     <small className='text-muted-foreground'>Your birthdate helps us verify your identity.</small>
                 </div>
-                <div className='flex flex-col gap-3 w-full '>
+                {profileInfo.status !== ProfileStatus.VERIFIED && <div className='flex flex-col gap-3 w-full '>
                     <div className='w-full flex items-center justify-between'>
                         <Label>Upload Valid ID (Front)</Label>
                         {(profileInfo.status === ProfileStatus['INCOMPLETE'] || profileInfo.status === ProfileStatus['INVALID']) && formData.front_id && <Button type='button' variant={'secondary'} onClick={() => setFormData(prev => ({ ...prev, front_id: "" }))}>Reupload</Button>}
@@ -219,8 +219,8 @@ const ProfileForm = ({ profileInfo }: {
                     />
                     {formData.front_id && <Image src={formData.front_id} alt='Front ID' width={500} height={200} className='w-full flex bg-secondary h-64 object-contain' />}
                     <small className='text-muted-foreground'>Please provide the front of your ID for identity verification.</small>
-                </div>
-                <div className='flex flex-col gap-3 w-full '>
+                </div>}
+                {profileInfo.status !== ProfileStatus['VERIFIED'] && <div className='flex flex-col gap-3 w-full '>
                     <div className='flex w-full items-center justify-between'>
                         <Label>Upload Valid ID (Back)</Label>
                         {(profileInfo.status === ProfileStatus['INCOMPLETE'] || profileInfo.status === ProfileStatus['INVALID']) && formData.back_id && <Button type='button' variant={'secondary'} onClick={() => setFormData(prev => ({ ...prev, back_id: "" }))}>Reupload</Button>}
@@ -256,7 +256,7 @@ const ProfileForm = ({ profileInfo }: {
                     />
                     {formData.back_id && <Image src={formData.back_id} alt='Back ID' width={500} height={200} className='w-full h-64 object-contain bg-secondary' />}
                     <small className='text-muted-foreground'>Please provide the back of your ID for identity verification.</small>
-                </div>
+                </div>}
             </div>
             <div className='border-t pt-5 w-full flex justify-center'>
                 {(profileInfo.status === ProfileStatus.INCOMPLETE || profileInfo.status === ProfileStatus.INVALID) && <Button disabled={isPending} className='w-full max-w-80'>{isPending ? <LoaderCircle size={16} className='animate-spin' /> : "Update"}</Button>}
