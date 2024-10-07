@@ -1,6 +1,6 @@
 import db from "@/db/db";
 import { getMoralis } from "@/lib/moralis";
-import { getUserTokenData } from "@/lib/prices";
+import { getIndexPrice, getUserTokenData } from "@/lib/prices";
 import { getUserId, privy } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { BASE_CHAIN_ID, USDC_ADDRESS } from "@/lib/token_address";
@@ -54,7 +54,7 @@ export const tokenRoute = {
 
             const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&precision=full`;
 
-            const [bitcoin, usdc] = await Promise.all([
+            const [bitcoin, usdc, conversionRate] = await Promise.all([
                 axios.get(url, {
                     headers: {
                         'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
@@ -63,29 +63,17 @@ export const tokenRoute = {
                 Moralis.EvmApi.token.getTokenPrice({
                     chain: BASE_CHAIN_ID,
                     address: USDC_ADDRESS
-                })
+                }),
+                db.currency_conversion.findFirst({ where: { currency: "PHP" } })
             ])
+            if (!conversionRate) throw new TRPCError({
+                code: "NOT_FOUND"
+            })
 
-            //BITCOIN
-            const btc_shot = 50000
-            const btc_market = bitcoin.data.bitcoin.usd
-            const btc_delta = btc_market / btc_shot * 100
-            const btc_weight = (btc_delta - 100) / 2
+            const indexPrice = getIndexPrice({ btc_price: bitcoin.data.bitcoin.usd, usdc_price: usdc.raw.usdPrice, php_converstion: conversionRate.conversion_rate })
 
-            //USDC
-            const usdc_shot = 1
-            const usdc_market = usdc.raw.usdPrice
-            const usdc_delta = usdc_market / usdc_shot * 100
-            const usdc_weight = (usdc_delta - 100) / 4
+            return indexPrice
 
-            //weight sum
-            const asset_weight = btc_weight + usdc_weight
-            const decimal = asset_weight / 100;
-
-            //index price
-            const index = 1 + 1 * decimal;
-
-            return index
         } catch (error: any) {
             console.log(error);
             throw new TRPCError({

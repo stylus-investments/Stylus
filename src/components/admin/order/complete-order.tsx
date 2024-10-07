@@ -11,7 +11,7 @@ const CompleteOrder = ({ orderID }: {
     orderID: string,
 }) => {
 
-    const { refetch } = trpc.message.getOrderMessages.useQuery({ sender: 'admin', orderID }, {
+    const { refetch, data } = trpc.message.getOrderMessages.useQuery({ sender: 'admin', orderID }, {
         enabled: false,
         refetchOnMount: false
     })
@@ -22,6 +22,7 @@ const CompleteOrder = ({ orderID }: {
         onSuccess: () => {
             refetch()
             socket.emit("update", { orderID, status: "completed" })
+            socket.emit("new-notif", { user_id: data?.user_id })
             toast.success("Success! Order updated")
             setOpen(false)
         },

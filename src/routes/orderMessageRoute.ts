@@ -3,6 +3,8 @@ import { getAuth } from "@/lib/nextAuth";
 import { getUserId } from "@/lib/privy";
 import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
+import { TRPCErrorResponse } from "@trpc/server/unstable-core-do-not-import";
+import { equals } from "validator";
 import { z } from "zod";
 
 export const orderMessageRoute = {
@@ -111,7 +113,7 @@ export const orderMessageRoute = {
         return true
     }),
     updateUnreadMessage: publicProcedure.input(z.object({
-        orderID: z.string(),
+        orderID: z.string().min(1, "Order ID cannot be empty"),
         sender: z.string()
     })).mutation(async (opts) => {
 
@@ -145,5 +147,54 @@ export const orderMessageRoute = {
         })
 
         return true
+    }),
+    openMesageRequest: publicProcedure.input(z.object({
+        orderID: z.string().min(1, "Order ID cannot be empty")
+    })).mutation(async ({ input }) => {
+
+        try {
+
+            const user = await getUserId()
+            if (!user) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+
+            const order = await db.user_order.findUnique({
+                where: { id: input.orderID }
+            })
+            if (!order) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Order not found"
+            })
+            if (order.user_id !== user) throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "This order does not belong to you."
+            })
+
+            //update order
+            const requestOpenChat = await db.user_order.update({
+                where: { id: order.id }, data: {
+                    request_chat: true
+                }
+            })
+            if (!requestOpenChat) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Something went wrong when requesting to update the order"
+            })
+
+            return true
+
+        } catch (error) {
+            if (error instanceof TRPCError) {
+                throw error; // Re-throw TRPCError without modification
+            }
+            console.log(error)
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Server error"
+            })
+        } finally {
+            await db.$disconnect()
+        }
     })
 }

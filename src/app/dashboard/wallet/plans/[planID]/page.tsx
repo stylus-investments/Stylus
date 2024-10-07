@@ -14,6 +14,8 @@ const PlanOrdersPage = async ({ params, searchParams }: {
     searchParams: {
         page: string | undefined
         status: string | undefined
+        request_chat: string
+
     }
 }) => {
 
@@ -21,18 +23,24 @@ const PlanOrdersPage = async ({ params, searchParams }: {
     const user = await getUserId()
     if (!user) redirect('/connect')
 
+    const filter = {
+        status: searchParams.status,
+        request_chat: searchParams.request_chat
+    }
+
     try {
         const initialData = await caller.investment.retrieveSinglePlan({
             plan_id: params.planID,
             page: searchParams.page,
-            status: searchParams.status
+            status: searchParams.status,
+            request_chat: searchParams.request_chat
         })
 
         return (
             <div>
                 <DashboardHeader currentPage='wallet' />
                 <DashboardLinksFooter currentPage='wallet' />
-                <SinglePlanData initialData={initialData} status={searchParams.status} />
+                <SinglePlanData initialData={initialData} filter={filter} />
             </div>
         )
 

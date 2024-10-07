@@ -9,21 +9,28 @@ const privy = new PrivyClient(privyAppID, privySecretKey);
 
 const getUserId = async () => {
 
-    const cookieStore = cookies()
+    try {
 
-    const authToken = cookieStore.get("privy-token")?.value
+        const cookieStore = cookies()
 
-    if (authToken) {
+        const authToken = cookieStore.get("privy-token")?.value
 
-        const verifiedClaims = await privy.verifyAuthToken(authToken);
+        if (authToken) {
 
-        if (!verifiedClaims) return null
-        
-        return verifiedClaims.userId
+            const verifiedClaims = await privy.verifyAuthToken(authToken);
 
+            if (!verifiedClaims) return null
+
+            return verifiedClaims.userId
+
+        }
+
+        return null
+
+    } catch (error) {
+        console.log(error);
+        return null
     }
-
-    return null
 }
 
 export { privy, getUserId }

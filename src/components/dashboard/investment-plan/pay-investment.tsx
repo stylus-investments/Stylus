@@ -54,7 +54,7 @@ const PayInvestmentPlan = ({
     useEffect(() => {
         if (data && investmentPrice) {
             const indexPrice = data
-            const amount = investmentPrice / indexPrice
+            const amount = investmentPrice / indexPrice.php
             setFormData(prev => ({ ...prev, amount: amount.toFixed(6) }))
         }
     }, [data, investmentPrice])
@@ -112,7 +112,7 @@ const PayInvestmentPlan = ({
                     setFormData={setFormData}
                     formData={formData}
                     closeOrder={closeOrder}
-                    indexPrice={data}
+                    indexPrice={data?.php}
                 />}
                 {formData.status === 2 && <ScanQr
                     setFormData={setFormData}

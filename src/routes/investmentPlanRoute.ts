@@ -203,6 +203,7 @@ export const investmentPlanRoute = {
         plan_id: z.string(),
         page: z.string().min(1).optional().default('1'),
         status: z.string().optional(),
+        request_chat: z.string().optional()
     })).query(async ({ input }) => {
         try {
 
@@ -224,6 +225,7 @@ export const investmentPlanRoute = {
                     payments: {
                         where: {
                             status: input.status  // Include specific status
+                            , request_chat: input.request_chat ? true : undefined
                         },
                         skip,
                         take: limit,

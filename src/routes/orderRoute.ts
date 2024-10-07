@@ -7,14 +7,14 @@ import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import axios from "axios";
 import { z } from "zod";
-
 export const orderRoute = {
     getAllOrder: publicProcedure.input(z.object({
         page: z.string().min(1).optional().default('1'),
         status: z.string().optional(),
+        request_chat: z.string().optional(),
     })).query(async ({ input }) => {
 
-        const { page, status } = input, limit = 8
+        const { page, status, request_chat } = input, limit = 8
 
         const auth = await getAuth()
         if (!auth) throw new TRPCError({
@@ -23,7 +23,8 @@ export const orderRoute = {
 
         const orders = await db.user_order.findMany({
             where: {
-                status
+                status,
+                request_chat: request_chat ? true : undefined
             },
             orderBy: { updated_at: 'desc' },
             skip: (Number(page) - 1) * limit, // Skip records for pagination
@@ -292,6 +293,20 @@ export const orderRoute = {
             }
         }
 
+        //notify user
+        await db.user_notification.create({
+            data: {
+                user: {
+                    connect: {
+                        user_id: order.user_id
+                    }
+                },
+                message: "Your order has been successfully processed. Thank you!",
+                from: "Stylus Admin",
+                link: `/dashboard/wallet/plans/${order.user_investment_plan}`
+            }
+        })
+
         return true
     }),
     invalidOrder: publicProcedure.input(z.string()).mutation(async (opts) => {
@@ -321,6 +336,18 @@ export const orderRoute = {
         if (!updateOrder) throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Failed to update order"
+        })
+
+        await db.user_notification.create({
+            data: {
+                user: {
+                    connect: {
+                        user_id: order.user_id
+                    }
+                },
+                message: "Unfortunately, this order is not valid. Please check your information.",
+                from: "Stylus Admin"
+            }
         })
 
         return true
@@ -427,9 +454,25 @@ export const orderRoute = {
                 code: "NOT_FOUND"
             })
 
+            if (order.closed && order.request_chat) {
+                await db.user_notification.create({
+                    data: {
+                        user: {
+                            connect: {
+                                user_id: order.user_id,
+                            }
+                        },
+                        message: "Your request to open a conversation has been approved.",
+                        link: `/dashboard/wallet/plans/${order.user_investment_plan_id}`,
+                        from: "Stylus Admin"
+                    }
+                })
+            }
+
             const updateOrder = await db.user_order.update({
                 where: { id: order.id }, data: {
                     closed: !order.closed
+                    , request_chat: order.closed ? false : true
                 }
             })
             if (!updateOrder) throw new TRPCError({
@@ -447,6 +490,5 @@ export const orderRoute = {
         } finally {
             await db.$disconnect()
         }
-
     })
 }

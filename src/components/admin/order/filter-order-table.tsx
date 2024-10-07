@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ORDERSTATUS } from '@/constant/order'
@@ -7,6 +8,7 @@ import { useRouter } from 'next/navigation'
 const FilterOrderTable = ({ filter }: {
     filter: {
         status?: string
+        request_chat: string
     }
 }) => {
 
@@ -23,7 +25,20 @@ const FilterOrderTable = ({ filter }: {
         router.push(url.toString()); // Navigate to the updated URL
     }
     return (
-        <div className="flex items-center gap-5 justify-end">
+        <div className="flex items-center gap-5 justify-between">
+            <div className='flex items-end gap-2'>
+                <Checkbox checked={filter.request_chat ? true : false} onCheckedChange={() => {
+                    const url = new URL(window.location.href);
+                    if (!filter.request_chat) {
+                        url.searchParams.set('request_chat', 'yes')
+                    } else {
+                        url.searchParams.delete('request_chat')
+                    }
+                    url.searchParams.set('page', '1')
+                    router.push(url.toString())
+                }} />
+                <Label>Message Request</Label>
+            </div>
             <div className='flex flex-col gap-2'>
                 <Label>Status</Label>
                 <Select value={filter.status || 'all'} onValueChange={(val) => {

@@ -4,7 +4,7 @@ import { caller } from '@/app/_trpc/server'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UploadButton } from '@/lib/utils'
-import { LoaderCircle, Send, UploadCloud } from 'lucide-react'
+import { AlertCircle, LoaderCircle, Send, UploadCloud } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useEffect, useRef, useState } from 'react'
@@ -27,7 +27,10 @@ const OrderMessageForm = ({ initialData, sender }: {
     }[]>(initialData.order_message)
 
     const [inputMessage, setInputMessage] = useState('')
-
+    const { isSuccess, mutateAsync, isPending } = trpc.message.openMesageRequest.useMutation({
+        onSuccess: () => toast.success("Success! request has been sent."),
+        onError: (err) => toast.error(err.message)
+    })
     const saveMessage = trpc.message.sendOrderMessage.useMutation({
         onError: (err) => {
             toast.error(err.message)
@@ -169,35 +172,42 @@ const OrderMessageForm = ({ initialData, sender }: {
                 })}
                 <div ref={endOfMessagesRef} />
             </div>
-            <div className='w-full'>
-                {!initialData.closed ? <div className='flex items-center gap-2  w-full'>
-                    <UploadButton
-                        endpoint='orderReceiptUploader'
-                        onClientUploadComplete={(res) => {
-                            if (res) {
-                                sendMessage({ content: res[0].url, is_image: true })
-                            }
-                        }}
-                        content={{
-                            button({ ready }) {
-                                if (ready) return <div className='w-12 bg-primary h-full flex items-center justify-center'><UploadCloud size={18} /></div>
+            <div className='w-full flex flex-col items-center'>
+                {initialData.request_chat && sender === 'user' ? <Button type='button' variant={'secondary'}>Request has been sent.</Button> : initialData.closed && sender === 'user' && <Button type='button' className='self-center' disabled={isSuccess || isPending} variant={isSuccess ? "secondary" : "default"} onClick={async () => mutateAsync({ orderID: initialData.id })}>
+                    {isPending ? <LoaderCircle size={18} className='animate-spin' /> : "Request to open."}
+                </Button>}
+                {initialData.request_chat && sender === 'admin' ? <div className='pb-10 flex flex-col sm:flex-row text-center text-lg items-center gap-3'>
+                    <Button type='button' className='h-9 px-2'>
+                        <AlertCircle size={20} />
+                    </Button>
+                    User requested to open this conversation.</div> : !initialData.closed ? <div className='flex items-center gap-2  w-full'>
+                        <UploadButton
+                            endpoint='orderReceiptUploader'
+                            onClientUploadComplete={(res) => {
+                                if (res) {
+                                    sendMessage({ content: res[0].url, is_image: true })
+                                }
+                            }}
+                            content={{
+                                button({ ready }) {
+                                    if (ready) return <div className='w-12 bg-primary h-full flex items-center justify-center'><UploadCloud size={18} /></div>
 
-                                return <Button variant={'secondary'} type='button'><LoaderCircle size={18} className='animate-spin' /></Button>
-                            }
-                        }}
-                        onUploadError={(error: Error) => {
-                            // Do something with the error.
-                            toast.error(`ERROR! ${error.message}`);
-                        }}
-                        appearance={{
-                            button: 'bg-muted text-foreground w-auto',
-                            allowedContent: 'hidden',
+                                    return <Button variant={'secondary'} type='button'><LoaderCircle size={18} className='animate-spin' /></Button>
+                                }
+                            }}
+                            onUploadError={(error: Error) => {
+                                // Do something with the error.
+                                toast.error(`ERROR! ${error.message}`);
+                            }}
+                            appearance={{
+                                button: 'bg-muted text-foreground w-auto',
+                                allowedContent: 'hidden',
 
-                        }}
-                    />
-                    <Input placeholder='Type Message...' value={inputMessage} onChange={(e) => setInputMessage(e.target.value)} />
-                    <Button><Send size={18} /></Button>
-                </div> : <div className='text-center w-full pt-2 text-muted-foreground'>Conversation is closed.</div>}
+                            }}
+                        />
+                        <Input placeholder='Type Message...' value={inputMessage} onChange={(e) => setInputMessage(e.target.value)} />
+                        <Button><Send size={18} /></Button>
+                    </div> : <small className='text-center w-full pt-2 text-muted-foreground'>Conversation is closed.</small>}
             </div>
         </form >
     )

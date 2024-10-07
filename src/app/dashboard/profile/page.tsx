@@ -8,8 +8,8 @@ import React from 'react'
 
 const Page = async () => {
 
+    cookies()
     try {
-        cookies()
         const initialInfo = await caller.user.getCurrentUserInfo()
 
         return (

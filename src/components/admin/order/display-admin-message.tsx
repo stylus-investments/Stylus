@@ -55,7 +55,7 @@ const DisplayAdminMessages = ({ orderID, unseen }: {
                         <div className='w-full h-[500px] grid place-items-center'>
                             <LoaderCircle size={40} className='animate-spin text-primary' />
                         </div>}
-                    <div className='flex  items-center gap-5'>
+                    <div className='flex justify-center items-center gap-2 sm:gap-5'>
                         <ToggleOrderConversation orderID={orderID} closed={order?.closed} />
                         <InvalidOrder orderID={orderID} />
                         <CompleteOrder orderID={orderID} />

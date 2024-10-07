@@ -15,8 +15,25 @@ const OrderTable = ({ orders, filter }: {
     orders: Awaited<ReturnType<typeof caller['order']['getAllOrder']>>
     filter: {
         status: string
+        request_chat: string
     }
 }) => {
+
+    const returnStatusButton = (status: string) => {
+        switch (status) {
+            case ORDERSTATUS['processing']:
+                return <Button className='h-7'>Processing</Button>
+            case ORDERSTATUS['unpaid']:
+                return <Button className='h-7' variant={'destructive'}>Unpaid</Button>
+            case ORDERSTATUS['upcoming']:
+                return <Button className='h-7 bg-blue-500'>Upcoming</Button>
+            case ORDERSTATUS['paid']:
+                return <Button className='h-7 bg-green-500'>Paid</Button>
+            case ORDERSTATUS['invalid']:
+                return <Button className='h-7' variant={'destructive'}>Invalid</Button>
+        }
+        return status
+    }
 
     const [ordersData, setOrdersData] = useState(orders.data)
 
@@ -65,7 +82,7 @@ const OrderTable = ({ orders, filter }: {
                 <TableBody>
                     {ordersData && ordersData.map(order => (
                         <TableRow key={order.id}>
-                            <TableCell>{order.status}</TableCell>
+                            <TableCell>{returnStatusButton(order.status)}</TableCell>
                             <TableCell>{order.amount}</TableCell>
                             <TableCell>
                                 {(order.status === ORDERSTATUS['processing'] ||

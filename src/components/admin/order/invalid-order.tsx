@@ -12,7 +12,7 @@ const InvalidOrder = ({ orderID }: {
 
 }) => {
 
-    const { refetch } = trpc.message.getOrderMessages.useQuery({ sender: 'admin', orderID }, {
+    const { refetch, data } = trpc.message.getOrderMessages.useQuery({ sender: 'admin', orderID }, {
         enabled: false,
         refetchOnMount: false
     })
@@ -23,6 +23,7 @@ const InvalidOrder = ({ orderID }: {
         onSuccess: () => {
             refetch()
             socket.emit("update", { orderID, status: "invalid" })
+            socket.emit("new-notif", { user_id: data?.user_id })
             toast.success("Success! Order updated")
             setOpen(false)
         },

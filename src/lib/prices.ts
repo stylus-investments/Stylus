@@ -6,6 +6,34 @@ import { BASE_CHAIN_ID, USDC_ADDRESS } from "./token_address";
 import { calculateBalanceArray } from "./balances";
 import { currency_conversion } from "@prisma/client";
 
+const getIndexPrice = ({ btc_price, usdc_price, php_converstion }: {
+    btc_price: number
+    usdc_price: number
+    php_converstion: string
+}) => {
+
+    const btc_shot = 50000
+    const btc_market = btc_price
+    const btc_delta = btc_market / btc_shot * 100
+    const btc_weight = (btc_delta - 100) / 2
+
+    const usdc_shot = 1
+    const usdc_market = usdc_price
+    const usdc_delta = usdc_market / usdc_shot * 100
+    const usdc_weight = (usdc_delta - 100) / 4
+
+    const asset_weight = btc_weight + usdc_weight
+    const decimal = asset_weight / 100;
+
+    const index = (1 + 1 * decimal);
+    const indexPrice = index / Number(php_converstion)
+
+    return {
+        'php': index,
+        'usd': indexPrice
+    }
+}
+
 const getTokenValue = async (tokenName: string) => {
 
     try {
@@ -33,23 +61,9 @@ const getTokenValue = async (tokenName: string) => {
                 code: "NOT_FOUND"
             })
 
-            const btc_shot = 50000
-            const btc_market = bitcoin.data.bitcoin.usd
-            const btc_delta = btc_market / btc_shot * 100
-            const btc_weight = (btc_delta - 100) / 2
+            const indexPrices = getIndexPrice({ btc_price: bitcoin.data.bitcoin.usd, usdc_price: usdc.raw.usdPrice, php_converstion: conversionRate.conversion_rate })
 
-            const usdc_shot = 1
-            const usdc_market = usdc.raw.usdPrice
-            const usdc_delta = usdc_market / usdc_shot * 100
-            const usdc_weight = (usdc_delta - 100) / 4
-
-            const asset_weight = btc_weight + usdc_weight
-            const decimal = asset_weight / 100;
-
-            const index = (1 + 1 * decimal);
-            const indexPrice = index / Number(conversionRate.conversion_rate)
-
-            return indexPrice.toFixed(6)
+            return indexPrices.usd.toFixed(6)
         }
 
         const [usdc, conversionRate] = await Promise.all([
@@ -230,24 +244,11 @@ const getCurrentBalance = async ({ totalUSDC = '0.00', totalSAVE = '0.00', total
             code: "NOT_FOUND"
         })
 
-        const btc_shot = 50000
-        const btc_market = bitcoin.data.bitcoin.usd
-        const btc_delta = btc_market / btc_shot * 100
-        const btc_weight = (btc_delta - 100) / 2
+        const indexPrice = getIndexPrice({ btc_price: bitcoin.data.bitcoin.usd, usdc_price: usdc.raw.usdPrice, php_converstion: conversionRate.conversion_rate })
 
-        const usdc_shot = 1
-        const usdc_market = usdc.raw.usdPrice
-        const usdc_delta = usdc_market / usdc_shot * 100
-        const usdc_weight = (usdc_delta - 100) / 4
-
-        const asset_weight = btc_weight + usdc_weight
-        const decimal = asset_weight / 100;
-
-        const index = (1 + 1 * decimal);
-
-        const convertedSbtcPrice = index * Number(totalSBTC)
-        const usdcConvertedPrice = Number(usdc_market) * Number(totalUSDC)
-        const convertedSavePrice = Number(usdc_market) * Number(totalSAVE)
+        const convertedSbtcPrice = indexPrice.usd * Number(totalSBTC)
+        const usdcConvertedPrice = Number(usdc.raw.usdPrice) * Number(totalUSDC)
+        const convertedSavePrice = Number(usdc.raw.usdPrice) * Number(totalSAVE)
         const convertedSphpPrice = Number(totalSPHP) / Number(conversionRate.conversion_rate);
 
         return (usdcConvertedPrice + convertedSavePrice + convertedSbtcPrice + convertedSphpPrice).toString()
@@ -271,4 +272,4 @@ const getRewardsAccumulated = ({ usdcPrice = '1', totalEarn = '0.00', totalSvn =
 }
 
 
-export { getCurrentBalance, getUserTokenData, getRewardsAccumulated, getTokenPrice }
+export { getCurrentBalance, getUserTokenData, getRewardsAccumulated, getTokenPrice, getIndexPrice }

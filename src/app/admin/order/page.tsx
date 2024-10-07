@@ -7,6 +7,7 @@ import React from 'react'
 const OrderPage = async ({ searchParams }: {
     searchParams: {
         status: string
+        request_chat: string
         page: string
     }
 }) => {
@@ -15,11 +16,13 @@ const OrderPage = async ({ searchParams }: {
 
     const orders = await caller.order.getAllOrder({
         page: searchParams.page,
-        status: searchParams.status
+        status: searchParams.status,
+        request_chat: searchParams.request_chat
     })
 
     const filter = {
-        status: searchParams.status
+        status: searchParams.status,
+        request_chat: searchParams.request_chat
     }
 
     return (

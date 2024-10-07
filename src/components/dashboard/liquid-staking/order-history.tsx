@@ -29,6 +29,7 @@ const OrderHistory = ({ initialData }: {
             case ORDERSTATUS['paid']:
                 return <Button className='h-7 bg-green-500'>Paid</Button>
         }
+        return status
     }
 
     useEffect(() => {

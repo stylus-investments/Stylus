@@ -7,9 +7,12 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { ORDERSTATUS } from '@/constant/order'
 
-const FilterOrderHistory = ({ name, status }: {
+const FilterOrderHistory = ({ name, filter }: {
     name: string
-    status?: string
+    filter: {
+        status: string | undefined;
+        request_chat: string;
+    }
 }) => {
 
     const router = useRouter()
@@ -49,7 +52,7 @@ const FilterOrderHistory = ({ name, status }: {
             <div className="flex items-center gap-5 justify-end">
                 <div className='flex flex-col gap-2'>
                     <Label>Status</Label>
-                    <Select value={status || 'all'} onValueChange={(val) => {
+                    <Select value={filter.status || 'all'} onValueChange={(val) => {
                         if (val === 'all') {
                             handleStatusChange('')
                         } else {
