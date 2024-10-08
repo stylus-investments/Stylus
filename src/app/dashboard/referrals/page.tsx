@@ -6,7 +6,11 @@ import ReferralInfo from '@/components/referrals/referral-info'
 import { cookies } from 'next/headers'
 import React from 'react'
 
-const ReferralsPage = async () => {
+const ReferralsPage = async ({ searchParams }: {
+  searchParams: {
+      page: string | undefined
+  }
+}) => {
 
   cookies()
   const userReferralInfo = await caller.referral.getUserReferralInfo()
@@ -17,7 +21,7 @@ const ReferralsPage = async () => {
       <DashboardLinksFooter currentPage='referrals' />
       <div className='py-28 padding flex flex-col gap-5 md:gap-10'>
         <ReferralInfo initialData={userReferralInfo} />
-        <ReferralTabs />
+        <ReferralTabs page={searchParams.page} />
       </div>
     </div>
   )

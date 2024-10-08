@@ -7,7 +7,9 @@ import TopReferralsTable from './top-referrals-table'
 
 const tabList = ['Rewards', 'Payouts', 'Leaderboard']
 
-const ReferralTabs = () => {
+const ReferralTabs = ({ page }: {
+  page: string | undefined
+}) => {
 
   const [currentTab, setCurrentTab] = useState('rewards')
 
@@ -28,7 +30,7 @@ const ReferralTabs = () => {
         <PayoutTables />
       </TabsContent>
       <TabsContent value="leaderboard" className='w-full'>
-        <TopReferralsTable />
+        <TopReferralsTable page={page} />
       </TabsContent>
     </Tabs>
   )

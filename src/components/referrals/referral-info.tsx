@@ -111,7 +111,7 @@ const ReferralInfo = ({ initialData }: {
                         </div>
                         <div className='flex items-center gap-5 w-full pt-2'>
                             <Button className='w-full' variant={'secondary'} onClick={copyReferralLink}>Copy Link</Button>
-                            <Button
+                            {/* <Button
                                 disabled={withdrawReferralReward.isPending}
                                 className='w-full'
                                 onClick={async () => {
@@ -131,7 +131,7 @@ const ReferralInfo = ({ initialData }: {
 
                                 }}>
                                 {withdrawReferralReward.isPending ? <LoaderCircle size={18} className='animate-spin' /> : "Withdraw"}
-                            </Button>
+                            </Button> */}
                         </div>
                     </div>
                 </CardContent>

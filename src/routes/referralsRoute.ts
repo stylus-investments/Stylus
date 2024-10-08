@@ -352,7 +352,9 @@ export const referralsRoute = {
             await db.$disconnect()
         }
     }),
-    getReferralLeaderboard: publicProcedure.query(async () => {
+    getReferralLeaderboard: publicProcedure.input(z.object({
+        page: z.string().min(1).optional().default('1')
+    })).query(async ({ input }) => {
 
         try {
 
@@ -361,6 +363,10 @@ export const referralsRoute = {
                 code: "UNAUTHORIZED",
             })
 
+            const page = input.page
+            const limit = 5; // Number of referrals per page
+            const skip = (Number(page) - 1) * limit; // Calculate the number of items to skip
+
             const topReferrals = await db.referral_info.findMany({
                 where: {
                     user_info: {
@@ -368,12 +374,12 @@ export const referralsRoute = {
                             not: ""
                         }
                     },
-
                 },
                 orderBy: {
                     total_invites: 'desc'
                 },
-                take: 10,
+                take: limit,
+                skip: skip,
                 select: {
                     total_invites: true,
                     total_reward: true,
@@ -386,7 +392,35 @@ export const referralsRoute = {
                 }
             })
 
-            return topReferrals
+            const modifyTopReferrals = topReferrals.map((user, i) => ({
+                ...user,
+                rank: skip + i + 1
+            }))
+
+            const totalInviters = await db.referral_info.count({
+                where: {
+                    user_info: {
+                        first_name: {
+                            not: ""
+                        }
+                    }
+                }
+            })
+
+            const totalPages = Math.ceil(totalInviters / limit);
+            const hasNextPage = Number(page) < totalPages;
+            const hasPreviousPage = Number(page) > 1;
+
+            return {
+                data: modifyTopReferrals,
+                pagination: {
+                    totalPages: totalPages,
+                    page,
+                    hasNextPage,
+                    hasPreviousPage,
+                    total: totalInviters
+                }
+            }
 
         } catch (error: any) {
             console.log(error);
