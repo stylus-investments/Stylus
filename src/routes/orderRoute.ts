@@ -90,7 +90,7 @@ export const orderRoute = {
             message: "This plan does not exist"
         })
 
-        const stxBtcAmount = (investmentPlan.total_price / index.data.result.data as number)
+        const stxBtcAmount = (investmentPlan.total_price / index.data.result.data.php as number)
 
         const now = new Date()
 

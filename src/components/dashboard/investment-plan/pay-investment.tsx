@@ -53,8 +53,8 @@ const PayInvestmentPlan = ({
 
     useEffect(() => {
         if (data && investmentPrice) {
-            const indexPrice = data
-            const amount = investmentPrice / indexPrice.php
+            const indexPrice = data.php
+            const amount = investmentPrice / indexPrice
             setFormData(prev => ({ ...prev, amount: amount.toFixed(6) }))
         }
     }, [data, investmentPrice])
