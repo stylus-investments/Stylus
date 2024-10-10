@@ -119,7 +119,7 @@ const AssetsData = ({ assets }: {
         </TableHeader>
         <TableBody>
           {assets.length > 0 ? assets.map((asset, i) => (
-            <TableRow key={i} onClick={() => router.push(`/dashboard/wallet/asset/${asset?.symbol}`)}>
+            <TableRow key={i} onClick={() => router.push(`/dashboard/wallet/asset/${asset?.address}`)}>
               <TableCell className='flex gap-2 items-center'>
                 <Image src={returnAssetIcon(asset?.symbol)} alt={asset?.name || ""} width={25} height={25} className='rounded-full' />
                 <Label>{asset?.symbol}</Label>
