@@ -81,6 +81,30 @@ export const tokenRoute = {
                 message: error.message || "Something went wrong"
             })
         }
+    }),
+    getUserTokenHistory: publicProcedure.input(z.string()).query(async ({ input }) => {
+
+        try {
+            const tokenAddress = input
+
+            const auth = getUserId()
+            if(!auth) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+            
+
+
+            await rateLimiter.consume(1)
+            await getMoralis()
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code || "BAD_REQUEST",
+                message: error.message || "Something went wrong"
+            })
+        }
+
     })
 
 }

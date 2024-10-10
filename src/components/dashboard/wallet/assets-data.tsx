@@ -7,9 +7,13 @@ import { caller } from '@/app/_trpc/server';
 import useBalanceStore from '@/state/balanceStore';
 import { availableCurrencies } from '@/constant/availableCurrency';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 const AssetsData = ({ assets }: {
   assets: Awaited<ReturnType<typeof caller['dashboard']['getWalletData']>>['balances']['assets']
 }) => {
+
+  const router = useRouter()
 
   const { currency, showBalance } = useBalanceStore()
 
@@ -32,7 +36,7 @@ const AssetsData = ({ assets }: {
   const smallScreen = (
     <div className='flex flex-col w-full md:hidden'>
       {assets.length > 0 ? assets.map((asset, i) => (
-        <div className='flex items-center justify-between px-3 py-4 border-b w-full' key={i}>
+        <Link href={`/dashboard/wallet/assets/${asset?.address}`} className='flex hover:bg-muted  items-center justify-between px-3 py-4 border-b w-full' key={i}>
           <div className='flex iems-start gap-2.5'>
             <Image src={returnAssetIcon(asset?.symbol)} width={20} height={20} alt={asset?.name || ""} className='rounded-full max-h-[20px] max-w-[20px]' />
             <div className='flex flex-col gap-3'>
@@ -94,7 +98,7 @@ const AssetsData = ({ assets }: {
               })}
             </div>
           </div>
-        </div>
+        </Link>
       )) :
         <div className='flex justify-center pt-20'>No Data.</div>
       }
@@ -115,7 +119,7 @@ const AssetsData = ({ assets }: {
         </TableHeader>
         <TableBody>
           {assets.length > 0 ? assets.map((asset, i) => (
-            <TableRow key={i}>
+            <TableRow key={i} onClick={() => router.push(`/dashboard/wallet/asset/${asset?.symbol}`)}>
               <TableCell className='flex gap-2 items-center'>
                 <Image src={returnAssetIcon(asset?.symbol)} alt={asset?.name || ""} width={25} height={25} className='rounded-full' />
                 <Label>{asset?.symbol}</Label>

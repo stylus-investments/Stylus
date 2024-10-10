@@ -3,12 +3,13 @@ import db from "@/db/db";
 import { getMoralis } from "@/lib/moralis";
 import { TRPCError } from "@trpc/server";
 import Moralis from "moralis";
-import { getCurrentBalance, getRewardsAccumulated, getUserTokenData } from "@/lib/prices";
+import { getCurrentBalance, getRewardsAccumulated, getTokenPrice, getUserTokenData } from "@/lib/prices";
 import { calculateBalanceArray } from "@/lib/balances";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { getUserId, privy } from "@/lib/privy";
 import { BASE_CHAIN_ID, EARN_ADDRESS, SBTC, SAVE, USDC_ADDRESS, SPHP } from "@/lib/token_address";
 import { ORDERSTATUS } from "@/constant/order";
+import { z } from "zod";
 
 export const dashboardRoute = {
     getStakingData: publicProcedure.query(async () => {
@@ -215,37 +216,47 @@ export const dashboardRoute = {
         return dashboardRewardData
 
     }),
-    getGoTokenBalanceHistory: publicProcedure.query(async () => {
+    getTokenBalanceHistory: publicProcedure.input(z.string()).query(async ({ input }) => {
 
         try {
 
             await rateLimiter.consume(1)
+            const user = await getUserId()
+            if (!user) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+
+            const userInfo = await db.user_info.findUnique({ where: { user_id: user } })
+            if (!userInfo) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Oops."
+            })
 
             await getMoralis()
 
-            const getGoTokenBalanceHistory = await Moralis.EvmApi.token.getWalletTokenTransfers({
-                chain: process.env.CHAIN,
+            const getTokenBalanceHistory = await Moralis.EvmApi.token.getWalletTokenTransfers({
+                chain: BASE_CHAIN_ID,
                 order: "ASC",
-                address: "session user wallet",
-                contractAddresses: [process.env.SBTC as string]
+                address: userInfo.wallet,
+                contractAddresses: [input]
             })
 
-            if (!getGoTokenBalanceHistory) throw new TRPCError({
+            if (!getTokenBalanceHistory) throw new TRPCError({
                 code: 'BAD_REQUEST',
                 message: "Failed to get wallet go balance history"
             })
 
-            const goTokenBalanceHistory = getGoTokenBalanceHistory.result
+            const tokenBalanceHistory = getTokenBalanceHistory.result
                 .map((history, index) => ({
                     id: history.transactionHash,
                     date: history.blockTimestamp.toISOString(),
-                    type: history.toAddress.lowercase === "session user wallet".toLowerCase() ? 'Deposit' : 'Withdrawal',
+                    type: history.toAddress.lowercase === userInfo.wallet.toLowerCase() ? 'Deposit' : 'Withdrawal',
                     amount: (Number(history.value) / 10 ** 10).toString(),
                     number: index + 1
                 }))
                 .reverse()
 
-            return goTokenBalanceHistory
+            return tokenBalanceHistory
 
         } catch (error: any) {
             console.log(error);
@@ -359,6 +370,54 @@ export const dashboardRoute = {
             throw new TRPCError({
                 code: error.code,
                 message: error.message
+            })
+        } finally {
+            await db.$disconnect()
+        }
+    }),
+    getAssetData: publicProcedure.input(z.string()).query(async ({ input }) => {
+        try {
+
+            const user = await getUserId()
+            if (!user) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+
+            const [userInfo, currencyExchangeRate] = await Promise.all([
+                db.user_info.findUnique({ where: { user_id: user } }),
+                db.currency_conversion.findMany()
+            ])
+            if (!userInfo) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Oops"
+            })
+
+            await getMoralis()
+
+            const tokenValue = await getUserTokenData({
+                chain: BASE_CHAIN_ID,
+                tokenAddress: input,
+                currencyExchangeRate,
+                walletAddress: userInfo.wallet
+            })
+            if (!tokenValue) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Somethin went wrong while getting asset data"
+            })
+
+            return tokenValue
+
+        } catch (error) {
+            if (error instanceof TRPCError) {
+                throw new TRPCError({
+                    code: error.code,
+                    message: error.message
+                })
+            }
+            console.error(error)
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Server error"
             })
         } finally {
             await db.$disconnect()

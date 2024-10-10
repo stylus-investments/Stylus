@@ -199,7 +199,8 @@ const getUserTokenData = async ({ tokenAddress, chain, walletAddress, currencyEx
                 name: userTokenData.name,
                 logo: userTokenData.logo,
                 symbol: userTokenData.symbol,
-                change: tokenChange
+                change: tokenChange,
+                address: tokenAddress
             }
 
         } else {

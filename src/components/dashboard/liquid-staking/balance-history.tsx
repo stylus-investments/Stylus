@@ -8,7 +8,7 @@ import BalanceHistorySkeleton from './balance-history-skeleton';
 
 const BalanceHistory = () => {
 
-    const { data, isLoading } = trpc.dashboard.getGoTokenBalanceHistory.useQuery(undefined, {
+    const { data, isLoading } = trpc.dashboard.getTokenBalanceHistory.useQuery('', {
         refetchOnMount: false
     })
 
