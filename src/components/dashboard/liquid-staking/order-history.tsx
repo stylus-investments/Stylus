@@ -97,7 +97,7 @@ const OrderHistory = ({ initialData }: {
                                     <TableCell>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button className='h-7' variant={'secondary'}>View</Button>
+                                                <Button className='h-7'>View</Button>
                                             </AlertDialogTrigger>
                                             <AlertDialogContent className='w-full max-w-96'>
                                                 {order.receipt ? <Image src={order.receipt} alt='Order Receipt' width={200} height={50} className='w-full h-auto' /> : "No Receipt"}

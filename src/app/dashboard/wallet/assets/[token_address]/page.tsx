@@ -24,7 +24,7 @@ const AssetData = async ({ params }: {
                 <DashboardHeader currentPage='wallet' />
                 <DashboardLinksFooter currentPage='wallet' />
                 <AssetBalancesHeader tokenData={userTokenData} />
-                <AssetActions />
+                <AssetActions tokenData={userTokenData} />
                 <AssetHistory tokenData={userTokenData} />
             </div>
         )

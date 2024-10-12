@@ -88,7 +88,7 @@ const ReferralInfo = ({ initialData }: {
     }, [initialData])
 
     return (
-        <div className='flex flex-col md:flex-row justify-center gap-5 w-full'>
+        <div className='flex flex-col md:flex-row justify-center gap-5 w-full lg:w-4/5 2xl:w-2/3'>
             <Card className='w-full'>
                 <CardContent className='pt-4 flex flex-col gap-4 w-full'>
                     <div className='flex flex-col gap-3'>

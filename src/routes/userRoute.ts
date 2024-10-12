@@ -44,7 +44,7 @@ export const userRoute = {
                     first_name: "",
                     last_name: "",
                     id_image: [''],
-                    email: "",
+                    email: getUser?.email?.address || "",
                     mobile: "",
                     age: "",
                     birth_date: new Date(),

@@ -137,7 +137,7 @@ const ProfileForm = ({ profileInfo }: {
                 </div>
                 <div className='flex flex-col w-full  gap-2'>
                     <Label htmlFor='email'>Email</Label>
-                    <Input required type='email' name='email' className='w-full cursor-pointer' value={formData.email} onChange={handleChange} />
+                    <Input readOnly={profileInfo.email && profileInfo.status === ProfileStatus['INCOMPLETE'] ? true : false} required type='email' name='email' className='w-full cursor-pointer' value={formData.email} onChange={handleChange} />
                     <small className='text-muted-foreground'>This is your linked email address.</small>
                 </div>
                 <div className='flex flex-col w-full  gap-2'>

@@ -33,7 +33,7 @@ const UserPlansTable = ({ initialData }: {
     }, [data, currentPage])
 
     return (
-        <div className='pt-28 padding flex flex-col gap-10'>
+        <div className='py-28 padding flex flex-col gap-10'>
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -64,7 +64,7 @@ const UserPlansTable = ({ initialData }: {
                                 <TableRow key={plan.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
                                     <TableCell>
                                         <Link href={`/dashboard/wallet/plans/${plan.id}`}>
-                                            <Button className='h-7'>View</Button>
+                                            <Button className='h-7' variant={'link'}>View</Button>
                                         </Link>
                                     </TableCell>
                                     <TableCell>{plan.name}</TableCell>

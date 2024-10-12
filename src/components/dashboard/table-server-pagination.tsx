@@ -16,7 +16,6 @@ const TableServerPagination = ({ pagination }: {
 }) => {
 
     const [gotoInput, setGotoInput] = useState('')
-
     const { page, totalPages, total, hasNextPage, hasPreviousPage } = pagination
 
     const router = useRouter()
