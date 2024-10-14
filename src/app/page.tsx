@@ -10,6 +10,8 @@ import React, { useEffect } from 'react'
 import 'aos/dist/aos.css';
 import Aos from 'aos'
 import Overview from '@/components/home/overview'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 const HomePage = () => {
 
@@ -22,8 +24,10 @@ const HomePage = () => {
   return (
     <div className='overflow-x-hidden xl:overflow-visible'>
       <Header />
-      <div className='grid place-items-center text-2xl pt-52'>
-        Under Development
+      <div className='grid place-items-center pt-52'>
+        <Link href={'/connect'}>
+          <Button>Connect To Stylus</Button>
+        </Link>
       </div>
       {/* <Main />
       <Partners />
