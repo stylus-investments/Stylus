@@ -11,6 +11,8 @@ import { ethers } from 'ethers'
 import { ArrowUp, LoaderCircle } from 'lucide-react'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
+import jsQR from 'jsqr';
+
 
 const SentToken = ({ tokenData }: {
     tokenData: Awaited<ReturnType<typeof caller['dashboard']['getAssetData']>>
@@ -27,21 +29,54 @@ const SentToken = ({ tokenData }: {
         amount: ""
     })
 
+    const handleImageUpload = (event: any) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function (e: any) {
+            const img = new Image();
+            img.src = e.target.result;
+
+            img.onload = function () {
+                // Create a canvas to extract image data
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                // Get image data from the canvas
+                const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
+                if (!imageData) return toast.error("No Image")
+
+                // Use jsQR to decode the QR code from the image data
+                const code = jsQR(imageData.data, canvas.width, canvas.height);
+                if (code) {
+                    toast.success("Success! Wallet address has been uploaded")
+                    setFormData(prev => ({ ...prev, recipientAddress: code.data })); // Set the decoded value
+                } else {
+                    toast.error("QR code is invalid")
+                }
+            };
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    };
+
+
     const sendToken = async (e: React.FormEvent) => {
 
         e.preventDefault()
         try {
-
             const { amount, recipientAddress } = formData
-
             setLoading(true)
-
             // Check if amount is greater than 0
             if (Number(amount) <= 0) {
                 setLoading(false)
                 return toast.error("Amount must be greater than 0");
             }
-
             if (!ethers.isAddress(recipientAddress)) {
                 setLoading(false)
                 return toast.error("Invalid wallet address");
@@ -92,6 +127,10 @@ const SentToken = ({ tokenData }: {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <form onSubmit={sendToken} className='flex flex-col gap-5'>
+                        <div className='flex flex-col gap-2'>
+                            <Label>Upload QR</Label>
+                            <Input type="file" accept="image/*" onChange={handleImageUpload} />
+                        </div>
                         <div className='flex flex-col gap-2'>
                             <Label>Wallet Address</Label>
                             <Input placeholder='0x...' value={formData.recipientAddress} onChange={(e) => setFormData(prev => ({ ...prev, recipientAddress: e.target.value }))} />
