@@ -8,10 +8,11 @@ import { ABI } from '@/constant/abi'
 import { BASE_CHAIN_ID } from '@/lib/token_address'
 import { useWallets } from '@privy-io/react-auth'
 import { ethers } from 'ethers'
-import { ArrowUp, LoaderCircle } from 'lucide-react'
+import { ArrowUp, LoaderCircle, QrCode } from 'lucide-react'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 import jsQR from 'jsqr';
+import { Scanner } from '@yudiel/react-qr-scanner';
 
 
 const SentToken = ({ tokenData }: {
@@ -23,6 +24,7 @@ const SentToken = ({ tokenData }: {
     const wallet = wallets[0]
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
+    const [scannerOpen, setScannerOpen] = useState(false)
 
     const [formData, setFormData] = useState({
         recipientAddress: '',
@@ -127,9 +129,45 @@ const SentToken = ({ tokenData }: {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <form onSubmit={sendToken} className='flex flex-col gap-5'>
-                        <div className='flex flex-col gap-2'>
-                            <Label>Upload QR</Label>
-                            <Input type="file" accept="image/*" onChange={handleImageUpload} />
+                        <div className='flex w-full items-center gap-5'>
+                            <div className='flex flex-col gap-2'>
+                                <Label>Upload QR</Label>
+                                <Input type="file" accept="image/*" onChange={handleImageUpload} />
+                            </div>
+                            <div className='flex flex-col gap-2 w-full'>
+                                <Label>QR Code</Label>
+                                <AlertDialog open={scannerOpen} onOpenChange={setScannerOpen}>
+                                    <AlertDialogTrigger asChild>
+                                        <Button className='flex items-center gap-2'>Scan
+                                            <QrCode size={20} />
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <Scanner onScan={(result) => {
+
+                                            const walletAddress = result[0].rawValue
+
+                                            if (!ethers.isAddress(walletAddress)) {
+                                                return toast.error("Invalid wallet address. Please scan a valid QR code or enter the address manually.");
+                                            }
+
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                recipientAddress: result[0].rawValue
+                                            }))
+                                            toast.success("Success! QR code has been scanned. Proceed with your transaction.");
+                                            setScannerOpen(false)
+                                        }}
+                                            onError={(err) => {
+                                                toast.error("Failed to scan the QR code. Check the lighting and try again.");
+                                            }}
+                                        />
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Close</AlertDialogCancel>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
                         </div>
                         <div className='flex flex-col gap-2'>
                             <Label>Wallet Address</Label>
