@@ -16,7 +16,7 @@ const ReceiveToken = () => {
     const qrRef = useRef<any>(null)
     const { copyText } = useGlobalStore()
     const download = () => {
-        qrRef.current.download('png', 'wallet')
+        qrRef.current.download('png', "wallet_address")
         toast.success("Success! QR has been downloaded.")
     }
 
