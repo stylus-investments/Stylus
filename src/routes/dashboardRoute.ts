@@ -402,7 +402,7 @@ export const dashboardRoute = {
             })
             if (!tokenValue) throw new TRPCError({
                 code: "BAD_REQUEST",
-                message: "Somethin went wrong while getting asset data"
+                message: "Something went wrong while getting asset data"
             })
 
             return tokenValue

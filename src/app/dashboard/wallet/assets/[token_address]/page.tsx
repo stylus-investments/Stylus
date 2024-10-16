@@ -30,7 +30,9 @@ const AssetData = async ({ params }: {
         )
 
     } catch (error) {
-        console.log(error);
+        return <div>
+            {JSON.stringify(error)}
+        </div>
     }
 }
 
