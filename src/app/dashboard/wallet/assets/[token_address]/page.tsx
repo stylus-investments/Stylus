@@ -31,7 +31,6 @@ const AssetData = async ({ params }: {
 
     } catch (error) {
         console.log(error);
-        redirect('/dashboard/wallet')
     }
 }
 
