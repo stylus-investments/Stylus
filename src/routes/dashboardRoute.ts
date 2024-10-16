@@ -411,7 +411,8 @@ export const dashboardRoute = {
             if (error instanceof TRPCError) {
                 throw new TRPCError({
                     code: error.code,
-                    message: error.message
+                    message: error.message,
+                    cause: error.cause,
                 })
             }
             console.error(error)
