@@ -1,6 +1,6 @@
 'use client'
 import React, { useRef, useState } from 'react';
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { ArrowDown } from 'lucide-react';
 import { Label } from '@/components/ui/label';

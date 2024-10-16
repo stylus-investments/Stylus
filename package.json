@@ -53,6 +53,7 @@
     "embla-carousel-react": "^8.0.4",
     "encoding": "^0.1.13",
     "ethers": "^6.13.3",
+    "framer-motion": "^11.11.9",
     "jsqr": "^1.4.0",
     "lucide-react": "^0.368.0",
     "moralis": "^2.25.4",
