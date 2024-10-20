@@ -4,9 +4,6 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { PAYMENT_METHOD } from '@/constant/order'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 const SelectPaymentMethod = (props: {
     formData: {
@@ -55,33 +52,23 @@ const SelectPaymentMethod = (props: {
             <h1 className='border-b pb-5 text-lg'>Order Form</h1>
             <div className='flex flex-col gap-2'>
                 <Label>Payment Method</Label>
-                <Command>
-                    <CommandInput placeholder="Search Payment Method" />
-                    <CommandList>
-                        <CommandEmpty>No method found.</CommandEmpty>
-                        <CommandGroup className='max-h-16 overflow-y-auto'>
-                            {Object.keys(PAYMENT_METHOD).map((method, i) => (
-                                <CommandItem
-                                    key={i}
-                                    value={method}
-                                    onSelect={(currentValue) => {
-                                        setFormData(prev => ({ ...prev, method: currentValue }))
-                                        setOpen(false)
-                                    }}
-                                    className='uppercase'
-                                >
-                                    <Check
-                                        className={cn(
-                                            "mr-2 h-4 w-4",
-                                            formData.method === method ? "opacity-100" : "opacity-0"
-                                        )}
-                                    />
-                                    {method}
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
+                <div className='flex items-center w-full gap-5'>
+                    {Object.keys(PAYMENT_METHOD).map((method, i) => (
+                        <Button
+                            key={i}
+                            variant={method === formData.method ? "default" : "secondary"}
+                            value={method}
+                            onClick={() => {
+                                setFormData(prev => ({ ...prev, method: method }))
+                                setOpen(false)
+                            }}
+                            className='uppercase w-full'
+                        >
+
+                            {method}
+                        </Button>
+                    ))}
+                </div>
             </div>
             <div className='flex flex-col gap-2'>
                 <Label>Amount (sBTC)</Label>

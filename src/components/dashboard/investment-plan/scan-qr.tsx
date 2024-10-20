@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { UploadButton } from '@/lib/utils';
 import { CircleCheck } from 'lucide-react';
+import { PAYMENT_METHOD } from '@/constant/order';
 
 
 const ScanQr = (props: {
@@ -43,10 +44,10 @@ const ScanQr = (props: {
         <div className='flex flex-col w-full gap-5'>
             <h1 className='border-b pb-5 text-lg'>Scan Qr To Pay</h1>
 
-            {show && <Image src={'/qrpay.webp'} alt='Scan To Pay' width={350} height={250} className='h-auto w-full' />}
+            {show && <Image src={formData.method === PAYMENT_METHOD['BPI'] ? "/qr/bpi.webp" : "/qr/instapay.webp"} alt='Scan To Pay' width={350} height={250} className='h-auto w-full' />}
             <div className='flex items-center gap-5'>
                 <Button variant={'secondary'} className='w-full' onClick={() => setShow(prev => !prev)}>{show ? "Hide QR Code" : "Show QR Code"}</Button>
-                <a href="/qrpay.webp" download="savernpayqrcode.webp" className='w-full'>
+                <a href={formData.method === PAYMENT_METHOD['BPI'] ? "/qr/bpi.webp" : "/qr/instapay.webp"} download="stylus_qr_pay.webp" className='w-full'>
                     <Button className='flex items-center gap-3' variant={'link'}>
                         Download QR
                         <FontAwesomeIcon icon={faDownload} width={16} height={16} />
@@ -57,6 +58,7 @@ const ScanQr = (props: {
                 Please proceed with a purchase of {formData.amount} STXBTC tokens, equivalent to {formData.price} {currency}. Payment should be made using ({formData.method.toUpperCase()}) option.
                 Scan the QR code above to complete your transaction.
             </div>
+            {formData.method === PAYMENT_METHOD['BPI'] && <small>Transaction fees may apply if a non-BPI payment method (e.g., GCash) is used to scan the BPI QR code.</small>}
             <div className='flex gap-3 items-center justify-between'>
                 <Label className='text-base'>Upload Receipt:</Label>
                 <UploadButton

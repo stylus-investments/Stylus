@@ -64,7 +64,7 @@ const UserPlansTable = ({ initialData }: {
                                 <TableRow key={plan.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
                                     <TableCell>
                                         <Link href={`/dashboard/wallet/plans/${plan.id}`}>
-                                            <Button className='h-7' variant={'link'}>View</Button>
+                                            <Button className='h-7'>View</Button>
                                         </Link>
                                     </TableCell>
                                     <TableCell>{plan.name}</TableCell>

@@ -29,12 +29,13 @@ const VerifyOrder = (props: {
 
     return (
         <div className='flex flex-col gap-5'>
-            <h1 className='border-b pb-5 text-lg'>Summary</h1>
+            <h1 className='border-b pb-5 text-lg'>Order Summary</h1>
             {showReceipt && <div className='flex flex-col gap-2'>
                 <Label>Uploaded Recept:</Label>
                 <Image width={200} height={50} className='w-full h-auto' src={formData.receipt} alt='Receipt' />
             </div>}
             <Button
+                className='flex items-center gap-2'
                 onClick={() => setShowReceipt(prev => !prev)} variant={'secondary'}>
                 {showReceipt ? "Hide Uploaded Receipt" : "Show Uploaded Receipt"}
                 <FontAwesomeIcon icon={showReceipt ? faEyeSlash : faEye} width={16} height={16} />

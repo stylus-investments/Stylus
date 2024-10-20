@@ -426,7 +426,7 @@ export const orderRoute = {
                         amount: ORDERSTATUS['upcoming'], // Second order
                         user_id: order.user_id,
                         status: ORDERSTATUS['upcoming'],
-                        method: PAYMENT_METHOD['GCASH'],
+                        method: ORDERSTATUS['upcoming'],
                         user_investment_plan_id: order.user_investment_plan_id,
                         created_at: nextMonth
                     }

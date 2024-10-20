@@ -6,7 +6,8 @@ const ORDERSTATUS = {
     'upcoming': "upcoming"
 }
 const PAYMENT_METHOD = {
-    'GCASH': 'GCASH',
+    'INSTAPAY': 'INSTAPAY',
+    'BPI': 'BPI',
 };
 
 export { ORDERSTATUS, PAYMENT_METHOD }
