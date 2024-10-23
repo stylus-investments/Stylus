@@ -1,10 +1,10 @@
 generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model admin {
@@ -59,6 +59,8 @@ model user_order {
   order_message           order_message[]
   user_investment_plan    user_investment_plan @relation(fields: [user_investment_plan_id], references: [id], onDelete: Cascade)
   user_investment_plan_id String
+
+  @@index([user_investment_plan_id])
 }
 
 model user_investment_plan {
@@ -78,6 +80,9 @@ model user_investment_plan {
   investment_plan_package_id String
   created_at                 DateTime                @default(now())
   updated_at                 DateTime                @updatedAt
+
+  @@index([user_id])
+  @@index([investment_plan_package_id])
 }
 
 model investment_plan_package {
@@ -158,6 +163,8 @@ model user_notification {
   user_id    String
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
+
+  @@index([user_id])
 }
 
 enum ProfileStatus {
@@ -192,6 +199,8 @@ model referral_reward {
   user_invited_id          String        @unique
   inviter_referral_info    referral_info @relation(fields: [inviter_referral_info_id], references: [user_id], onDelete: Cascade)
   inviter_referral_info_id String
+
+  @@index([inviter_referral_info_id])
 }
 
 model referral_payout {
@@ -205,4 +214,6 @@ model referral_payout {
   user_id                String
   created_at             DateTime       @default(now())
   updated_at             DateTime       @updatedAt
+
+  @@index([user_id])
 }

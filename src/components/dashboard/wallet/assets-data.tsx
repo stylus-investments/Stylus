@@ -3,20 +3,22 @@ import React from 'react'
 import Image from 'next/image';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { caller } from '@/app/_trpc/server';
 import useBalanceStore from '@/state/balanceStore';
 import { availableCurrencies } from '@/constant/availableCurrency';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-const AssetsData = ({ assets }: {
-  assets: Awaited<ReturnType<typeof caller['dashboard']['getWalletData']>>['balances']['assets']
-}) => {
+import { trpc } from '@/app/_trpc/client';
+import { Skeleton } from '@/components/ui/skeleton';
+const AssetsData = () => {
+
+  const { data } = trpc.dashboard.getWalletData.useQuery()
+
+  const assets = data?.balances.assets
 
   const router = useRouter()
 
   const { currency, showBalance } = useBalanceStore()
-
 
   const returnAssetIcon = (symbol: string | undefined) => {
 
@@ -35,7 +37,7 @@ const AssetsData = ({ assets }: {
 
   const smallScreen = (
     <div className='flex flex-col w-full md:hidden'>
-      {assets.length > 0 ? assets.map((asset, i) => (
+      {assets && assets.length > 0 ? assets.map((asset, i) => (
         <Link href={`/dashboard/wallet/assets/${asset?.address}`} className='flex hover:bg-muted  items-center justify-between px-3 py-4 border-b w-full' key={i}>
           <div className='flex iems-start gap-2.5'>
             <Image src={returnAssetIcon(asset?.symbol)} width={20} height={20} alt={asset?.name || ""} className='rounded-full max-h-[20px] max-w-[20px]' />
@@ -118,65 +120,69 @@ const AssetsData = ({ assets }: {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {assets.length > 0 ? assets.map((asset, i) => (
-            <TableRow key={i} onClick={() => router.push(`/dashboard/wallet/assets/${asset?.address}`)} className='cursor-pointer'>
-              <TableCell className='flex gap-2 items-center'>
-                <Image src={returnAssetIcon(asset?.symbol)} alt={asset?.name || ""} width={25} height={25} className='rounded-full' />
-                <Label>{asset?.symbol}</Label>
-              </TableCell>
-              <TableCell>
-                {asset?.value_array.map((obj, i) => {
-                  if (obj.currency === currency) {
-                    // Find the matching currency object
-                    const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
-                    if (!showBalance) return "********"
+          {
+            assets && assets.length > 0 ? assets.map((asset, i) => (
+              <TableRow key={i} onClick={() => router.push(`/dashboard/wallet/assets/${asset?.address}`)} className='cursor-pointer'>
+                <TableCell className='flex gap-2 items-center'>
+                  <Image src={returnAssetIcon(asset?.symbol)} alt={asset?.name || ""} width={25} height={25} className='rounded-full' />
+                  <Label>{asset?.symbol}</Label>
+                </TableCell>
+                <TableCell>
+                  {asset?.value_array.map((obj, i) => {
+                    if (obj.currency === currency) {
+                      // Find the matching currency object
+                      const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
+                      if (!showBalance) return "********"
 
-                    return (
-                      <div className='flex items-center' key={i}>
-                        {matchingCurrency && (
-                          <FontAwesomeIcon icon={matchingCurrency.icon} width={15} height={15} />
-                        )}
-                        <div>
-                          {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })}
+                      return (
+                        <div className='flex items-center' key={i}>
+                          {matchingCurrency && (
+                            <FontAwesomeIcon icon={matchingCurrency.icon} width={15} height={15} />
+                          )}
+                          <div>
+                            {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })}
+                          </div>
                         </div>
-                      </div>
-                    );
+                      );
+                    }
+                  })}
+                </TableCell>
+                <TableCell className={`${Number(asset?.change) > 0 ? "text-green-500" : "text-red-500"}`}>
+                  {Number(asset?.change) > 0 ? "+" : ""}{asset?.change}%
+                </TableCell>
+                <TableCell>
+                  {!showBalance ? "********" :
+                    asset?.amount ? Number(asset?.amount).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''
                   }
-                })}
-              </TableCell>
-              <TableCell className={`${Number(asset?.change) > 0 ? "text-green-500" : "text-red-500"}`}>
-                {Number(asset?.change) > 0 ? "+" : ""}{asset?.change}%
-              </TableCell>
-              <TableCell>
-                {!showBalance ? "********" :
-                  asset?.amount ? Number(asset?.amount).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : ''
-                }
-              </TableCell>
-              <TableCell>
-                {asset?.total_value_array.map((obj, i) => {
-                  if (obj.currency === currency) {
-                    // Find the matching currency object
-                    const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
-                    if (!showBalance) return "********"
+                </TableCell>
+                <TableCell>
+                  {asset?.total_value_array.map((obj, i) => {
+                    if (obj.currency === currency) {
+                      // Find the matching currency object
+                      const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
+                      if (!showBalance) return "********"
 
-                    return (
-                      <div className='flex items-center w-full' key={i}>
-                        {matchingCurrency && (
-                          <FontAwesomeIcon icon={matchingCurrency.icon} width={15} height={15} />
-                        )}
-                        <div>
-                          {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })}
+                      return (
+                        <div className='flex items-center w-full' key={i}>
+                          {matchingCurrency && (
+                            <FontAwesomeIcon icon={matchingCurrency.icon} width={15} height={15} />
+                          )}
+                          <div>
+                            {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 })}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  }
-                })}
-              </TableCell>
-            </TableRow>
-          )) :
-            <TableRow>
-              <TableCell>No Data</TableCell>
-            </TableRow>
+                      );
+                    }
+                  })}
+                </TableCell>
+              </TableRow>
+            )) :
+              assets && assets.length === 0 ?
+                <TableRow>
+                  <TableCell>No Data</TableCell>
+                </TableRow>
+                :
+                <AssetSkeleton />
           }
         </TableBody>
       </Table>
@@ -189,6 +195,29 @@ const AssetsData = ({ assets }: {
       {largeScreen}
     </div>
   )
+}
+
+const AssetSkeleton = () => {
+
+  return [1, 2, 3, 4].map(item => (
+    <TableRow key={item}>
+      <TableCell>
+        <Skeleton className='h-7 w-32' />
+      </TableCell>
+      <TableCell>
+        <Skeleton className='h-7 w-28' />
+      </TableCell>
+      <TableCell>
+        <Skeleton className='h-7 w-24' />
+      </TableCell>
+      <TableCell>
+        <Skeleton className='h-7 w-28' />
+      </TableCell>
+      <TableCell>
+        <Skeleton className='h-7 w-32' />
+      </TableCell>
+    </TableRow>
+  ))
 }
 
 export default AssetsData

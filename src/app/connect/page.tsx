@@ -4,10 +4,13 @@ import { usePrivy } from '@privy-io/react-auth';
 import { Button } from '@/components/ui/button';
 import { LoaderCircle } from 'lucide-react';
 import { trpc } from '../_trpc/client';
+import { useRouter } from 'next-nprogress-bar';
 
 const ConnectPage = () => {
 
-    const {  refetch } = trpc.user.getCurrentUserInfo.useQuery(undefined, {
+    const router = useRouter()
+
+    const { refetch } = trpc.user.getCurrentUserInfo.useQuery(undefined, {
         enabled: false
     })
 
@@ -18,7 +21,7 @@ const ConnectPage = () => {
             // Refetch user info once authenticated and wallet address is available
             refetch().then(() => {
                 // After refetching, redirect to the dashboard
-                window.location.href = '/dashboard/wallet';
+                router.push('/dashboard/wallet')
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

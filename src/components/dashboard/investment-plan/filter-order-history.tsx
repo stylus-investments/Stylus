@@ -6,14 +6,22 @@ import Link from 'next/link'
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { ORDERSTATUS } from '@/constant/order'
+import { trpc } from '@/app/_trpc/client'
+import { Skeleton } from '@/components/ui/skeleton'
 
-const FilterOrderHistory = ({ name, filter }: {
-    name: string
+const FilterOrderHistory = ({ filter, planID }: {
     filter: {
         status: string | undefined;
         request_chat: string;
-    }
+    },
+    planID: string
 }) => {
+
+    const { data } = trpc.investment.retrieveSinglePlan.useQuery({
+        plan_id: planID
+    }, {
+        enabled: false
+    })
 
     const router = useRouter()
 
@@ -45,7 +53,7 @@ const FilterOrderHistory = ({ name, filter }: {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>{name}</BreadcrumbPage>
+                        <BreadcrumbPage>{data?.data.name || <Skeleton className='h-6 w-28' />}</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>

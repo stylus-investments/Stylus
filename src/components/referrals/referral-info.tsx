@@ -1,5 +1,4 @@
 'use client'
-import { caller } from '@/app/_trpc/server'
 import React, { useEffect, useState } from 'react'
 import { Card, CardContent } from '../ui/card'
 import { Label } from '../ui/label'
@@ -9,9 +8,7 @@ import { trpc } from '@/app/_trpc/client'
 import { toast } from 'sonner'
 import { Copy, LoaderCircle } from 'lucide-react'
 
-const ReferralInfo = ({ initialData }: {
-    initialData: Awaited<ReturnType<typeof caller['referral']['getUserReferralInfo']>>
-}) => {
+const ReferralInfo = () => {
 
     const [formData, setFormData] = useState({
         account_number: '',
@@ -27,11 +24,7 @@ const ReferralInfo = ({ initialData }: {
         }
     })
 
-    const { refetch, data } = trpc.referral.getUserReferralInfo.useQuery(undefined, {
-        refetchOnMount: false,
-        enabled: false,
-        initialData: initialData
-    })
+    const { refetch, data } = trpc.referral.getUserReferralInfo.useQuery()
     const getPayouts = trpc.referral.getPayoutHistory.useQuery(undefined, {
         enabled: false,
         refetchOnMount: false
@@ -76,16 +69,16 @@ const ReferralInfo = ({ initialData }: {
     }
 
     const copyReferralLink = () => {
-        navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_URL}/join/${initialData.referral_code}`)
+        navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_URL}/join/${data?.referral_code}`)
         toast.success("Referral Link Copied.")
     }
 
     useEffect(() => {
         setFormData({
-            account_name: initialData.payment_account_name,
-            account_number: initialData.payment_account_number
+            account_name: data?.payment_account_name || "",
+            account_number: data?.payment_account_number || ""
         })
-    }, [initialData])
+    }, [data])
 
     return (
         <div className='flex flex-col md:flex-row justify-center gap-5 w-full lg:w-4/5 2xl:w-2/3'>
@@ -95,17 +88,17 @@ const ReferralInfo = ({ initialData }: {
                         <div className='flex items-center gap-5'>
                             <div className='flex flex-col gap-1.5 w-full'>
                                 <Label >Total Rewards</Label>
-                                <Input value={`₱ ${data.total_reward}`} readOnly />
+                                <Input value={`₱ ${data?.total_reward || 0}`} readOnly />
                             </div>
                             <div className='flex flex-col gap-1.5 w-full'>
                                 <Label>Unclaimed Rewards</Label>
-                                <Input readOnly value={`₱ ${data.unclaimed_reward}`} />
+                                <Input readOnly value={`₱ ${data?.unclaimed_reward || 0}`} />
                             </div>
                         </div>
                         <div className='flex flex-col gap-1.5 w-full'>
                             <Label>Referral Link</Label>
                             <div className='w-full relative cursor-pointer' onClick={copyReferralLink}>
-                                <Input value={`${process.env.NEXT_PUBLIC_URL}/join/${data.referral_code}`} readOnly className='cursor-pointer' />
+                                <Input value={`${process.env.NEXT_PUBLIC_URL}/join/${data?.referral_code || "loading"}`} readOnly className='cursor-pointer' />
                                 <Copy size={20} className='w-10 bg-card absolute px-3 top-3 right-3 cursor-pointer text-primary' />
                             </div>
                         </div>
@@ -142,7 +135,7 @@ const ReferralInfo = ({ initialData }: {
                         <div className='flex items-center gap-5'>
                             <div className='flex flex-col gap-1.5'>
                                 <Label htmlFor='payment_method'>Method</Label>
-                                <Input value={data.payment_method} readOnly />
+                                <Input value={data?.payment_method || "loading"} readOnly />
                             </div>
                             <div className='flex flex-col gap-1.5 w-full'>
                                 <Label htmlFor='account_number'>Account Number</Label>

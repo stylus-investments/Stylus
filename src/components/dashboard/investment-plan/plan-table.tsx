@@ -6,20 +6,14 @@ import React, { useEffect, useState } from 'react'
 import TablePagination from '../table-pagination';
 import { trpc } from '@/app/_trpc/client';
 import { user_investment_plan } from '@prisma/client';
-import { caller } from '@/app/_trpc/server';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { ORDERSTATUS } from '@/constant/order';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const UserPlansTable = ({ initialData }: {
-    initialData: Awaited<ReturnType<typeof caller['investment']['getUserInvestmentPlans']>>
-}) => {
+const UserPlansTable = () => {
 
-    const { data } = trpc.investment.getUserInvestmentPlans.useQuery(undefined, {
-        refetchOnMount: false,
-        initialData: initialData
-    })
+    const { data } = trpc.investment.getUserInvestmentPlans.useQuery()
 
     const [currentTable, setCurrentTable] = useState<user_investment_plan[] | undefined>(undefined)
 
@@ -60,22 +54,26 @@ const UserPlansTable = ({ initialData }: {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {currentTable && currentTable.length > 0 ? currentTable.map((plan, i) => (
-                                <TableRow key={plan.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
-                                    <TableCell>
-                                        <Link href={`/dashboard/wallet/plans/${plan.id}`}>
-                                            <Button className='h-7'>View</Button>
-                                        </Link>
-                                    </TableCell>
-                                    <TableCell>{plan.name}</TableCell>
-                                    <TableCell>₱{plan.total_price}</TableCell>
-                                    <TableCell>{plan.profit_protection ? "Yes" : "No"}</TableCell>
-                                    <TableCell>{plan.insurance ? "Yes" : "No"}</TableCell>
-                                </TableRow>
-                            )) :
-                                <TableRow>
-                                    <TableCell>No Data</TableCell>
-                                </TableRow>
+                            {
+                                currentTable && currentTable.length > 0 ? currentTable.map((plan, i) => (
+                                    <TableRow key={plan.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
+                                        <TableCell>
+                                            <Link href={`/dashboard/wallet/plans/${plan.id}`}>
+                                                <Button className='h-7'>View</Button>
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell>{plan.name}</TableCell>
+                                        <TableCell>₱{plan.total_price}</TableCell>
+                                        <TableCell>{plan.profit_protection ? "Yes" : "No"}</TableCell>
+                                        <TableCell>{plan.insurance ? "Yes" : "No"}</TableCell>
+                                    </TableRow>
+                                )) :
+                                    currentTable && currentTable.length === 0 ?
+                                        <TableRow>
+                                            <TableCell>No Data</TableCell>
+                                        </TableRow>
+                                        :
+                                        <InvestmentPlanTableSkeleton />
                             }
                         </TableBody>
                     </Table>
@@ -85,6 +83,28 @@ const UserPlansTable = ({ initialData }: {
             </Card >
         </div>
     )
+}
+
+const InvestmentPlanTableSkeleton = () => {
+    return [1, 2, 3, 4, 5, 6].map(item => (
+        <TableRow key={item}>
+            <TableCell>
+                <Skeleton className='h-7 w-20' />
+            </TableCell>
+            <TableCell>
+                <Skeleton className='h-7 w-40' />
+            </TableCell>
+            <TableCell>
+                <Skeleton className='h-7 w-32' />
+            </TableCell>
+            <TableCell>
+                <Skeleton className='h-7 w-20' />
+            </TableCell>
+            <TableCell>
+                <Skeleton className='h-7 w-20' />
+            </TableCell>
+        </TableRow>
+    ))
 }
 
 

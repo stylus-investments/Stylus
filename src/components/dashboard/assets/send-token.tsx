@@ -13,12 +13,17 @@ import React, { useState } from 'react'
 import { toast } from 'sonner'
 import jsQR from 'jsqr';
 import { Scanner } from '@yudiel/react-qr-scanner';
+import { trpc } from '@/app/_trpc/client'
 
 
-const SentToken = ({ tokenData }: {
-    tokenData: Awaited<ReturnType<typeof caller['dashboard']['getAssetData']>>
+const SendToken = ({ tokenAddress }: {
+    tokenAddress: string
 
 }) => {
+
+    const { data } = trpc.dashboard.getAssetData.useQuery(tokenAddress, {
+        enabled: false
+    })
 
     const { wallets } = useWallets()
     const wallet = wallets[0]
@@ -87,7 +92,7 @@ const SentToken = ({ tokenData }: {
             await wallet.switchChain(BASE_CHAIN_ID)
             const provider = await wallet.getEthersProvider()
             const signer = provider.getSigner() as any
-            const tokenContract = new ethers.Contract(tokenData.address, ABI, signer);
+            const tokenContract = new ethers.Contract(tokenAddress, ABI, signer);
             const decimals = await tokenContract.decimals()
             // Get the user's balance
             const userAddress = wallet.address // Get user's wallet address
@@ -125,7 +130,7 @@ const SentToken = ({ tokenData }: {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Transfer Token</AlertDialogTitle>
                         <AlertDialogDescription>
-                            You are about to transfer {tokenData.name} to the specified recipient. Please note that you will need ETH in your wallet to cover the transaction fees (gas). Review the details carefully before confirming.
+                            You are about to transfer {data?.name} to the specified recipient. Please note that you will need ETH in your wallet to cover the transaction fees (gas). Review the details carefully before confirming.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <form onSubmit={sendToken} className='flex flex-col gap-5'>
@@ -188,4 +193,4 @@ const SentToken = ({ tokenData }: {
     )
 }
 
-export default SentToken
+export default SendToken

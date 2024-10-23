@@ -144,6 +144,9 @@ export const dashboardRoute = {
 
 
     }),
+    getUserBalances: publicProcedure.query(async () => {
+        
+    }),
     getRewardData: publicProcedure.query(async () => {
 
         const auth = await getUserId()

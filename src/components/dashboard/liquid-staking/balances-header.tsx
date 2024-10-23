@@ -8,12 +8,16 @@ import { Eye, EyeOff } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import CreateInvestment from '../investment-plan/create-investment'
 import Link from 'next/link'
-import { caller } from '@/app/_trpc/server'
+import { trpc } from '@/app/_trpc/client'
+import { Skeleton } from '@/components/ui/skeleton'
 
 
-const BalancesHeader = ({ balances }: {
-    balances: Awaited<ReturnType<typeof caller['dashboard']['getWalletData']>>['balances']['currentBalances']
-}) => {
+const BalancesHeader = () => {
+
+    const { data } = trpc.dashboard.getWalletData.useQuery(undefined, {
+        refetchOnMount: false,
+        enabled: false
+    })
 
     const { currency, showBalance, setShowBalance } = useBalanceStore()
 
@@ -28,26 +32,29 @@ const BalancesHeader = ({ balances }: {
                         {showBalance ? <Eye size={18} /> : <EyeOff size={18} />}
                     </div>
                 </div>
-                {balances && balances.map((obj, i) => {
-                    if (obj.currency === currency) {
-                        // Find the matching currency object
-                        const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
-                        return (
-                            <div className='font-medium text-4xl flex items-center justify-between' key={i}>
-                                {showBalance ? <div className='flex items-center'>
-                                    {matchingCurrency && (
-                                        <FontAwesomeIcon icon={matchingCurrency.icon} width={30} height={30} />
-                                    )}
-                                    <div>
-                                        {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </div>
-                                </div> : <div>********</div>}
-                            </div>
-                        );
-                    }
-                })}
+                {
+                    data?.balances.currentBalances ? data.balances.currentBalances.map((obj, i) => {
+                        if (obj.currency === currency) {
+                            // Find the matching currency object
+                            const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
+                            return (
+                                <div className='font-medium text-4xl flex items-center justify-between' key={i}>
+                                    {showBalance ? <div className='flex items-center'>
+                                        {matchingCurrency && (
+                                            <FontAwesomeIcon icon={matchingCurrency.icon} width={30} height={30} />
+                                        )}
+                                        <div>
+                                            {(Number(obj.amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </div>
+                                    </div> : <div>********</div>}
+                                </div>
+                            );
+                        }
+                    }) :
+                        <Skeleton className='h-9 w-44' />
+                }
             </div>
-            <div className='flex items-center self-center w-full xl:w-80 sm:gap-5 gap-5'>
+            <div className='flex items-center self-center w-full max-w-96 xl:w-80 sm:gap-5 gap-5'>
                 <Link href={'/dashboard/wallet/plans'} className='w-full'>
                     <Button className='w-full'>
                         My Plan

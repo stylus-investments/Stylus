@@ -15,25 +15,16 @@ const AssetData = async ({ params }: {
 
     if (!params.token_address) redirect('/dashboard/wallet')
 
-    try {
-
-        const userTokenData = await caller.dashboard.getAssetData(params.token_address)
-
-        return (
-            <div className='flex flex-col gap-5 w-full py-24 padding'>
-                <DashboardHeader currentPage='wallet' />
-                <DashboardLinksFooter currentPage='wallet' />
-                <AssetBalancesHeader tokenData={userTokenData} />
-                <AssetActions tokenData={userTokenData} />
-                <AssetHistory tokenData={userTokenData} />
-            </div>
-        )
-
-    } catch (error) {
-        return <div>
-            {JSON.stringify(error)}
+    return (
+        <div className='flex flex-col gap-5 w-full py-24 padding'>
+            <DashboardHeader currentPage='wallet' />
+            <DashboardLinksFooter currentPage='wallet' />
+            <AssetBalancesHeader tokenAddress={params.token_address} />
+            <AssetActions tokenAddress={params.token_address} />
+            <AssetHistory tokenAddress={params.token_address} />
         </div>
-    }
+    )
+
 }
 
 export default AssetData

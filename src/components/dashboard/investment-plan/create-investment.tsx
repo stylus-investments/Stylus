@@ -18,7 +18,9 @@ const CreateInvestment = () => {
     const [open, setOpen] = useState(false)
 
     const [selectedDuration, setSelectedDuration] = useState(0)
-    const { data } = trpc.package.getAllPackages.useQuery('USER')
+    const { data } = trpc.package.getAllPackages.useQuery('USER', {
+        staleTime: 1000 * 60 * 60 * 24
+    })
 
     const createInvestmentPlan = trpc.investment.createUserInvestmentPlan.useMutation({
         onSuccess: () => {

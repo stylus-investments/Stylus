@@ -2,15 +2,13 @@
 import React, { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import GuideAccordions from '../liquid-staking/guide-accordions'
-import SnapshotHistory from '../grow-rewards/snapshot-history'
 import AssetsData from './assets-data'
 import { caller } from '@/app/_trpc/server'
 import StatusData from './status-data'
+import { trpc } from '@/app/_trpc/client'
 const tabList = ['Assets', 'Status', 'Guides']
 
-const WalletTabs = ({ assets }: {
-    assets: Awaited<ReturnType<typeof caller['dashboard']['getWalletData']>>['balances']['assets']
-}) => {
+const WalletTabs = () => {
 
     const [currentTab, setCurrentTab] = useState('assets')
 
@@ -25,7 +23,7 @@ const WalletTabs = ({ assets }: {
                 ))}
             </TabsList>
             <TabsContent value="assets" className='w-full'>
-                <AssetsData assets={assets} />
+                <AssetsData />
             </TabsContent>
             <TabsContent value="status" className='w-full'>
                 <StatusData />

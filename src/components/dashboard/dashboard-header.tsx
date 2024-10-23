@@ -11,14 +11,15 @@ import { usePrivy } from '@privy-io/react-auth'
 import { toast } from 'sonner'
 import UserProfile from './user-profile'
 import { Skeleton } from '../ui/skeleton'
-import { redirect } from 'next/navigation'
 import Notifications from './notifications'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select'
 import { availableCurrencies } from '@/constant/availableCurrency'
 import useBalanceStore from '@/state/balanceStore'
-
+import { useRouter } from 'next-nprogress-bar'
 
 const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
+
+    const router = useRouter()
 
     const { user, logout, authenticated, ready } = usePrivy()
 
@@ -27,9 +28,10 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
     useEffect(() => {
 
         if (ready && !authenticated) {
-            redirect('/connect')
+            router.push('/connect')
         }
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, ready, authenticated])
 
     const mobileScreen = (
@@ -76,10 +78,7 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                                 <FontAwesomeIcon icon={faWallet} width={16} height={16} />
                             </DropdownMenuShortcut>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className='flex items-center gap-2' onClick={() => {
-                            logout()
-                            redirect('/connect')
-                        }}>
+                        <DropdownMenuItem className='flex items-center gap-2' onClick={logout}>
                             <span>
                                 Logout
                             </span>
@@ -131,10 +130,7 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                     <DropdownMenuContent>
                         <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className='flex items-center gap-2' onClick={() => {
-                            logout()
-                            redirect('/connect')
-                        }}>
+                        <DropdownMenuItem className='flex items-center gap-2' onClick={logout}>
                             <span>
                                 Logout
                             </span>

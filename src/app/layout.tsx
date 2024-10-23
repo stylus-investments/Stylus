@@ -8,6 +8,7 @@ import Privy from "@/components/providers/privy-provider";
 import { Analytics } from "@vercel/analytics/react"
 import SessionProviders from "@/components/providers/session-provider";
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import LoadingBarComp from "@/components/loadingbar";
 
 export const metadata: Metadata = {
   title: "Stylus",
@@ -26,6 +27,7 @@ export default function RootLayout({
         <Privy>
           <TrpcProvider>
             <body>
+              <LoadingBarComp />
               <ThemeProvider
                 attribute="class"
                 defaultTheme="system"

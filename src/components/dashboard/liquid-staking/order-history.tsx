@@ -5,18 +5,27 @@ import React, { useEffect, useState } from 'react'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { caller } from '@/app/_trpc/server';
 import { ORDERSTATUS } from '@/constant/order';
 import PayInvestmentPlan from '../investment-plan/pay-investment';
 import DisplayClientMessages from '../messages/display-client-messages';
 import { socket } from '@/lib/socket';
 import TableServerPagination from '../table-server-pagination';
+import { trpc } from '@/app/_trpc/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const OrderHistory = ({ initialData }: {
-    initialData: Awaited<ReturnType<typeof caller['investment']['retrieveSinglePlan']>>
-}) => {
+type tProps = {
+    plan_id: string
+    page?: string
+}
 
-    const [currentTable, setCurrentTable] = useState(initialData.data.payments)
+const OrderHistory = (props: tProps) => {
+
+    const { data } = trpc.investment.retrieveSinglePlan.useQuery({
+        plan_id: props.plan_id,
+        page: props.page
+    })
+
+    const [currentTable, setCurrentTable] = useState(data?.data.payments)
 
     const returnStatusButton = (status: string) => {
         switch (status) {
@@ -35,13 +44,15 @@ const OrderHistory = ({ initialData }: {
     useEffect(() => {
 
         socket.on("unseen_message", ({ orderID }) => {
-            setCurrentTable(prev =>
-                prev.map(order =>
-                    order.id === orderID
-                        ? { ...order, user_unread_messages: order.user_unread_messages + 1 }
-                        : order
+            if (currentTable) {
+                setCurrentTable(prev =>
+                    prev?.map(order =>
+                        order.id === orderID
+                            ? { ...order, user_unread_messages: order.user_unread_messages + 1 }
+                            : order
+                    )
                 )
-            )
+            }
         })
 
         return () => {
@@ -54,9 +65,9 @@ const OrderHistory = ({ initialData }: {
 
     useEffect(() => {
 
-        setCurrentTable(initialData.data.payments)
+        setCurrentTable(data?.data.payments)
 
-    }, [initialData.data.payments])
+    }, [data?.data.payments])
 
     return (
         <>
@@ -74,51 +85,76 @@ const OrderHistory = ({ initialData }: {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {currentTable && currentTable.length > 0 ? currentTable.map((order, i) => (
-                                <TableRow key={order.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
-                                    <TableCell>
-                                        {order.status === ORDERSTATUS['unpaid'] ?
-                                            <PayInvestmentPlan
-                                                investmentPrice={initialData.data.total_price}
-                                                orderID={order.id}
-                                                currency="PHP"
-                                            />
-                                            :
-                                            order.status === ORDERSTATUS['upcoming'] ? "upcoming" :
-                                                <DisplayClientMessages orderID={order.id} unseen={order.user_unread_messages} />
-                                        }
-                                    </TableCell>
-                                    <TableCell>{order.amount}</TableCell>
-                                    <TableCell>
-                                        {returnStatusButton(order.status)}
-                                    </TableCell>
-                                    <TableCell>{new Date(order.created_at).toDateString()}</TableCell>
-                                    <TableCell>{order.status === ORDERSTATUS['paid'] ? new Date(order.updated_at).toLocaleString() : ""}</TableCell>
-                                    <TableCell>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button className='h-7'>View</Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent className='w-full max-w-96'>
-                                                {order.receipt ? <Image src={order.receipt} alt='Order Receipt' width={200} height={50} className='w-full h-auto' /> : "No Receipt"}
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel className='w-full'>
-                                                        Close
-                                                    </AlertDialogCancel>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </TableCell>
+                            {
+                                currentTable && currentTable.length > 0 ? currentTable.map((order, i) => (
+                                    <TableRow key={order.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
+                                        <TableCell>
+                                            {order.status === ORDERSTATUS['unpaid'] ?
+                                                <PayInvestmentPlan
+                                                    investmentPrice={data?.data.total_price || 0}
+                                                    orderID={order.id}
+                                                    currency="PHP"
+                                                />
+                                                :
+                                                order.status === ORDERSTATUS['upcoming'] ? "upcoming" :
+                                                    <DisplayClientMessages orderID={order.id} unseen={order.user_unread_messages} />
+                                            }
+                                        </TableCell>
+                                        <TableCell>{order.amount}</TableCell>
+                                        <TableCell>
+                                            {returnStatusButton(order.status)}
+                                        </TableCell>
+                                        <TableCell>{new Date(order.created_at).toDateString()}</TableCell>
+                                        <TableCell>{order.status === ORDERSTATUS['paid'] ? new Date(order.updated_at).toLocaleString() : ""}</TableCell>
+                                        <TableCell>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button className='h-7'>View</Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent className='w-full max-w-96'>
+                                                    {order.receipt ? <Image src={order.receipt} alt='Order Receipt' width={200} height={50} className='w-full h-auto' /> : "No Receipt"}
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel className='w-full'>
+                                                            Close
+                                                        </AlertDialogCancel>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </TableCell>
 
-                                </TableRow>
-                            )) :
-                                <TableRow>
-                                    <TableCell>No Data</TableCell>
-                                </TableRow>
+                                    </TableRow>
+                                )) :
+                                    currentTable && currentTable.length === 0 ?
+                                        <TableRow>
+                                            <TableCell>No Data</TableCell>
+                                        </TableRow>
+                                        :
+                                        [1, 2, 3, 4, 5].map(item => (
+                                            <TableRow key={item}>
+                                                <TableCell>
+                                                    <Skeleton className='h-6 w-16' />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Skeleton className='h-6 w-24' />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Skeleton className='h-6 w-32' />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Skeleton className='h-6 w-44' />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Skeleton className='h-6 w-44' />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Skeleton className='h-6 w-20' />
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
                             }
                         </TableBody>
                     </Table>
-                    <TableServerPagination pagination={initialData.pagination} />
+                    <TableServerPagination pagination={data?.pagination} />
                 </CardContent>
             </Card >
         </>

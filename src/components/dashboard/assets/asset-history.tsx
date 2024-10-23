@@ -1,18 +1,19 @@
 'use client'
-import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import usePaginationStore from '@/state/paginationStore';
 import React, { useEffect, useState } from 'react'
 import TablePagination from '../table-pagination';
 import { trpc } from '@/app/_trpc/client';
 import BalanceHistorySkeleton from '../liquid-staking/balance-history-skeleton';
-import { caller } from '@/app/_trpc/server';
 
-const AssetHistory = ({ tokenData }: {
-    tokenData: Awaited<ReturnType<typeof caller['dashboard']['getAssetData']>>
+const AssetHistory = ({ tokenAddress }: {
+    tokenAddress: string
 }) => {
 
-    const { data, isLoading } = trpc.dashboard.getTokenBalanceHistory.useQuery(tokenData.address)
+    const { data, isLoading } = trpc.dashboard.getTokenBalanceHistory.useQuery(tokenAddress)
+    const { data: tokenData } = trpc.dashboard.getAssetData.useQuery(tokenAddress, {
+        enabled: false
+    })
 
     const [currentTable, setCurrentTable] = useState<{
         number: number;
@@ -39,7 +40,7 @@ const AssetHistory = ({ tokenData }: {
                         <TableHeader>
                             <TableRow className='text-xs md:text-sm'>
                                 <TableHead className='w-5'>#</TableHead>
-                                <TableHead className='min-w-32'>Amount {tokenData.symbol}</TableHead>
+                                <TableHead className='min-w-32'>Amount {tokenData?.name}</TableHead>
                                 <TableHead className='min-w-32'>Transaction Type</TableHead>
                                 <TableHead className=' min-w-52'>Date</TableHead>
                                 <TableHead className='min-w-32'>Transaction ID</TableHead>
@@ -79,7 +80,7 @@ const AssetHistory = ({ tokenData }: {
                             }
                         </TableBody>
                     </Table>
-                    <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>{tokenData.name} Transaction History</div>
+                    <div className='w-full text-center text-xs sm:text-sm text-muted-foreground'>{tokenData?.name} Transaction History</div>
                     <TablePagination data={data || []} />
                 </>
             }

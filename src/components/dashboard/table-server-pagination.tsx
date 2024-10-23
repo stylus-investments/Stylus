@@ -12,13 +12,16 @@ const TableServerPagination = ({ pagination }: {
         hasNextPage: boolean
         hasPreviousPage: boolean
         total: number
-    }
+    } | undefined
 }) => {
 
-    const [gotoInput, setGotoInput] = useState('')
-    const { page, totalPages, total, hasNextPage, hasPreviousPage } = pagination
 
+    const [gotoInput, setGotoInput] = useState('')
     const router = useRouter()
+
+    if (!pagination) return null
+
+    const { page, totalPages, total, hasNextPage, hasPreviousPage } = pagination
 
     const handlePageChange = (newPage: string) => {
         const url = new URL(window.location.href);

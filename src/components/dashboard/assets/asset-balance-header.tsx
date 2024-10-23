@@ -5,11 +5,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import useBalanceStore from '@/state/balanceStore'
 import { Label } from '@/components/ui/label'
 import { caller } from '@/app/_trpc/server'
+import { trpc } from '@/app/_trpc/client'
+import { Skeleton } from '@/components/ui/skeleton'
 
 
-const AssetBalancesHeader = ({ tokenData }: {
-    tokenData: Awaited<ReturnType<typeof caller['dashboard']['getAssetData']>>
+const AssetBalancesHeader = ({ tokenAddress }: {
+    tokenAddress: string
 }) => {
+
+    const { data } = trpc.dashboard.getAssetData.useQuery(tokenAddress)
 
     const { currency, showBalance } = useBalanceStore()
 
@@ -20,7 +24,7 @@ const AssetBalancesHeader = ({ tokenData }: {
                     Your Balance
                 </Label>
             </div>
-            {tokenData.total_value_array.map((obj, i) => {
+            {data ? data.total_value_array.map((obj, i) => {
                 if (obj.currency === currency) {
                     // Find the matching currency object
                     const matchingCurrency = availableCurrencies.find(currency => currency.currency === obj.currency);
@@ -37,10 +41,15 @@ const AssetBalancesHeader = ({ tokenData }: {
                         </div>
                     );
                 }
-            })}
-            <Label className='text-muted-foreground uppercase'>
-                {tokenData.amount} {tokenData.symbol}
+            }) :
+                <Skeleton className='h-8 w-28' />
+            }
+            {data ? <Label className='text-muted-foreground uppercase'>
+                {data.amount} {data.symbol}
             </Label>
+                :
+                <Skeleton className='h-7 w-44' />
+            }
         </div>
     )
 }
