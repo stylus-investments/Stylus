@@ -6,10 +6,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import useBalanceStore from '@/state/balanceStore';
 import { availableCurrencies } from '@/constant/availableCurrency';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { trpc } from '@/app/_trpc/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from 'next-nprogress-bar';
 const AssetsData = () => {
 
   const { data } = trpc.dashboard.getWalletData.useQuery()
