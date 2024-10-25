@@ -7,7 +7,7 @@ const LoadingBarComp = () => {
     return (
         <ProgressBar
             height="4px"
-            startPosition={0.35}
+            startPosition={0.4}
             color="#f7b208"
             options={{ showSpinner: false }}
             shallowRouting

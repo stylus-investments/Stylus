@@ -145,7 +145,7 @@ export const dashboardRoute = {
 
     }),
     getUserBalances: publicProcedure.query(async () => {
-        
+
     }),
     getRewardData: publicProcedure.query(async () => {
 
@@ -237,13 +237,26 @@ export const dashboardRoute = {
 
             await getMoralis()
 
-            const getTokenBalanceHistory = await Moralis.EvmApi.token.getWalletTokenTransfers({
-                chain: BASE_CHAIN_ID,
-                order: "ASC",
-                address: userInfo.wallet,
-                contractAddresses: [input]
-            })
+            const [getTokenBalanceHistory, tokenData] = await Promise.all([
+                Moralis.EvmApi.token.getWalletTokenTransfers({
+                    chain: BASE_CHAIN_ID,
+                    order: "ASC",
+                    address: userInfo.wallet,
+                    contractAddresses: [input]
+                }),
+                Moralis.EvmApi.token.getWalletTokenBalances({
+                    chain: BASE_CHAIN_ID,
+                    address: userInfo.wallet,
+                    tokenAddresses: [
+                        input
+                    ],
+                })
+            ])
 
+            if (!tokenData) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Token not found"
+            })
             if (!getTokenBalanceHistory) throw new TRPCError({
                 code: 'BAD_REQUEST',
                 message: "Failed to get wallet go balance history"
@@ -254,7 +267,7 @@ export const dashboardRoute = {
                     id: history.transactionHash,
                     date: history.blockTimestamp.toISOString(),
                     type: history.toAddress.lowercase === userInfo.wallet.toLowerCase() ? 'Deposit' : 'Withdrawal',
-                    amount: (Number(history.value) / 10 ** 10).toString(),
+                    amount: (Number(history.value) / 10 ** tokenData.result[0].decimals).toString(),
                     number: index + 1
                 }))
                 .reverse()
