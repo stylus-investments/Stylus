@@ -41,7 +41,7 @@ const AccountStatus = () => {
                     </div>
                     <small className='text-muted-foreground'>Profile information</small>
                 </div>
-                <div className='flex flex-col gap-3 p-5 border w-full'>
+                {/* <div className='flex flex-col gap-3 p-5 border w-full'>
                     <div className='text-muted-foreground flex items-center justify-between gap-3'>
                         <div className='flex items-center gap-3'>
                             <FontAwesomeIcon icon={faNotesMedical} width={18} height={18} />
@@ -64,7 +64,7 @@ const AccountStatus = () => {
                         {status.hasInsurance ? "Active" : "Inactive"}
                     </h1>
                     <small className='text-muted-foreground'>Health Insurance</small>
-                </div>
+                </div> */}
                 <div className='flex flex-col gap-3 p-5 border w-full rounded-b-lg lg:rounded-bl-none lg:rounded-tr-lg'>
                     <div className='text-muted-foreground flex items-center justify-between gap-3'>
                         <div className='flex items-center gap-3'>

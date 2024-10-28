@@ -165,7 +165,7 @@ const CreateInvestment = () => {
 
                                 return (
                                     <div className='flex flex-col gap-5 w-full' key={obj.id}>
-                                        <div className='flex flex-col gap-1.5'>
+                                        {/* <div className='flex flex-col gap-1.5'>
                                             <div className='flex w-full items-center gap-3'>
                                                 <Switch id='insurance' checked={formData.insurance} onCheckedChange={(bol) => setFormData(prev => ({ ...prev, insurance: bol }))} />
                                                 <Label htmlFor='insurance'>Insurance</Label>
@@ -173,7 +173,7 @@ const CreateInvestment = () => {
                                             <small className='text-muted-foreground'>
                                                 +300 (200k hospitalization coverage + annual physical exam)
                                             </small>
-                                        </div>
+                                        </div> */}
                                         <div className='flex w-full items-center gap-3'>
                                             <Switch id='profit_protection' checked={true} disabled />
                                             <Label htmlFor='profit_protection'>Profit Protection</Label>
@@ -185,7 +185,7 @@ const CreateInvestment = () => {
                             if (obj.duration >= 10) {
                                 return (
                                     <div className='flex flex-col gap-5 w-full' key={obj.id}>
-                                        <div className='flex flex-col gap-1.5'>
+                                        {/* <div className='flex flex-col gap-1.5'>
                                             <div className='flex w-full items-center gap-3'>
                                                 <Switch id='insurance' checked={formData.insurance} onCheckedChange={(bol) => setFormData(prev => ({ ...prev, insurance: bol }))} />
                                                 <Label htmlFor='insurance'>Insurance</Label>
@@ -193,7 +193,7 @@ const CreateInvestment = () => {
                                             <small className='text-muted-foreground'>
                                                 +300 (200k hospitalization coverage + annual physical exam)
                                             </small>
-                                        </div>
+                                        </div> */}
                                         <div className='flex flex-col gap-1.5'>
                                             <div className='flex w-full items-center gap-3'>
                                                 <Switch id='profit_protection' checked={formData.profit_protection} onCheckedChange={(bol) => setFormData(prev => ({ ...prev, profit_protection: bol }))} />

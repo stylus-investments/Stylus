@@ -50,7 +50,7 @@ const UserPlansTable = () => {
                                 <TableHead className='min-w-32'>Plan Name</TableHead>
                                 <TableHead className='min-w-32'>Monthly Payment</TableHead>
                                 <TableHead className=' min-w-52'>Profit Protection</TableHead>
-                                <TableHead className='min-w-32'>Health Insurance</TableHead>
+                                {/* <TableHead className='min-w-32'>Health Insurance</TableHead> */}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -65,7 +65,7 @@ const UserPlansTable = () => {
                                         <TableCell>{plan.name}</TableCell>
                                         <TableCell>₱{plan.total_price}</TableCell>
                                         <TableCell>{plan.profit_protection ? "Yes" : "No"}</TableCell>
-                                        <TableCell>{plan.insurance ? "Yes" : "No"}</TableCell>
+                                        {/* <TableCell>{plan.insurance ? "Yes" : "No"}</TableCell> */}
                                     </TableRow>
                                 )) :
                                     currentTable && currentTable.length === 0 ?
