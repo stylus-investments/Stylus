@@ -1,4 +1,4 @@
-import { ORDERSTATUS, PAYMENT_METHOD } from "@/constant/order";
+import { ORDERSTATUS } from "@/constant/order";
 import db from "@/db/db";
 import { getAuth } from "@/lib/nextAuth";
 import { getUserId } from "@/lib/privy";
@@ -7,6 +7,11 @@ import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import axios from "axios";
 import { z } from "zod";
+import { Resend } from 'resend';
+import { NewOrderEmailTemplate } from "@/components/emails/new-order";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 export const orderRoute = {
     getAllOrder: publicProcedure.input(z.object({
         page: z.string().min(1).optional().default('1'),
@@ -110,6 +115,13 @@ export const orderRoute = {
             code: 'BAD_REQUEST',
             message: "Failed to pay order"
         })
+
+        await resend.emails.send({
+            from: 'New Order Processing <order@stylus.investments>',
+            to: ['support@stylus.investments'],
+            subject: 'New Order Processing',
+            react: NewOrderEmailTemplate(),
+        });
 
         return updateOrder
     }),

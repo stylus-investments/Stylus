@@ -209,7 +209,6 @@ const getUserTokenData = async ({ tokenAddress, chain, walletAddress, currencyEx
 
 
     } catch (error) {
-        console.log(error)
         return null
     }
 }

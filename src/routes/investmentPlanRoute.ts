@@ -20,7 +20,6 @@ export const investmentPlanRoute = {
 
         try {
 
-
             await rateLimiter.consume(1)
 
             const auth = await getUserId()
@@ -28,11 +27,13 @@ export const investmentPlanRoute = {
                 code: "UNAUTHORIZED"
             })
 
+
             const user = await db.user_info.findUnique({ where: { user_id: auth } })
             if (!user) throw new TRPCError({
                 code: "NOT_FOUND",
                 message: "User not found"
             })
+            console.log("User Info", user)
 
             //need to be changed
             if (user.status !== 'VERIFIED') throw new TRPCError({
@@ -44,6 +45,8 @@ export const investmentPlanRoute = {
 
             //retrieve package
 
+            console.log("User Input", opts.input)
+
             const investmentPackage = await db.investment_plan_package.findUnique({ where: { id: package_id } })
             if (!investmentPackage) throw new TRPCError({
                 code: "NOT_FOUND",
@@ -53,6 +56,8 @@ export const investmentPlanRoute = {
                 code: "BAD_REQUEST",
                 message: "Something is not right"
             })
+
+            console.log("Package", investmentPackage)
 
             const prices = investmentPackage.prices as number[]
 
@@ -85,6 +90,8 @@ export const investmentPlanRoute = {
                 message: "Prices are not matched"
             })
 
+            console.log("Price calculation is correct")
+
             //create the user investment plan
             const now = new Date()
             const nextMonth = new Date(now.setMonth(now.getMonth() + 1))
@@ -94,7 +101,7 @@ export const investmentPlanRoute = {
                 data: {
                     user: {
                         connect: {
-                            user_id: user.user_id
+                            user_id: auth
                         }
                     },
                     name, total_price: recalculateTotalPrice,
@@ -108,11 +115,15 @@ export const investmentPlanRoute = {
                     },
                     base_price
                 }
+            }).catch(async e => {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Faild to create investment plan",
+                    cause: e
+                })
             })
-            if (!investmentPlan) throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: "Faild to create investment plan"
-            })
+
+            console.log("Investment plan created")
 
             // Create an array with only unpaid and upcoming orders
             const ordersData = [
