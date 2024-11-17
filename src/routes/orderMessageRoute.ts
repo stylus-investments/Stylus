@@ -108,8 +108,6 @@ export const orderMessageRoute = {
             })
         ])
 
-        await db.$disconnect()
-
         return true
     }),
     updateUnreadMessage: publicProcedure.input(z.object({

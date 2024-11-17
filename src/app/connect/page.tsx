@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { LoaderCircle } from 'lucide-react';
 import { trpc } from '../_trpc/client';
 import { useRouter } from 'next-nprogress-bar';
+import { useSmartWallets } from '@privy-io/react-auth/smart-wallets';
 
 const ConnectPage = () => {
 
@@ -14,10 +15,12 @@ const ConnectPage = () => {
         enabled: false
     })
 
+    const { client } = useSmartWallets()
+
     const { login, user, ready, authenticated } = usePrivy();
 
     useEffect(() => {
-        if (ready && user?.hasAcceptedTerms && authenticated && user.wallet?.address) {
+        if (ready && user?.hasAcceptedTerms && authenticated && user.wallet?.address && client?.account.address) {
             // Refetch user info once authenticated and wallet address is available
             refetch().then(() => {
                 // After refetching, redirect to the dashboard
@@ -25,7 +28,7 @@ const ConnectPage = () => {
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, ready, user?.wallet?.address, user?.hasAcceptedTerms]);
+    }, [user, ready, user?.wallet?.address, user?.hasAcceptedTerms, client]);
 
     if (ready && authenticated && user?.wallet?.address) {
         return (

@@ -9,6 +9,8 @@ import { getAuth } from "@/lib/nextAuth";
 import { ProfileStatus } from "@prisma/client";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { UTApi } from "uploadthing/server";
+import { ethers } from "ethers";
+import axios from "axios";
 
 export const userRoute = {
     getCurrentUserInfo: publicProcedure.query(async () => {
@@ -32,7 +34,7 @@ export const userRoute = {
             })
 
             const [getUser, inviter] = await Promise.all([
-                privy.getUser(user),
+                privy.getUserById(user),
                 db.referral_info.findUnique({ where: { referral_code: referalCode || "" } })
             ])
 
@@ -45,11 +47,12 @@ export const userRoute = {
                     last_name: "",
                     id_image: [''],
                     email: getUser?.email?.address || "",
+                    claimed_gass: true,
                     mobile: "",
                     age: "",
                     birth_date: new Date(),
                     user_id: user,
-                    wallet: getUser.wallet?.address || "",
+                    wallet: getUser.smartWallet?.address || "",
                     referral_info: {
                         create: {
                             referral_code: userReferralCode[0],
@@ -354,5 +357,76 @@ export const userRoute = {
         } finally {
             await db.$disconnect()
         }
+    }),
+    claimGass: publicProcedure.mutation(async () => {
+
+        const provider = new ethers.JsonRpcProvider(process.env.MORALIS_RPC_URL); // Your RPC URL
+        const wallet = new ethers.Wallet(process.env.GAS_WALLET_PRIVATE_KEY as string, provider); // Wallet used to send gas fees
+
+        await rateLimiter.consume(1)
+
+        const auth = await getUserId()
+        if (!auth) throw new TRPCError({
+            code: "UNAUTHORIZED"
+        })
+
+        const user = await db.user_info.findUnique({ where: { user_id: auth } })
+        if (!user) throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: "User not found"
+        })
+
+        if (user.claimed_gass) throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Gas fee already claimed."
+        })
+
+        const response = await axios.get(
+            'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'
+        );
+        const ethPriceInUSD = response.data.ethereum.usd;
+
+        // Step 2: Calculate the amount of ETH equivalent to $0.30
+        const gasFeeInUSD = 0.20;
+        const gasFeeAmount = ethers.parseEther((gasFeeInUSD / ethPriceInUSD).toFixed(8)); // Convert to ETH
+
+        // Step 3: Send the gas fee to the user's wallet
+        const tx = await wallet.sendTransaction({
+            to: user.wallet,
+            value: gasFeeAmount,
+        });
+
+        console.log("Transaction sent:", tx.hash);
+
+        // Step 4: Wait for the transaction to be mined
+        await tx.wait();
+
+        console.log("Transaction confirmed:", tx.hash);
+
+        await db.user_info.update({
+            where: { user_id: user.user_id },
+            data: { claimed_gass: true }
+        })
+
+        // Step 5: Return the transaction hash
+        return true
+
+    }),
+    checkGas: publicProcedure.query(async () => {
+        await rateLimiter.consume(1)
+
+        const auth = await getUserId()
+        if (!auth) throw new TRPCError({
+            code: "UNAUTHORIZED"
+        })
+
+        const user = await db.user_info.findUnique({ where: { user_id: auth } })
+        if (!user) throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: "User not found"
+        })
+
+        return user.claimed_gass
+
     })
 }

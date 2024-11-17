@@ -72,7 +72,7 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                                 navigator.clipboard.writeText(user?.wallet?.address || '')
                                 toast.success("Wallet address copied.")
                             }}>
-                                {`${user?.wallet?.address.substring(0, 6)}...${user?.wallet?.address.substring(38)}`}
+                                {`${user?.smartWallet?.address.substring(0, 6)}...${user?.smartWallet?.address.substring(38)}`}
                             </span>
                             <DropdownMenuShortcut>
                                 <FontAwesomeIcon icon={faWallet} width={16} height={16} />
@@ -117,18 +117,31 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
             <div className='flex items-center gap-5 justify-end w-full'>
                 <DashboardLinksHeader currentPage={currentPage} />
                 <ToggleTheme />
-
+                {/* <button onClick={exportWallet}>
+                                s
+                                </button>   */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        {user?.wallet?.address ?
+                        {user?.smartWallet?.address ?
                             <Button>
-                                {`${user?.wallet?.address.substring(0, 6)}...${user?.wallet?.address.substring(38)}`}
+                                {`${user?.smartWallet?.address.substring(0, 6)}...${user?.smartWallet?.address.substring(38)}`}
                             </Button>
                             :
                             <Skeleton className='w-32 h-9' />}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
+                        <DropdownMenuItem className='flex items-center gap-2'>
+                            <span onClick={() => {
+                                navigator.clipboard.writeText(user?.wallet?.address || '')
+                                toast.success("Wallet address copied.")
+                            }}>
+                                {`${user?.smartWallet?.address.substring(0, 6)}...${user?.smartWallet?.address.substring(38)}`}
+                            </span>
+                            <DropdownMenuShortcut>
+                                <FontAwesomeIcon icon={faWallet} width={16} height={16} />
+                            </DropdownMenuShortcut>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className='flex items-center gap-2' onClick={logout}>
                             <span>

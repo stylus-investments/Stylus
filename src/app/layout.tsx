@@ -25,20 +25,21 @@ export default function RootLayout({
     <html lang="en">
       <SessionProviders>
         <Privy>
-          <TrpcProvider>
-            <body>
-              <LoadingBarComp />
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
-                {children}
-                <Toaster />
-              </ThemeProvider>
-            </body>
-          </TrpcProvider>
+
+            <TrpcProvider>
+              <body>
+                <LoadingBarComp />
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="system"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  {children}
+                  <Toaster />
+                </ThemeProvider>
+              </body>
+            </TrpcProvider>
         </Privy>
         <Analytics />
         <SpeedInsights />
