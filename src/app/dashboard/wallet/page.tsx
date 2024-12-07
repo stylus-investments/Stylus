@@ -1,3 +1,4 @@
+import AssetActions from '@/components/dashboard/assets/asset-actions'
 import DashboardHeader from '@/components/dashboard/dashboard-header'
 import DashboardLinksFooter from '@/components/dashboard/dashboard-links-footer'
 import BalancesHeader from '@/components/dashboard/liquid-staking/balances-header'
@@ -11,6 +12,7 @@ const WalletPage = async () => {
             <DashboardHeader currentPage='wallet' />
             <DashboardLinksFooter currentPage='wallet' />
             <BalancesHeader />
+            <AssetActions />
             <WalletTabs />
         </div>
     )

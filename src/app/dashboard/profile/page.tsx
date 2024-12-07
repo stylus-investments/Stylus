@@ -14,8 +14,8 @@ const Page = async () => {
 
         return (
             <div>
-                <DashboardHeader currentPage='wallet' />
-                <DashboardLinksFooter currentPage='wallet' />
+                <DashboardHeader currentPage='profile' />
+                <DashboardLinksFooter currentPage='profile' />
                 <ProfileForm profileInfo={initialInfo} />
             </div>
         )

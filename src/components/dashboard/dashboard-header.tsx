@@ -16,12 +16,15 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { availableCurrencies } from '@/constant/availableCurrency'
 import useBalanceStore from '@/state/balanceStore'
 import { useRouter } from 'next-nprogress-bar'
+import { trpc } from '@/app/_trpc/client'
+import { useSmartWallets } from '@privy-io/react-auth/smart-wallets'
 
 const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
     const router = useRouter()
 
     const { user, logout, authenticated, ready } = usePrivy()
+    const { client } = useSmartWallets()
 
     const { currency, setCurrency } = useBalanceStore()
 
@@ -34,11 +37,14 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, ready, authenticated])
 
+    // if (client?.account.address) {
+    //     const updateUserWallet = trpc.user.updateUserWallet.useQuery(client?.account.address)
+    // }
+
     const mobileScreen = (
         <nav className='lg:hidden flex items-center justify-between w-full'>
             <div className='flex items-center'>
                 <Notifications />
-                <UserProfile />
 
             </div>
             <div className='flex items-center gap-1 sm:gap-2'>
@@ -97,7 +103,6 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
             <div className='flex items-center gap-1'>
                 <Notifications />
-                <UserProfile />
                 <Select value={currency} onValueChange={(value) => setCurrency(value)}>
                     <SelectTrigger className='w-20'>
                         <SelectValue />

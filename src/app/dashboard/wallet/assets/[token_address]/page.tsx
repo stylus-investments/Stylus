@@ -1,5 +1,3 @@
-import { caller } from '@/app/_trpc/server'
-import AssetActions from '@/components/dashboard/assets/asset-actions'
 import AssetBalancesHeader from '@/components/dashboard/assets/asset-balance-header'
 import AssetHistory from '@/components/dashboard/assets/asset-history'
 import DashboardHeader from '@/components/dashboard/dashboard-header'
@@ -20,7 +18,7 @@ const AssetData = async ({ params }: {
             <DashboardHeader currentPage='wallet' />
             <DashboardLinksFooter currentPage='wallet' />
             <AssetBalancesHeader tokenAddress={params.token_address} />
-            <AssetActions tokenAddress={params.token_address} />
+            {/* <AssetActions tokenAddress={params.token_address} /> */}
             <AssetHistory tokenAddress={params.token_address} />
         </div>
     )

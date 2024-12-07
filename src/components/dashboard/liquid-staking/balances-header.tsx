@@ -74,14 +74,14 @@ const BalancesHeader = () => {
                         <Skeleton className='h-9 w-44' />
                 }
             </div>
-            <div className='flex items-center self-center w-full max-w-96 xl:w-80 sm:gap-5 gap-5'>
+            {/* <div className='flex items-center self-center w-full max-w-96 xl:w-80 sm:gap-5 gap-5'>
                 <Link href={'/dashboard/wallet/plans'} className='w-full'>
                     <Button className='w-full'>
                         My Plan
                     </Button>
                 </Link>
                 <CreateInvestment />
-            </div>
+            </div> */}
         </div >
     )
 }

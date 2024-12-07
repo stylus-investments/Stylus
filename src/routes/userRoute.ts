@@ -11,6 +11,7 @@ import { rateLimiter } from "@/lib/ratelimiter";
 import { UTApi } from "uploadthing/server";
 import { ethers } from "ethers";
 import axios from "axios";
+import { okayRes } from "@/lib/apiResponse";
 
 export const userRoute = {
     getCurrentUserInfo: publicProcedure.query(async () => {
@@ -97,7 +98,6 @@ export const userRoute = {
 
             return data
 
-
         }
 
         const data = {
@@ -111,6 +111,28 @@ export const userRoute = {
 
         return data
 
+    }),
+    updateUserWallet: publicProcedure.input(z.string()).query(async ({ input }) => {
+        const user = await getUserId()
+        if (!user) throw new TRPCError({
+            code: "UNAUTHORIZED"
+        })
+
+        const userInfo = await db.user_info.findUnique({
+            where: { user_id: user }
+        })
+        if (!userInfo) throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found"
+        })
+
+        if (userInfo.wallet !== input) {
+            await db.user_info.update({
+                where: { user_id: user },
+                data: { wallet: input }
+            })
+        }
+        return okayRes()
     }),
     updateUserInfo: publicProcedure.input(z.object({
         first_name: z.string(),

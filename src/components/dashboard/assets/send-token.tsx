@@ -15,15 +15,18 @@ import jsQR from 'jsqr';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { trpc } from '@/app/_trpc/client'
 import { useSmartWallets } from '@privy-io/react-auth/smart-wallets'
-import { encodeFunctionData } from 'viem'
 
 
-const SendToken = ({ tokenAddress }: {
-    tokenAddress: string
+const SendToken = () => {
 
-}) => {
+    const [tokenAddress, setTokenAddress] = useState("")
 
     const { data } = trpc.dashboard.getAssetData.useQuery(tokenAddress, {
+        enabled: false
+    })
+
+    const walletData = trpc.dashboard.getWalletData.useQuery(undefined, {
+        refetchOnMount: false,
         enabled: false
     })
 
@@ -154,7 +157,7 @@ const SendToken = ({ tokenAddress }: {
                         <Label className='text-sm font-normal'>Send</Label>
                     </div>
                 </AlertDialogTrigger>
-                <AlertDialogContent className='max-w-96'>
+                {tokenAddress ? <AlertDialogContent className='max-w-96'>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Transfer Token</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -196,7 +199,7 @@ const SendToken = ({ tokenAddress }: {
                                             }}
                                         />
                                         <AlertDialogFooter>
-                                            <AlertDialogCancel>Close</AlertDialogCancel>
+                                            <Button onClick={() => setTokenAddress("")}>Close</Button>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
@@ -211,11 +214,28 @@ const SendToken = ({ tokenAddress }: {
                             <Input placeholder='Enter amount' value={formData.amount} onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))} />
                         </div>
                         <AlertDialogFooter className='flex items-center flex-row gap-5'>
-                            <AlertDialogCancel className='w-full'>Close</AlertDialogCancel>
+                            <AlertDialogCancel className='w-full' onClick={() => setTokenAddress("")}>Close</AlertDialogCancel>
                             <Button className='w-full' disabled={loading}>{loading ? <LoaderCircle size={18} className='animate-spin' /> : "Send"}</Button>
                         </AlertDialogFooter>
                     </form>
-                </AlertDialogContent>
+                </AlertDialogContent> :
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Select Token</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Select a specific token to transfer.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <div className='flex flex-col gap-3 pb-2'>
+                            {walletData.data?.balances.assets.map((asset, i) => (
+                                <div key={i} className='px-3 py-2 rounded-md hover:bg-primary border cursor-pointer' onClick={() => setTokenAddress(asset.address)}>
+                                    {asset.name}
+                                </div>
+                            ))}
+                        </div>
+                        <AlertDialogCancel>Close</AlertDialogCancel>
+                    </AlertDialogContent>
+                }
             </AlertDialog>
         </div>
     )
