@@ -1,4 +1,4 @@
-import { faCircleUser, faSackDollar, faUserPlus, faWallet } from "@fortawesome/free-solid-svg-icons";
+import { faCircleUser, faUserPlus, faWallet, faDiagramProject } from "@fortawesome/free-solid-svg-icons";
 export const dashboardLinks = [
     {
         icon: faWallet,
@@ -6,9 +6,9 @@ export const dashboardLinks = [
         link: '/dashboard/wallet'
     },
     {
-        icon: faSackDollar,
-        label: "Reward",
-        link: '/dashboard/reward'
+        icon: faDiagramProject,
+        label: "Project",
+        link: '/dashboard/project'
     },
     {
         icon: faUserPlus,
