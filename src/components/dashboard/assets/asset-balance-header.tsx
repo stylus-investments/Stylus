@@ -4,7 +4,6 @@ import { availableCurrencies } from '@/constant/availableCurrency'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import useBalanceStore from '@/state/balanceStore'
 import { Label } from '@/components/ui/label'
-import { caller } from '@/app/_trpc/server'
 import { trpc } from '@/app/_trpc/client'
 import { Skeleton } from '@/components/ui/skeleton'
 

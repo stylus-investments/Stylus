@@ -14,7 +14,6 @@ import { toast } from 'sonner'
 import jsQR from 'jsqr';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { trpc } from '@/app/_trpc/client'
-import { useSmartWallets } from '@privy-io/react-auth/smart-wallets'
 
 
 const SendToken = () => {
@@ -29,8 +28,6 @@ const SendToken = () => {
         refetchOnMount: false,
         enabled: false
     })
-
-    const { client } = useSmartWallets();
 
     const { wallets } = useWallets()
     const wallet = wallets[0]
@@ -95,26 +92,6 @@ const SendToken = () => {
                 setLoading(false)
                 return toast.error("Invalid wallet address");
             }
-            await client?.switchChain({
-                id: 8453
-            })
-            await wallet.switchChain(BASE_CHAIN_ID)
-
-            // const txHash = await client?.sendTransaction({
-            //     account: client.account,
-            //     // to: `${recipientAddress}` as `0x${string}`,
-            //     // data: data
-            //     calls: [{
-            //         to: tokenAddress as `0x${string}`,
-            //         data: encodeFunctionData({
-            //             abi: ABI,
-            //             functionName: 'transfer',
-            //             args: [recipientAddress, parsedAmount]
-            //         })
-            //     }]
-            // });
-            // console.log(txHash)
-
             await wallet.switchChain(BASE_CHAIN_ID)
             const provider = await wallet.getEthersProvider()
             const signer = provider.getSigner() as any
@@ -125,14 +102,10 @@ const SendToken = () => {
             const userBalance = await tokenContract.balanceOf(userAddress);
 
             // Convert the user's balance to a readable format
-            const readableBalance = ethers.formatUnits(userBalance, decimals);
+            // const readableBalance = ethers.formatUnits(userBalance, decimals);
 
             const convertedAmount = ethers.parseUnits(amount, decimals)
             const transactionResponse = await tokenContract.transfer(recipientAddress, convertedAmount)
-            setLoading(false)
-            setFormData({ recipientAddress: "", amount: "" })
-            setOpen(false)
-            toast.success("Success! token has been sent.")
 
             setLoading(false)
             setFormData({ recipientAddress: "", amount: "" })

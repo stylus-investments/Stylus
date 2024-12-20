@@ -7,9 +7,8 @@ import { faBarsStaggered, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import DashboardLinksHeader from './dashboard-links-header'
 import { LogOut } from 'lucide-react'
-import { usePrivy } from '@privy-io/react-auth'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { toast } from 'sonner'
-import UserProfile from './user-profile'
 import { Skeleton } from '../ui/skeleton'
 import Notifications from './notifications'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select'
@@ -17,16 +16,16 @@ import { availableCurrencies } from '@/constant/availableCurrency'
 import useBalanceStore from '@/state/balanceStore'
 import { useRouter } from 'next-nprogress-bar'
 import { trpc } from '@/app/_trpc/client'
-import { useSmartWallets } from '@privy-io/react-auth/smart-wallets'
 
 const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
 
     const router = useRouter()
 
     const { user, logout, authenticated, ready } = usePrivy()
-    const { client } = useSmartWallets()
 
     const { currency, setCurrency } = useBalanceStore()
+
+    const wallet = useWallets().wallets.find(item => item.walletClientType === 'privy')
 
     useEffect(() => {
 
@@ -37,15 +36,13 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, ready, authenticated])
 
-    // if (client?.account.address) {
-    //     const updateUserWallet = trpc.user.updateUserWallet.useQuery(client?.account.address)
-    // }
+    const updateUserWallet = trpc.user.updateUserWallet.useQuery(wallet?.address)
 
     const mobileScreen = (
         <nav className='lg:hidden flex items-center justify-between w-full'>
             <div className='flex items-center'>
                 <Notifications />
-
+                <Button></Button>
             </div>
             <div className='flex items-center gap-1 sm:gap-2'>
                 <Select value={currency} onValueChange={(value) => setCurrency(value)}>
@@ -75,10 +72,10 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className='flex items-center gap-2'>
                             <span onClick={() => {
-                                navigator.clipboard.writeText(user?.wallet?.address || '')
+                                navigator.clipboard.writeText(wallet?.address || '')
                                 toast.success("Wallet address copied.")
                             }}>
-                                {`${user?.smartWallet?.address.substring(0, 6)}...${user?.smartWallet?.address.substring(38)}`}
+                                {`${wallet?.address.substring(0, 6)}...${wallet?.address.substring(38)}`}
                             </span>
                             <DropdownMenuShortcut>
                                 <FontAwesomeIcon icon={faWallet} width={16} height={16} />
@@ -127,9 +124,9 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                                 </button>   */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        {user?.smartWallet?.address ?
+                        {wallet?.address ?
                             <Button>
-                                {`${user?.smartWallet?.address.substring(0, 6)}...${user?.smartWallet?.address.substring(38)}`}
+                                {`${wallet?.address.substring(0, 6)}...${wallet?.address.substring(38)}`}
                             </Button>
                             :
                             <Skeleton className='w-32 h-9' />}
@@ -138,10 +135,10 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
                         <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
                         <DropdownMenuItem className='flex items-center gap-2'>
                             <span onClick={() => {
-                                navigator.clipboard.writeText(user?.wallet?.address || '')
+                                navigator.clipboard.writeText(wallet?.address || '')
                                 toast.success("Wallet address copied.")
                             }}>
-                                {`${user?.smartWallet?.address.substring(0, 6)}...${user?.smartWallet?.address.substring(38)}`}
+                                {`${wallet?.address.substring(0, 6)}...${wallet?.address.substring(38)}`}
                             </span>
                             <DropdownMenuShortcut>
                                 <FontAwesomeIcon icon={faWallet} width={16} height={16} />

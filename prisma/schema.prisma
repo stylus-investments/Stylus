@@ -219,3 +219,21 @@ model referral_payout {
 
   @@index([user_id])
 }
+
+model user_cashout {
+  id             String         @id @default(uuid())
+  status         cashout_status
+  amount         String
+  name           String
+  method         String
+  account_number String
+  note           String?
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+}
+
+enum cashout_status {
+  COMPLETED
+  PENDING
+  FAILED
+}

@@ -75,7 +75,7 @@ export const dashboardRoute = {
                 message: "Login First."
             })
 
-            const user = await privy.getUser(auth)
+            const user = await privy.getUserById(auth)
 
             const userWalletAddress = user.wallet?.address as string
 

@@ -53,7 +53,7 @@ export const userRoute = {
                     age: "",
                     birth_date: new Date(),
                     user_id: user,
-                    wallet: getUser.smartWallet?.address || "",
+                    wallet: getUser.wallet?.address || "",
                     referral_info: {
                         create: {
                             referral_code: userReferralCode[0],
@@ -112,11 +112,13 @@ export const userRoute = {
         return data
 
     }),
-    updateUserWallet: publicProcedure.input(z.string()).query(async ({ input }) => {
+    updateUserWallet: publicProcedure.input(z.string().optional()).query(async ({ input }) => {
         const user = await getUserId()
         if (!user) throw new TRPCError({
             code: "UNAUTHORIZED"
         })
+
+        if(!input) return okayRes()
 
         const userInfo = await db.user_info.findUnique({
             where: { user_id: user }
