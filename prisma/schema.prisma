@@ -152,6 +152,7 @@ model user_info {
   inviter_reward       referral_reward[]
   referral_info        referral_info[]
   user_notification    user_notification[]
+  rel_cashouts         user_cashout[]
 }
 
 model user_notification {
@@ -221,19 +222,30 @@ model referral_payout {
 }
 
 model user_cashout {
-  id             String         @id @default(uuid())
-  status         cashout_status
-  amount         String
-  name           String
-  method         String
-  account_number String
-  note           String?
-  created_at     DateTime       @default(now())
-  updated_at     DateTime       @updatedAt
+  id               String         @id @default(uuid())
+  transaction_hash String         @unique
+  status           cashout_status
+  amount           String
+  payment_method   cashout_method
+  account_name     String
+  account_number   String
+  token_name       String
+  note             String?
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+  user_info        user_info      @relation(fields: [user_id], references: [user_id])
+  user_id          String
+
+  @@index([user_id])
 }
 
 enum cashout_status {
   COMPLETED
   PENDING
   FAILED
+}
+
+enum cashout_method {
+  GCASH
+  BPI
 }

@@ -6,7 +6,8 @@ import AssetsData from './assets-data'
 import { caller } from '@/app/_trpc/server'
 import StatusData from './status-data'
 import { trpc } from '@/app/_trpc/client'
-const tabList = ['Assets', 'Status', 'Guides']
+import CashoutHistory from './cashout-history'
+const tabList = ['Assets', 'Status', 'Cashouts']
 
 const WalletTabs = () => {
 
@@ -28,8 +29,8 @@ const WalletTabs = () => {
             <TabsContent value="status" className='w-full'>
                 <StatusData />
             </TabsContent>
-            <TabsContent value="guides" className='w-full'>
-                <GuideAccordions />
+            <TabsContent value="cashouts" className='w-full'>
+                <CashoutHistory />
             </TabsContent>
         </Tabs>
     )

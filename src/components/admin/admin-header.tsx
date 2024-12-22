@@ -8,7 +8,7 @@ import { LogOut, Menu } from 'lucide-react'
 import Link from 'next/link'
 import { ToggleTheme } from '../ui/toggle-theme'
 
-const pages = ['Order', 'Package', 'Referral', 'Snapshot', 'User', 'Admin']
+const pages = ['Order', 'Package', 'Referral', 'Snapshot', 'Cashout', 'User', 'Admin']
 
 const AdminHeader = ({ currentPage }: {
     currentPage: string

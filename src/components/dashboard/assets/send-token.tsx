@@ -1,5 +1,4 @@
 'use client'
-import { caller } from '@/app/_trpc/server'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -102,7 +101,11 @@ const SendToken = () => {
             const userBalance = await tokenContract.balanceOf(userAddress);
 
             // Convert the user's balance to a readable format
-            // const readableBalance = ethers.formatUnits(userBalance, decimals);
+            const readableBalance = ethers.formatUnits(userBalance, decimals);
+            if (readableBalance < amount) {
+                setLoading(false)
+                return toast.error("You don't have enough token to cashout.")
+            }
 
             const convertedAmount = ethers.parseUnits(amount, decimals)
             const transactionResponse = await tokenContract.transfer(recipientAddress, convertedAmount)
