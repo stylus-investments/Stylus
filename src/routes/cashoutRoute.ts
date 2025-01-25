@@ -1,11 +1,16 @@
+import { ABI } from "@/constant/abi";
 import db from "@/db/db";
 import { okayRes } from "@/lib/apiResponse";
 import { getAuth } from "@/lib/nextAuth";
 import { getUserId } from "@/lib/privy";
+import { rateLimiter } from "@/lib/ratelimiter";
+import { SAVE } from "@/lib/token_address";
 import { publicProcedure } from "@/trpc/trpc";
-import { cashoutFormSchema } from "@/types/cashoutType";
+import { cashoutFormSchema, compoundFormSchema } from "@/types/cashoutType";
 import { cashout_status } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import axios from "axios";
+import { ethers } from "ethers";
 import { z } from "zod";
 
 export const cashoutRoute = {
@@ -30,7 +35,7 @@ export const cashoutRoute = {
             const cCashoutRequest = await db.user_cashout.create({
                 data: {
                     account_name,
-                    amount,
+                    amount: (Number(amount) * 0.95).toString(),
                     account_number,
                     transaction_hash: input.hash,
                     token_name,
@@ -46,6 +51,7 @@ export const cashoutRoute = {
                 code: "BAD_REQUEST",
                 message: "Failed to create cashout request"
             })
+
 
             return okayRes()
 
@@ -165,5 +171,52 @@ export const cashoutRoute = {
                 message: error.message || "Something went wrong"
             })
         }
+    }),
+    cashoutCompound: publicProcedure.input(z.object({
+        data: compoundFormSchema,
+        hash: z.string().min(1, {
+            message: "Transaction hash is required"
+        })
+    })).mutation(async ({ input }) => {
+        const provider = new ethers.JsonRpcProvider(process.env.MORALIS_RPC_URL); // Your RPC URL
+        const wallet = new ethers.Wallet(process.env.ASSET_WALLET_PRIVATE_KEY as string, provider); // Wallet used to send gas fees
+
+        await rateLimiter.consume(1)
+
+        const auth = await getUserId()
+        if (!auth) throw new TRPCError({
+            code: "UNAUTHORIZED"
+        })
+
+        const user = await db.user_info.findUnique({ where: { user_id: auth } })
+        if (!user) throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: "User not found"
+        })
+
+        console.log("User found", user)
+
+         // Create contract instance
+         const tokenAddress = SAVE
+         const tokenContract = new ethers.Contract(tokenAddress, ABI, wallet);
+
+         const decimals = await tokenContract.decimals();
+
+         console.log("Getting token decimal", decimals)
+
+        const tokenAmount = ethers.parseUnits(input.data.amount, decimals);
+
+        console.log("Token amount conversion", tokenAmount)
+
+        const tx = await tokenContract.transfer(user.wallet, tokenAmount);
+
+        console.log("Transaction request", tx)
+
+        // Step 4: Wait for the transaction to be mined
+        await tx.wait();
+
+        console.log("Transaction complete")
+
+        return true
     })
 }

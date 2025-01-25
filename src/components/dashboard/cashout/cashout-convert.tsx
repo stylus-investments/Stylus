@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { BASE_CHAIN_ID, SPHP, USDC_ADDRESS } from '@/lib/token_address'
-import { cashoutFormSchema } from '@/types/cashoutType'
+import { cashoutFormSchema, tCashoutFormSchema } from '@/types/cashoutType'
 import { HandCoins, LoaderCircle } from 'lucide-react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -23,7 +23,7 @@ import { useWallets } from '@privy-io/react-auth'
 import { ethers } from 'ethers'
 import { ABI } from '@/constant/abi'
 
-const Cashout = () => {
+const CashoutConvert = () => {
 
     const [open, setOpen] = useState(false)
 
@@ -62,7 +62,7 @@ const Cashout = () => {
             setOpen(false)
         }
     })
-    const onSubmit = async (values: z.infer<typeof cashoutFormSchema>) => {
+    const onSubmit = async (values: tCashoutFormSchema) => {
         try {
 
             const { amount } = values
@@ -91,7 +91,7 @@ const Cashout = () => {
             if (readableBalance < amount) {
                 setLoading(false)
                 return toast.error("You don't have enough token to cashout.")
-            } 
+            }
 
             const convertedAmount = ethers.parseUnits(amount, decimals)
             const transactionResponse = await tokenContract.transfer(TOKENRECEIVER_ADDRESS, convertedAmount)
@@ -113,24 +113,14 @@ const Cashout = () => {
 
 
     // if (!data) return (
-    //     <div className='flex flex-col gap-1.5 items-center' onClick={() => toast.error(isError ? "You don't have SPHP to cashout" : "Loading please wait...")}>
-    //         <Button className='w-11 h-11 p-0 rounded-full' variant={'secondary'}>
-    //             <HandCoins size={20} />
-    //         </Button>
-    //         <Label className='text-sm font-normal'>Cashout</Label>
-    //     </div>
+    //     <Button className='w-28' disabled>Convert</Button>
     // )
 
     return (
         <div>
             <AlertDialog open={open} onOpenChange={setOpen}>
                 <AlertDialogTrigger asChild>
-                    <div className='flex flex-col gap-1.5 items-center'>
-                        <Button className='w-11 h-11 p-0 rounded-full' variant={'secondary'}>
-                            <HandCoins size={20} />
-                        </Button>
-                        <Label className='text-sm font-normal'>Cashout</Label>
-                    </div>
+                    <Button className='w-28'>Convert</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className='max-w-96'>
                     <AlertDialogHeader>
@@ -254,4 +244,4 @@ const Cashout = () => {
     )
 }
 
-export default Cashout
+export default CashoutConvert

@@ -1,12 +1,11 @@
-'use client'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { HandCoins, UserPlus } from 'lucide-react'
+import { UserPlus } from 'lucide-react'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React from 'react'
 import SendToken from './send-token'
 import ReceiveToken from './receive-token'
-import Cashout from './cashout'
+import Cashout from '../cashout/cashout'
 
 const AssetActions = () => {
 

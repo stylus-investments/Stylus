@@ -31,7 +31,7 @@ const ConnectPage = () => {
             createWallet()
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, ready, user?.wallet?.address, user?.hasAcceptedTerms, wallet]);
+    }, [user, ready, user?.wallet?.address, user?.hasAcceptedTerms, wallet?.address, authenticated]);
 
 
     if (ready && authenticated && user?.wallet?.address) {

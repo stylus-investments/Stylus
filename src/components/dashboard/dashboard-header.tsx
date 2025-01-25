@@ -42,7 +42,6 @@ const DashboardHeader = ({ currentPage }: { currentPage: string }) => {
         <nav className='lg:hidden flex items-center justify-between w-full'>
             <div className='flex items-center'>
                 <Notifications />
-                <Button></Button>
             </div>
             <div className='flex items-center gap-1 sm:gap-2'>
                 <Select value={currency} onValueChange={(value) => setCurrency(value)}>

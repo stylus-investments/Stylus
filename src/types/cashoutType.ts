@@ -20,7 +20,14 @@ export const cashoutFormSchema = z.object({
     }),
     note: z.string().optional(),
 });
-
-
-
 export type tCashoutFormSchema = z.TypeOf<typeof cashoutFormSchema>;
+
+export const compoundFormSchema = z.object({
+    amount: z.string().min(1, {
+        message: 'Amount must be greater than 0'
+    }),
+    token_name: z.string().min(1, {
+        message: "Select token to cashout."
+    }),
+})
+export type tCompoundFormSchema = z.TypeOf<typeof compoundFormSchema>
