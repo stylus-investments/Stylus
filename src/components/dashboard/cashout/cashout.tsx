@@ -37,7 +37,7 @@ const Cashout = () => {
                     <Separator />
                     <div className='space-y-2 flex items-center justify-between'>
                         <div className='space-y-1 flex flex-col'>
-                            <Label>Compund to sAVE</Label>
+                            <Label>Compound to sAVE</Label>
                             <small className='text-muted-foreground'>Convert your SPHP into sAVE to compound.</small>
                         </div>
                         <CashoutCompound />
