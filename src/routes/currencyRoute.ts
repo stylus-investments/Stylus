@@ -5,6 +5,7 @@ import { publicProcedure } from "@/trpc/trpc";
 import { TRPCError } from "@trpc/server";
 import axios from "axios";
 import { RateLimiterMemory } from "rate-limiter-flexible";
+import { z } from "zod";
 
 const exchangeApiKey = process.env.CURRENCY_EXCHANGE_API_KEY
 
@@ -70,5 +71,22 @@ export const currencyRoute = {
         } finally {
             await db.$disconnect()
         }
+    }),
+    getSingle: publicProcedure.input(z.string()).query(async ({ input }) => {
+
+        const userID = await getUserId()
+
+        if (!userID) throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Login First"
+        })
+
+        return await db.currency_conversion.findUniqueOrThrow({ where: { currency: input } }).catch(async e => {
+            throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Currency not found"
+            })
+        })
+
     })
 }

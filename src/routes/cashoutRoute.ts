@@ -188,27 +188,41 @@ export const cashoutRoute = {
             code: "UNAUTHORIZED"
         })
 
-        const user = await db.user_info.findUnique({ where: { user_id: auth } })
+        const [user, exchangeRate] = await Promise.all([
+            db.user_info.findUnique({ where: { user_id: auth } }),
+            db.currency_conversion.findUnique({
+                where: {
+                    currency: "PHP"
+                }
+            })
+        ])
         if (!user) throw new TRPCError({
             code: 'NOT_FOUND',
             message: "User not found"
         })
+        if (!exchangeRate) throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Currency not found"
+        })
 
         console.log("User found", user)
 
-         // Create contract instance
-         const tokenAddress = SAVE
-         const tokenContract = new ethers.Contract(tokenAddress, ABI, wallet);
+        // Create contract instance
+        const tokenAddress = SAVE
+        const tokenContract = new ethers.Contract(tokenAddress, ABI, wallet);
 
-         const decimals = await tokenContract.decimals();
+        const decimals = await tokenContract.decimals();
 
-         console.log("Getting token decimal", decimals)
+        console.log("Getting token decimal", decimals)
 
-        const tokenAmount = ethers.parseUnits(input.data.amount, decimals);
+        const tokenAmount = (Number(input.data.amount) / Number(exchangeRate.conversion_rate)).toFixed(6)
+
+        const tokenAmountToSend = ethers.parseUnits(tokenAmount, decimals)
 
         console.log("Token amount conversion", tokenAmount)
+        console.log("Token amount to Send", tokenAmountToSend)
 
-        const tx = await tokenContract.transfer(user.wallet, tokenAmount);
+        const tx = await tokenContract.transfer(user.wallet, Number(tokenAmountToSend));
 
         console.log("Transaction request", tx)
 

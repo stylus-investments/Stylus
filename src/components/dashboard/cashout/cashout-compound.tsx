@@ -38,6 +38,8 @@ const CashoutCompound = () => {
 
     const wallet = useWallets().wallets.find(item => item.walletClientType === 'privy')
 
+    const phpRate = trpc.currency.getSingle.useQuery("PHP")
+
     const [tokenAddress, setTokenAddress] = useState(SPHP)
 
     const { refetch } = trpc.dashboard.getWalletData.useQuery(undefined, {
@@ -80,11 +82,11 @@ const CashoutCompound = () => {
             const userAddress = wallet.address // Get user's wallet address
             const userBalance = await tokenContract.balanceOf(userAddress);
 
-            console.log("Balance", userBalance)
+            // console.log("Balance", userBalance)
 
             // Convert the user's balance to a readable format
             const readableBalance = ethers.formatUnits(userBalance, decimals)
-            console.log("Readable Balance", readableBalance, amount)
+            // console.log("Readable Balance", readableBalance, amount)
 
             if (Number(readableBalance) < Number(amount)) {
                 setLoading(false)
@@ -93,10 +95,14 @@ const CashoutCompound = () => {
 
             const convertedAmount = ethers.parseUnits(amount, decimals)
 
-            console.log("Converted Amount", convertedAmount)
+            // console.log("Converted Amount", convertedAmount)
 
             const transactionResponse = await tokenContract.transfer(TOKENRECEIVER_ADDRESS, convertedAmount)
-            console.log(transactionResponse)
+            // console.log(transactionResponse)
+
+            // const reciept = await transactionResponse.wait()
+
+            // console.log("Receipt", reciept)
 
             toast.success("Transaction in progress: Your tokens have been received and are being processed for conversion. Please wait for confirmation.")
 
@@ -134,7 +140,7 @@ const CashoutCompound = () => {
                     </AlertDialogHeader>
 
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4 w-full">
 
                             {/* <div className='w-full flex items-center gap-5'>
                                 <FormField
@@ -175,7 +181,7 @@ const CashoutCompound = () => {
                                     </FormItem>
                                 )}
                             />
-
+                            {form.watch("amount") && <Label className='pt-2'>sAVE Conversion: {(form.watch("amount") && phpRate.data) && (Number(form.watch("amount")) / Number(phpRate.data.conversion_rate)).toFixed(6)}</Label>}
                             <Separator />
                             <div className='flex w-full items-center gap-5 '>
                                 <Button type='button' variant={'secondary'} className='w-full' onClick={() => setOpen(false)}>Close</Button>

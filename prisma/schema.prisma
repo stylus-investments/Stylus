@@ -226,7 +226,7 @@ model user_cashout {
   transaction_hash String         @unique
   status           cashout_status
   amount           String
-  payment_method   cashout_method
+  payment_method   String
   account_name     String
   account_number   String
   token_name       String
@@ -243,9 +243,4 @@ enum cashout_status {
   COMPLETED
   PENDING
   FAILED
-}
-
-enum cashout_method {
-  GCASH
-  BPI
 }

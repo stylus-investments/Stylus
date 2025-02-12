@@ -17,7 +17,6 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod' // Import zod resolver for react-hook-form
 import { Checkbox } from '@/components/ui/checkbox'
-import { cashout_method, cashout_status } from '@prisma/client'
 import { TOKENRECEIVER_ADDRESS } from '@/constant/receiverAddress'
 import { useWallets } from '@privy-io/react-auth'
 import { ethers } from 'ethers'
@@ -32,7 +31,7 @@ const CashoutConvert = () => {
         defaultValues: {
             amount: "",
             token_name: "SPHP",
-            payment_method: "GCASH",
+            payment_method: "",
             account_number: "",
             account_name: ""
         },
@@ -159,30 +158,18 @@ const CashoutConvert = () => {
                                 />
                                 <FormField
                                     control={form.control}
-                                    name='payment_method'
+                                    name="payment_method"
                                     render={({ field }) => (
                                         <FormItem className='w-full'>
                                             <FormLabel>Payment Method</FormLabel>
                                             <FormControl>
-                                                <Select
-                                                    {...field}
-                                                    onValueChange={(val) => field.onChange(val)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Payment Method" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value={cashout_method.GCASH}>GCASH</SelectItem>
-                                                        <SelectItem value={cashout_method.BPI}>BPI</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
+                                                <Input placeholder="Bank, Gcash, Etc.." {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
                             </div>
-
                             <FormField
                                 control={form.control}
                                 name="account_name"
@@ -190,7 +177,7 @@ const CashoutConvert = () => {
                                     <FormItem>
                                         <FormLabel>Account Name</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Name" {...field} />
+                                            <Input placeholder="Account Name" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

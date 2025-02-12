@@ -1,4 +1,3 @@
-import { cashout_method } from "@prisma/client";
 import { z } from "zod";
 
 export const cashoutFormSchema = z.object({
@@ -9,8 +8,8 @@ export const cashoutFormSchema = z.object({
         message: 'Account number is required'
     }
     ),
-    payment_method: z.enum([cashout_method.BPI, cashout_method.GCASH], {
-        message: "Select Payment Method"
+    payment_method: z.string().min(1, {
+        message: "Enter Payment Method (Bank,Gcash, Etc..)"
     }),
     amount: z.string().min(1, {
         message: 'Amount must be greater than 0'
