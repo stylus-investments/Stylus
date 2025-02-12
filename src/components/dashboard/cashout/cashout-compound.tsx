@@ -17,7 +17,6 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod' // Import zod resolver for react-hook-form
 import { Checkbox } from '@/components/ui/checkbox'
-import { cashout_method, cashout_status } from '@prisma/client'
 import { TOKENRECEIVER_ADDRESS } from '@/constant/receiverAddress'
 import { useWallets } from '@privy-io/react-auth'
 import { ethers } from 'ethers'
