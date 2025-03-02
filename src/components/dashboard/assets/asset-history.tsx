@@ -5,13 +5,21 @@ import React, { useEffect, useState } from 'react'
 import TablePagination from '../table-pagination';
 import { trpc } from '@/app/_trpc/client';
 import BalanceHistorySkeleton from '../liquid-staking/balance-history-skeleton';
+import { redirect, useSearchParams } from 'next/navigation';
 
 const AssetHistory = ({ tokenAddress }: {
     tokenAddress: string
 }) => {
 
-    const { data, isLoading } = trpc.dashboard.getTokenBalanceHistory.useQuery(tokenAddress)
-    const { data: tokenData } = trpc.dashboard.getAssetData.useQuery(tokenAddress, {
+    const searchParams = useSearchParams()
+    const tokenName = searchParams.get("tokenName")
+    const tokenSymbol = searchParams.get("tokenSymbol")
+    const tokenLogo = searchParams.get("tokenLogo")
+
+    if (!tokenName || !tokenSymbol || !tokenLogo) redirect('/dashboard/wallet')
+
+    const { data, isLoading, error } = trpc.dashboard.getTokenBalanceHistory.useQuery(tokenAddress)
+    const { data: tokenData } = trpc.dashboard.getAssetData.useQuery({ tokenAddress, tokenLogo, tokenName, tokenSymbol }, {
         enabled: false
     })
 
@@ -31,6 +39,8 @@ const AssetHistory = ({ tokenAddress }: {
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, currentPage])
+
+    if(error) redirect('/dashboard/wallet')
 
     return (
         <>

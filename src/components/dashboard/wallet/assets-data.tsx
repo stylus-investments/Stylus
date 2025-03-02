@@ -35,11 +35,17 @@ const AssetsData = () => {
     return '/icons/logo/logo.svg'
   }
 
+
+
   const smallScreen = (
     <div className='flex flex-col w-full md:hidden'>
       {
         assets && assets.length > 0 ? assets.map((asset, i) => (
-          <Link href={`/dashboard/wallet/assets/${asset?.address}`} className='flex hover:bg-muted  items-center justify-between px-3 py-4 border-b w-full' key={i}>
+          <Link
+            href={`/dashboard/wallet/assets/${asset?.address}?tokenLogo=${encodeURIComponent(asset.logo)}&tokenSymbol=${encodeURIComponent(asset.symbol)}&tokenName=${encodeURIComponent(asset.name)}`}
+            className="flex hover:bg-muted items-center justify-between px-3 py-4 border-b w-full"
+            key={i}
+          >
             <div className='flex iems-start gap-2.5'>
               <Image src={returnAssetIcon(asset?.symbol)} width={20} height={20} alt={asset?.name || ""} className='rounded-full max-h-[20px] max-w-[20px]' />
               <div className='flex flex-col gap-3'>
@@ -125,7 +131,7 @@ const AssetsData = () => {
         <TableBody>
           {
             assets && assets.length > 0 ? assets.map((asset, i) => (
-              <TableRow key={i} onClick={() => router.push(`/dashboard/wallet/assets/${asset?.address}`)} className='cursor-pointer'>
+              <TableRow key={i} onClick={() => router.push(`/dashboard/wallet/assets/${asset?.address}?tokenLogo=${encodeURIComponent(asset.logo)}&tokenSymbol=${encodeURIComponent(asset.symbol)}&tokenName=${encodeURIComponent(asset.name)}`)} className='cursor-pointer'>
                 <TableCell className='flex gap-2 items-center'>
                   <Image src={returnAssetIcon(asset?.symbol)} alt={asset?.name || ""} width={25} height={25} className='rounded-full' />
                   <Label>{asset?.symbol}</Label>

@@ -12,7 +12,7 @@ const getIndexPrice = ({ btc_price, usdc_price, php_converstion }: {
     php_converstion: string
 }) => {
 
-    const btc_shot = 50000
+    const btc_shot = 100000
     const btc_market = btc_price
     const btc_delta = btc_market / btc_shot * 100
     const btc_weight = (btc_delta - 100) / 2
@@ -34,11 +34,11 @@ const getIndexPrice = ({ btc_price, usdc_price, php_converstion }: {
     }
 }
 
-const getTokenValue = async (tokenName: string) => {
+const getTokenValue = async (tokenSymbol: string) => {
 
     try {
 
-        if (tokenName === 'sbtc') {
+        if (tokenSymbol === 'sbtc') {
 
             const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&precision=full&include_24hr_change=true`;
             const [bitcoin, usdc, conversionRate] = await Promise.all([
@@ -83,7 +83,7 @@ const getTokenValue = async (tokenName: string) => {
 
         const usdc_market = usdc.raw.usdPrice
 
-        switch (tokenName) {
+        switch (tokenSymbol) {
             case 'usdc':
                 return usdc_market.toFixed(6)
             case 'sphp':
@@ -119,12 +119,28 @@ const getTokenPrice = async ({ tokenAddress, chain }: {
     }
 }
 
-const getUserTokenData = async ({ tokenAddress, chain, walletAddress, currencyExchangeRate }: {
+interface UserTokenData {
     tokenAddress: string
     walletAddress: string
     chain: string
+    tokenSymbol: string
+    tokenName: string
+    tokenLogo: string
     currencyExchangeRate: currency_conversion[]
-}) => {
+}
+
+
+const getUserTokenData = async (props: UserTokenData) => {
+
+    const {
+        tokenAddress,
+        chain,
+        walletAddress,
+        currencyExchangeRate,
+        tokenSymbol,
+        tokenName,
+        tokenLogo
+    } = props
 
     try {
 
@@ -139,77 +155,133 @@ const getUserTokenData = async ({ tokenAddress, chain, walletAddress, currencyEx
             })
         ])
 
-        if (userToken) {
+        const tokenPrice = tokenData?.raw.usdPriceFormatted || "0.00"
+        const userTokenData = userToken.raw[0]
+        const balance = userTokenData ? Number(userTokenData.balance) : 0.00;
+        const decimals = userTokenData ? userTokenData.decimals : 0;
+        const formatBalance = decimals > 0 ? balance / (10 ** decimals) : 0;
+        const amount = isNaN(formatBalance) ? "0.0000" : formatBalance.toFixed(6);
 
-            const tokenPrice = tokenData?.raw.usdPriceFormatted || "0.00"
-            const userTokenData = userToken.raw[0]
-            const balance = Number(userTokenData.balance);
-            if (!balance) return null
-            const decimals = userTokenData.decimals;
-            const formatBalance = decimals > 0 ? balance / (10 ** decimals) : 0;
-            const amount = isNaN(formatBalance) ? "0.0000" : formatBalance.toFixed(6);
-            const tokenValue = await getTokenValue(userTokenData.symbol.toLocaleLowerCase())
-            const tokenValueArray = calculateBalanceArray({ currencyExchangeRate, balance: tokenValue })
-            const totalValueArray = calculateBalanceArray({ currencyExchangeRate, balance: (Number(tokenValue) * Number(amount)).toFixed(6) })
+        const tokenValue = await getTokenValue(tokenSymbol.toLocaleLowerCase())
 
-            let tokenChange: string
+        const tokenValueArray = calculateBalanceArray({ currencyExchangeRate, balance: tokenValue })
+        const totalValueArray = calculateBalanceArray({ currencyExchangeRate, balance: (Number(tokenValue) * Number(amount)).toFixed(6) })
 
-            if (userTokenData.symbol.toLocaleLowerCase() === 'sbtc') {
-                const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&precision=full&include_24hr_change=true`;
-                const data = await axios.get(url, {
-                    headers: {
-                        'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
-                    }
-                })
+        let tokenChange: string
 
-                tokenChange = (Number(data.data.bitcoin.usd_24h_change) / 2.1).toFixed(4)
-            } else {
+        if (tokenSymbol.toLocaleLowerCase() === 'sbtc') {
+            const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&precision=full&include_24hr_change=true`;
+            const data = await axios.get(url, {
+                headers: {
+                    'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
+                }
+            })
 
-                const url = `https://api.coingecko.com/api/v3/simple/token_price/base?contract_addresses=${USDC_ADDRESS}&include_24hr_change=true&vs_currencies=usd`;
-                const data = await axios.get(url, {
-                    headers: {
-                        'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
-                    }
-                })
+            tokenChange = (Number(data.data.bitcoin.usd_24h_change) / 2.1).toFixed(4)
+        } else {
 
-                const change = data.data['0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'].usd_24h_change
+            const url = `https://api.coingecko.com/api/v3/simple/token_price/base?contract_addresses=${USDC_ADDRESS}&include_24hr_change=true&vs_currencies=usd`;
+            const data = await axios.get(url, {
+                headers: {
+                    'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
+                }
+            })
 
-                if (userTokenData.symbol.toLocaleLowerCase() === 'sphp') {
+            const change = data.data['0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'].usd_24h_change
 
-                    const phpRate = currencyExchangeRate.find(currency => currency.currency === 'PHP')
-                    if (phpRate) {
-                        const decimalChange = change / 100;
-                        const amountChangeInPHP = decimalChange * Number(phpRate.conversion_rate); // Change in PHP
-                        tokenChange = amountChangeInPHP.toFixed(4)
-                    } else {
-                        tokenChange = change.toFixed(4)
-                    }
+            if (tokenSymbol.toLocaleLowerCase() === 'sphp') {
+
+                const phpRate = currencyExchangeRate.find(currency => currency.currency === 'PHP')
+                if (phpRate) {
+                    const decimalChange = change / 100;
+                    const amountChangeInPHP = decimalChange * Number(phpRate.conversion_rate); // Change in PHP
+                    tokenChange = amountChangeInPHP.toFixed(4)
                 } else {
                     tokenChange = change.toFixed(4)
                 }
+            } else {
+                tokenChange = change.toFixed(4)
             }
-
-            return {
-                amount,
-                value: tokenValue,
-                value_array: tokenValueArray,
-                total_value: (Number(tokenValue) * Number(amount)).toFixed(6),
-                total_value_array: totalValueArray,
-                price: tokenPrice,
-                name: userTokenData.name,
-                logo: userTokenData.logo,
-                symbol: userTokenData.symbol,
-                change: tokenChange,
-                address: tokenAddress
-            }
-
-        } else {
-            return null
         }
 
+        const data = {
+            amount,
+            value: tokenValue,
+            value_array: tokenValueArray,
+            total_value: (Number(tokenValue) * Number(amount)).toFixed(6),
+            total_value_array: totalValueArray,
+            price: tokenPrice,
+            name: tokenName,
+            logo: tokenLogo,
+            symbol: tokenSymbol,
+            change: tokenChange,
+            address: tokenAddress
+        }
+
+        return data
 
     } catch (error) {
-        return null
+
+        const amount = "0.00000"
+        const tokenValue = await getTokenValue(tokenSymbol.toLocaleLowerCase())
+        const tokenValueArray = calculateBalanceArray({ currencyExchangeRate, balance: tokenValue })
+        const totalValueArray = calculateBalanceArray({ currencyExchangeRate, balance: (Number(tokenValue) * Number(amount)).toFixed(6) })
+        const tokenPrice = "0.00"
+
+        let tokenChange: string
+
+        if (tokenSymbol.toLocaleLowerCase() === 'sbtc') {
+            const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&precision=full&include_24hr_change=true`;
+            const data = await axios.get(url, {
+                headers: {
+                    'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
+                }
+            })
+
+            tokenChange = (Number(data.data.bitcoin.usd_24h_change) / 2.1).toFixed(4)
+        } else {
+
+            const url = `https://api.coingecko.com/api/v3/simple/token_price/base?contract_addresses=${USDC_ADDRESS}&include_24hr_change=true&vs_currencies=usd`;
+            const data = await axios.get(url, {
+                headers: {
+                    'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
+                }
+            })
+
+            const change = data.data['0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'].usd_24h_change
+
+            if (tokenSymbol.toLocaleLowerCase() === 'sphp') {
+
+                const phpRate = currencyExchangeRate.find(currency => currency.currency === 'PHP')
+                if (phpRate) {
+                    const decimalChange = change / 100;
+                    const amountChangeInPHP = decimalChange * Number(phpRate.conversion_rate); // Change in PHP
+                    tokenChange = amountChangeInPHP.toFixed(4)
+                } else {
+                    tokenChange = change.toFixed(4)
+                }
+            } else {
+                tokenChange = change.toFixed(4)
+            }
+        }
+
+        const data = {
+            amount,
+            value: tokenValue,
+            value_array: tokenValueArray,
+            total_value: (Number(tokenValue) * Number(amount)).toFixed(6),
+            total_value_array: totalValueArray,
+            price: tokenPrice,
+            name: tokenName,
+            logo: tokenLogo,
+            symbol: tokenSymbol,
+            change: tokenChange,
+            address: tokenAddress
+        }
+
+        return data
+
+
     }
 }
 

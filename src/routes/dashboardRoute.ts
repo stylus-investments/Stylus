@@ -87,27 +87,38 @@ export const dashboardRoute = {
                 getUserTokenData({
                     tokenAddress: SBTC,
                     chain: BASE_CHAIN_ID,
+                    tokenName: "SBTC",
+                    tokenSymbol: "sBTC",
+                    tokenLogo: "/icons/token/sbtc.svg",
                     walletAddress: userWalletAddress,
                     currencyExchangeRate
                 }),
                 getUserTokenData({
                     tokenAddress: SPHP,
                     chain: BASE_CHAIN_ID,
+                    tokenName: "SPHP",
+                    tokenSymbol: "sPHP",
+                    tokenLogo: "/icons/token/sphp.svg",
                     walletAddress: userWalletAddress,
                     currencyExchangeRate
                 }),
                 getUserTokenData({
                     tokenAddress: SAVE,
                     chain: BASE_CHAIN_ID,
+                    tokenName: "SAVE",
+                    tokenSymbol: "sAVE",
+                    tokenLogo: "/icons/token/save.svg",
                     walletAddress: userWalletAddress,
                     currencyExchangeRate
                 }),
                 getUserTokenData({
                     tokenAddress: USDC_ADDRESS,
                     chain: BASE_CHAIN_ID,
+                    tokenName: "USD Coin",
+                    tokenSymbol: "USDC",
+                    tokenLogo: "/icons/token/usdc.png",
                     walletAddress: userWalletAddress,
                     currencyExchangeRate
-
                 }),
             ])
 
@@ -154,32 +165,30 @@ export const dashboardRoute = {
             code: "UNAUTHORIZED",
             message: "Login First."
         })
-        const user = await privy.getUser(auth)
+        const user = await privy.getUserById(auth)
 
         const userWalletAddress = user.wallet?.address as string
 
         await getMoralis()
         const currencyExchangeRate = await db.currency_conversion.findMany()
 
-        const [usdcPrice, userSnapshots] = await Promise.all([
-            getUserTokenData({
+        const [usdcPrice, userSnapshots, earn, svn] = await Promise.all([
+            getTokenPrice({
                 tokenAddress: USDC_ADDRESS,
-                walletAddress: userWalletAddress,
                 chain: BASE_CHAIN_ID,
-                currencyExchangeRate
             }),
             db.user_snapshot.findMany({
                 where: { user_id: user.id },
                 orderBy: {
                     created_at: 'desc'
                 }
-            })
-        ])
-
-        const [earn, svn] = await Promise.all([
+            }),
             getUserTokenData({
                 tokenAddress: EARN_ADDRESS,
                 walletAddress: userWalletAddress,
+                tokenName: "EARN",
+                tokenSymbol: "EARN",
+                tokenLogo: "/icons/token/logo.svg",
                 chain: BASE_CHAIN_ID,
                 currencyExchangeRate
             }),
@@ -187,12 +196,15 @@ export const dashboardRoute = {
                 tokenAddress: SAVE,
                 walletAddress: userWalletAddress,
                 chain: BASE_CHAIN_ID,
+                tokenName: "SAVE",
+                tokenSymbol: "sAVE",
+                tokenLogo: "/icons/token/save.svg",
                 currencyExchangeRate
             }),
         ])
 
         const rewardsAccumulated = getRewardsAccumulated({
-            usdcPrice: usdcPrice?.price as string,
+            usdcPrice: usdcPrice?.raw.usdPriceFormatted as string,
             totalEarn: earn?.amount as string,
             totalSvn: svn?.amount as string
         })
@@ -391,7 +403,12 @@ export const dashboardRoute = {
             await db.$disconnect()
         }
     }),
-    getAssetData: publicProcedure.input(z.string()).query(async ({ input }) => {
+    getAssetData: publicProcedure.input(z.object({
+        tokenAddress: z.string(),
+        tokenName: z.string(),
+        tokenSymbol: z.string(),
+        tokenLogo: z.string()
+    })).query(async ({ input }) => {
         try {
 
             const user = await getUserId()
@@ -412,7 +429,10 @@ export const dashboardRoute = {
 
             const tokenValue = await getUserTokenData({
                 chain: BASE_CHAIN_ID,
-                tokenAddress: input,
+                tokenAddress: input.tokenAddress,
+                tokenName: input.tokenName,
+                tokenSymbol: input.tokenSymbol,
+                tokenLogo: input.tokenLogo,
                 currencyExchangeRate,
                 walletAddress: userInfo.wallet
             })

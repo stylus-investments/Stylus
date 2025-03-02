@@ -6,13 +6,26 @@ import useBalanceStore from '@/state/balanceStore'
 import { Label } from '@/components/ui/label'
 import { trpc } from '@/app/_trpc/client'
 import { Skeleton } from '@/components/ui/skeleton'
+import { redirect, useSearchParams } from 'next/navigation'
 
 
 const AssetBalancesHeader = ({ tokenAddress }: {
     tokenAddress: string
 }) => {
 
-    const { data } = trpc.dashboard.getAssetData.useQuery(tokenAddress)
+    const searchParams = useSearchParams()
+    const tokenName = searchParams.get("tokenName")
+    const tokenSymbol = searchParams.get("tokenSymbol")
+    const tokenLogo = searchParams.get("tokenLogo")
+
+    if (!tokenName || !tokenSymbol || !tokenLogo) redirect('/dashboard/wallet')
+
+    const { data, error } = trpc.dashboard.getAssetData.useQuery({
+        tokenAddress,
+        tokenLogo,
+        tokenName,
+        tokenSymbol
+    })
 
     const { currency, showBalance } = useBalanceStore()
 
