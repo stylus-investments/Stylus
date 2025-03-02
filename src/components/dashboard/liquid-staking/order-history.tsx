@@ -15,14 +15,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 type tProps = {
     plan_id: string
-    page?: string
+    pagination: {
+        page: string | undefined;
+    }
 }
 
 const OrderHistory = (props: tProps) => {
 
     const { data } = trpc.investment.retrieveSinglePlan.useQuery({
         plan_id: props.plan_id,
-        page: props.page
+        page: props.pagination.page
     })
 
     const [currentTable, setCurrentTable] = useState(data?.data.payments)

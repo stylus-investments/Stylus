@@ -21,6 +21,7 @@ import { TOKENRECEIVER_ADDRESS } from '@/constant/receiverAddress'
 import { useWallets } from '@privy-io/react-auth'
 import { ethers } from 'ethers'
 import { ABI } from '@/constant/abi'
+import { getTokenName } from '@/utils/token'
 
 const CashoutConvert = () => {
 
@@ -49,9 +50,7 @@ const CashoutConvert = () => {
         enabled: false
     })
 
-    const { data, isError } = trpc.dashboard.getAssetData.useQuery(tokenAddress, {
-        retry: false
-    })
+    const tokenName = getTokenName(tokenAddress)
 
     const { isPending, mutateAsync } = trpc.cashout.cashoutToken.useMutation({
         onError: (e) => toast.error(e.message),
@@ -125,7 +124,7 @@ const CashoutConvert = () => {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Cashout Token</AlertDialogTitle>
                         <AlertDialogDescription>
-                            You are about to cashout {data?.name}. Review the details carefully before confirming.
+                            You are about to cashout {tokenName}. Review the details carefully before confirming.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
 

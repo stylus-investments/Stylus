@@ -55,7 +55,7 @@ const ScanQr = (props: {
                 </a>
             </div>
             <div className='text-muted-foreground text-sm'>
-                Please proceed with a purchase of {formData.amount} STXBTC tokens, equivalent to {formData.price} {currency}. Payment should be made using ({formData.method.toUpperCase()}) option.
+                Please proceed with a purchase of {formData.amount} sBTC tokens, equivalent to {formData.price} {currency}. Payment should be made using ({formData.method.toUpperCase()}) option.
                 Scan the QR code above to complete your transaction.
             </div>
             {formData.method === PAYMENT_METHOD['BPI'] && <small>Transaction fees may apply if a non-BPI payment method (e.g., GCash) is used to scan the BPI QR code.</small>}

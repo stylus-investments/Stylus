@@ -33,7 +33,7 @@ export const investmentPlanRoute = {
                 code: "NOT_FOUND",
                 message: "User not found"
             })
-            console.log("User Info", user)
+            // console.log("User Info", user)
 
             //need to be changed
             if (user.status !== 'VERIFIED') throw new TRPCError({
@@ -45,7 +45,7 @@ export const investmentPlanRoute = {
 
             //retrieve package
 
-            console.log("User Input", opts.input)
+            // console.log("User Input", opts.input)
 
             const investmentPackage = await db.investment_plan_package.findUnique({ where: { id: package_id } })
             if (!investmentPackage) throw new TRPCError({
@@ -57,7 +57,7 @@ export const investmentPlanRoute = {
                 message: "Something is not right"
             })
 
-            console.log("Package", investmentPackage)
+            // console.log("Package", investmentPackage)
 
             const prices = investmentPackage.prices as number[]
 

@@ -45,10 +45,6 @@ const CashoutCompound = () => {
         enabled: false
     })
 
-    const { data, isError } = trpc.dashboard.getAssetData.useQuery(tokenAddress, {
-        retry: false
-    })
-
     const { isPending, mutateAsync } = trpc.cashout.cashoutCompound.useMutation({
         onError: (e) => toast.error(e.message),
         onSuccess: () => {

@@ -43,7 +43,7 @@ model user_snapshot {
   @@index([snapshot_id], map: "user_snapshot_snapshot_id_fkey")
 }
 
-model user_investment_order {
+model user_order {
   id                      String               @id @default(uuid())
   amount                  String
   user_id                 String
@@ -64,6 +64,25 @@ model user_investment_order {
   @@index([user_investment_plan_id])
 }
 
+model user_token_order {
+  id                    String          @id @default(uuid())
+  amount                String
+  status                String
+  receipt               String?
+  method                String
+  active                Boolean         @default(false)
+  user_unread_messages  Int             @default(0)
+  admin_unread_messages Int             @default(0)
+  request_chat          Boolean         @default(false)
+  closed                Boolean         @default(false)
+  created_at            DateTime        @default(now())
+  updated_at            DateTime        @updatedAt
+  order_message         order_message[]
+  user                  user_info       @relation(fields: [user_id], references: [user_id])
+  user_id               String
+  @@index([user_id])
+}
+
 model user_investment_plan {
   id                         String                  @id @default(uuid())
   user                       user_info               @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
@@ -76,7 +95,7 @@ model user_investment_plan {
   completed                  Boolean                 @default(false)
   profit_protection          Boolean                 @default(false) // Optional for 10-year plans
   insurance                  Boolean                 @default(false) // Optional for 10 and 20-year plans
-  payments                   user_investment_order[]
+  payments                   user_order[]
   package                    investment_plan_package @relation(fields: [investment_plan_package_id], references: [id], onDelete: Cascade)
   investment_plan_package_id String
   created_at                 DateTime                @default(now())
@@ -117,14 +136,15 @@ model currency_conversion {
 }
 
 model order_message {
-  id         Int        @id @default(autoincrement())
-  order_id   String
-  sender     String
-  content    String
-  is_image   Boolean
-  seen       Boolean    @default(false)
-  created_at DateTime   @default(now())
-  user_order user_investment_order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  id               Int                @id @default(autoincrement())
+  order_id         String
+  sender           String
+  content          String
+  is_image         Boolean
+  seen             Boolean            @default(false)
+  created_at       DateTime           @default(now())
+  user_order       user_order         @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  user_token_order user_token_order[]
 
   @@index([order_id], map: "order_message_order_id_fkey")
 }
@@ -153,6 +173,7 @@ model user_info {
   referral_info        referral_info[]
   user_notification    user_notification[]
   rel_cashouts         user_cashout[]
+  user_token_order     user_token_order[]
 }
 
 model user_notification {

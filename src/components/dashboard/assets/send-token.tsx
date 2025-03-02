@@ -13,16 +13,14 @@ import { toast } from 'sonner'
 import jsQR from 'jsqr';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { trpc } from '@/app/_trpc/client'
+import { getTokenName } from '@/utils/token'
 
 
 const SendToken = () => {
 
     const [tokenAddress, setTokenAddress] = useState("")
 
-    const { data } = trpc.dashboard.getAssetData.useQuery(tokenAddress, {
-        enabled: false
-    })
-
+    const tokenName = getTokenName(tokenAddress)
     const walletData = trpc.dashboard.getWalletData.useQuery(undefined, {
         refetchOnMount: false,
         enabled: false
@@ -137,7 +135,7 @@ const SendToken = () => {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Transfer Token</AlertDialogTitle>
                         <AlertDialogDescription>
-                            You are about to transfer {data?.name} to the specified recipient. Please note that you will need ETH in your wallet to cover the transaction fees (gas). Review the details carefully before confirming.
+                            You are about to transfer {tokenName} to the specified recipient. Please note that you will need ETH in your wallet to cover the transaction fees (gas). Review the details carefully before confirming.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <form onSubmit={sendToken} className='flex flex-col gap-5'>

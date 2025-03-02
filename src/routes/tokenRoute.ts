@@ -1,3 +1,4 @@
+import { ORDERSTATUS } from "@/constant/order";
 import db from "@/db/db";
 import { getMoralis } from "@/lib/moralis";
 import { getIndexPrice, getUserTokenData } from "@/lib/prices";
@@ -11,46 +12,112 @@ import Moralis from "moralis";
 import { z } from "zod";
 
 export const tokenRoute = {
+    getAllSphpOrder: publicProcedure.input(z.object({
+        page: z.string().min(1),
+        status: z.string().optional(),
+        request_chat: z.string().optional(),
+    })).query(async ({ input }) => {
 
-    getTokenPrice: publicProcedure.input(z.object({
-        tokenAddress: z.string(),
-        tokenName: z.string(),
-    })).query(async (opts) => {
-        const { tokenAddress } = opts.input
+        const { page, status, request_chat } = input, limit = 8
 
-        const session = await getUserId()
-        if (!session) throw new TRPCError({
+        await rateLimiter.consume(1)
+
+        const auth = await getUserId()
+        if (!auth) throw new TRPCError({
             code: "UNAUTHORIZED"
         })
 
-        const currencyExchangeRate = await db.currency_conversion.findMany()
 
-        const user = await privy.getUser(session)
-
-        if (!user) throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "User not found"
+        const user = await db.user_info.findUniqueOrThrow({ where: { user_id: auth } }).catch(e => {
+            throw new TRPCError({
+                code: "NOT_FOUND"
+            })
         })
+        const [qUserSPHPOrder, totalSPHPOrder] = await Promise.all([
+            db.user_token_order.findMany({
+                where: {
+                    request_chat: request_chat ? true : undefined,
+                    status
+                },
+                orderBy: {
+                    updated_at: 'desc'
+                },
+                skip: (Number(page) - 1) * limit, // Skip records for pagination
+                take: limit
+            }),
+            db.user_token_order.count({
+                where: {
+                    status,
+                    user_id: user.user_id
+                }
+            })
+        ])
 
-        const price = await getUserTokenData({
-            tokenAddress,
-            walletAddress: user.wallet?.address as string,
-            chain: BASE_CHAIN_ID,
-            currencyExchangeRate
-        })
+        const hasNextPage = (Number(page) * limit) < totalSPHPOrder;
+        const hasPreviousPage = Number(page) > 1;
+        const totalPages = Math.ceil(totalSPHPOrder / limit);
 
-        if (!price) throw new TRPCError({
-            code: 'BAD_REQUEST'
-        })
-
-        return price.price
+        return {
+            data: qUserSPHPOrder,
+            pagination: {
+                total: totalSPHPOrder,
+                page,
+                hasNextPage,
+                hasPreviousPage,
+                totalPages
+            }
+        };
     }),
+    buySPHPToken: publicProcedure.input(z.object({
+        amount: z.string(),
+        method: z.string(),
+        receipt: z.string(),
+
+    })).mutation(async ({ input }) => {
+        await rateLimiter.consume(1)
+
+        const auth = await getUserId()
+        if (!auth) throw new TRPCError({
+            code: "UNAUTHORIZED"
+        })
+
+        const { amount, method, receipt } = input
+
+        const user = await db.user_info.findUniqueOrThrow({ where: { user_id: auth } }).catch(e => {
+            throw new TRPCError({
+                code: "NOT_FOUND"
+            })
+        })
+
+        const cUserTokenOrder = await db.user_token_order.create({
+            data: {
+                user: {
+                    connect: {
+                        user_id: user?.user_id
+                    }
+                },
+                amount,
+                method,
+                receipt,
+                status: ORDERSTATUS.processing
+            }
+        })
+        if (!cUserTokenOrder) throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Failed to buy SPHP"
+        })
+
+        return true
+    }),
+
     getIndexPrice: publicProcedure.query(async () => {
 
         try {
 
             await rateLimiter.consume(1)
             await getMoralis()
+
+
 
             const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&precision=full`;
 
@@ -87,11 +154,11 @@ export const tokenRoute = {
         try {
             const tokenAddress = input
 
-            const auth = getUserId()
-            if(!auth) throw new TRPCError({
+            const auth = await getUserId()
+            if (!auth) throw new TRPCError({
                 code: "UNAUTHORIZED"
             })
-            
+
 
 
             await rateLimiter.consume(1)

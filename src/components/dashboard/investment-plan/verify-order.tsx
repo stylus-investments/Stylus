@@ -46,7 +46,7 @@ const VerifyOrder = (props: {
                     <Input className='text-muted-foreground' value={formData.method.toUpperCase()} />
                 </div>
                 <div className='flex flex-col gap-2'>
-                    <Label>Amount (STXBTC)</Label>
+                    <Label>Amount (sBTC)</Label>
                     <Input className='text-muted-foreground' value={formData.amount} />
                 </div>
             </div>

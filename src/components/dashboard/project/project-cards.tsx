@@ -8,6 +8,8 @@ import CreateInvestment from '../investment-plan/create-investment'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
+import BuySPHP from './sphp/buy-sphp'
+import { PhilippinePeso } from 'lucide-react';
 
 const ProjectCards = () => {
     return (
@@ -46,6 +48,28 @@ const ProjectCards = () => {
                     </CardHeader>
                     <CardContent className='flex items-center'>
                         <Button className='w-full' onClick={() => toast("Coming Soon.")}>Buy Save</Button>
+                    </CardContent>
+                </Card>
+            </div>
+            <div className='space-y-2 w-full'>
+                <LabelSeparator text='sPHP' />
+                <Card>
+                    <CardHeader>
+                        <CardTitle className='flex w-full items-center justify-between text-lg'>
+                            <div>sPHP Investments</div>
+                            <PhilippinePeso />
+                        </CardTitle>
+                        <CardDescription>
+                            <Separator className='my-2' />
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className='flex items-center w-full gap-5'>
+                        <Link href={'/dashboard/wallet/sphp-orders'} className='w-full'>
+                            <Button className='w-full'>
+                                SPHP Orders
+                            </Button>
+                        </Link>
+                        <BuySPHP />
                     </CardContent>
                 </Card>
             </div>
