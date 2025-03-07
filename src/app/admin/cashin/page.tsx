@@ -1,26 +1,24 @@
 import { caller } from "@/app/_trpc/server";
 import AdminHeader from "@/components/admin/admin-header";
-import OrderTable from "@/components/admin/order/order-table";
+import SPHPOrderTable from "@/components/admin/order/sphp-order-table";
 import { cookies } from "next/headers";
 import React from "react";
 
-const OrderPage = async ({
+const CashoutPage = async ({
   searchParams,
 }: {
   searchParams: {
-    status: string;
-    request_chat: string;
+    status:  string;
     page: string;
+    request_chat: string;
   };
 }) => {
   cookies();
 
-  const orders = await caller.order.getAllOrder({
+  const cashoutList = await caller.token.qAllSPHPOrder({
     page: searchParams.page,
     status: searchParams.status,
-    request_chat: searchParams.request_chat,
   });
-
   const filter = {
     status: searchParams.status,
     request_chat: searchParams.request_chat,
@@ -28,10 +26,10 @@ const OrderPage = async ({
 
   return (
     <>
-      <AdminHeader currentPage="order" />
-      <OrderTable orders={orders} filter={filter} />
+      <AdminHeader currentPage="cashout" />
+      <SPHPOrderTable orders={cashoutList} filter={filter} />
     </>
   );
 };
 
-export default OrderPage;
+export default CashoutPage;

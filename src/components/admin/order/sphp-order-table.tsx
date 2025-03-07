@@ -24,11 +24,11 @@ import FilterOrderTable from "./filter-order-table";
 import { caller } from "@/app/_trpc/server";
 import TableServerPagination from "@/components/dashboard/table-server-pagination";
 
-const OrderTable = ({
+const SPHPOrderTable = ({
   orders,
   filter,
 }: {
-  orders: Awaited<ReturnType<(typeof caller)["order"]["getAllOrder"]>>;
+  orders: Awaited<ReturnType<(typeof caller)['token']['qAllSPHPOrder']>>;
   filter: {
     status: string;
     request_chat: string;
@@ -97,10 +97,9 @@ const OrderTable = ({
         <TableHeader>
           <TableRow>
             <TableHead>Status</TableHead>
-            <TableHead>Amount (sBTC)</TableHead>
+            <TableHead>Amount (sPHP)</TableHead>
             <TableHead>Messages</TableHead>
             <TableHead>Receipt</TableHead>
-            <TableHead>Paid At</TableHead>
             <TableHead>Method</TableHead>
           </TableRow>
         </TableHeader>
@@ -115,7 +114,7 @@ const OrderTable = ({
                   order.status === ORDERSTATUS["invalid"] ||
                   order.status === ORDERSTATUS["paid"] ? (
                     <DisplayAdminMessages
-                      orderType='sbtc'
+                      orderType='sphp'
                       orderID={order.id}
                       unseen={order.admin_unread_messages}
                     />
@@ -150,11 +149,6 @@ const OrderTable = ({
                     </AlertDialogContent>
                   </AlertDialog>
                 </TableCell>
-                <TableCell>
-                  {order.status === ORDERSTATUS["paid"]
-                    ? new Date(order.updated_at).toLocaleString()
-                    : ""}
-                </TableCell>
                 <TableCell>{order.method}</TableCell>
               </TableRow>
             ))}
@@ -165,4 +159,4 @@ const OrderTable = ({
   );
 };
 
-export default OrderTable;
+export default SPHPOrderTable;

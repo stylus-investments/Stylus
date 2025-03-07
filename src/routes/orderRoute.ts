@@ -1,4 +1,4 @@
-import { ORDERSTATUS } from "@/constant/order";
+import { ORDER_TYPE, ORDERSTATUS } from "@/constant/order";
 import db from "@/db/db";
 import { getAuth } from "@/lib/nextAuth";
 import { getUserId } from "@/lib/privy";
@@ -125,175 +125,137 @@ export const orderRoute = {
 
         return updateOrder
     }),
-    completeOrder: publicProcedure.input(z.string()).mutation(async (opts) => {
+    completeOrder: publicProcedure.input(z.object({
+        orderType: z.enum(Object.values(ORDER_TYPE) as [keyof typeof ORDER_TYPE]),
+        orderID: z.string()
+    })).mutation(async (opts) => {
 
         await rateLimiter.consume(1)
 
-        const orderID = opts.input
+        const { orderID, orderType } = opts.input
         if (!orderID) throw new TRPCError({
             code: 'NOT_FOUND'
         })
 
-        const order = await db.user_order.findUnique({
-            where: { id: orderID }, select: {
-                id: true,
-                user_id: true,
-                status: true,
-                user_investment_plan: {
-                    select: {
-                        id: true,
-                        base_price: true,
-                    }
-                }
-            }
-        })
-        if (!order) throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: "Order not found"
-        })
+        if (orderType === 'sbtc') {
 
-        if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "This order is invalid or paid"
-        })
 
-        const updateOrder = await db.user_order.update({
-            where: { id: order.id },
-            data: {
-                status: ORDERSTATUS['paid'],
-                user_investment_plan: {
-                    update: {
-                        where: {
-                            id: order.user_investment_plan.id
-                        },
-                        data: {
-                            payment_count: {
-                                decrement: 1
-                            }
+            const order = await db.user_order.findUnique({
+                where: { id: orderID }, select: {
+                    id: true,
+                    user_id: true,
+                    status: true,
+                    user_investment_plan: {
+                        select: {
+                            id: true,
+                            base_price: true,
                         }
                     }
                 }
-            }
-        })
-        if (!updateOrder) throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Failed to update order"
-        })
-
-        const orderBasePrice = order.user_investment_plan.base_price
-        const primaryInviterCommission = orderBasePrice * 0.03
-        const secondaryInviterCommission = orderBasePrice * 0.02
-
-        //give referrals commission
-        const primaryUser = await db.referral_info.findUnique({
-            where: { user_id: order.user_id }, include: {
-                user_info: {
-                    include: {
-                        inviter_reward: true
-                    }
-                }
-            }
-        })
-        if (!primaryUser) throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "User not found"
-        })
-
-        //update total_invites in referral_info
-        const userpaidOrders = await db.user_order.findMany({
-            where: {
-                user_id: order.user_id,
-                status: ORDERSTATUS['paid']
-            }
-        })
-
-        if (primaryUser.inviter_referral_code) {
-
-            const [_, secondaryUser] = await Promise.all([
-                // Increase the primary inviter's user referral reward
-                db.referral_reward.update({
-                    where: {
-                        user_invited_id: primaryUser.user_id
-                    }, data: {
-                        reward: primaryUser.user_info.inviter_reward[0].reward + primaryInviterCommission
-                    }
-                }),
-                // Update the primary inviter's unclaimed reward
-                db.referral_info.update({
-                    where: {
-                        referral_code: primaryUser.inviter_referral_code
-                    },
-                    data: {
-                        unclaimed_reward: {
-                            increment: primaryInviterCommission
-                        },
-                        total_reward: {
-                            increment: primaryInviterCommission
-                        }
-                    },
-                    include: {
-                        user_info: {
-                            include: {
-                                inviter_reward: true
-                            }
-                        }
-                    }
-                })
-            ])
-            if (!secondaryUser) throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Secondary User not found"
+            })
+            if (!order) throw new TRPCError({
+                code: 'NOT_FOUND',
+                message: "Order not found"
             })
 
-            if (userpaidOrders.length === 1 && primaryUser.inviter_referral_code) {
+            if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "This order is invalid or paid"
+            })
 
-                await db.referral_info.update({
-                    where: {
-                        referral_code: primaryUser.inviter_referral_code
-                    },
-                    data: {
-                        total_invites: {
-                            increment: 1
+            const updateOrder = await db.user_order.update({
+                where: { id: order.id },
+                data: {
+                    status: ORDERSTATUS['paid'],
+                    user_investment_plan: {
+                        update: {
+                            where: {
+                                id: order.user_investment_plan.id
+                            },
+                            data: {
+                                payment_count: {
+                                    decrement: 1
+                                }
+                            }
                         }
                     }
-                })
-            }
+                }
+            })
+            if (!updateOrder) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to update order"
+            })
 
-            if (secondaryUser.inviter_referral_code) {
+            const orderBasePrice = order.user_investment_plan.base_price
+            const primaryInviterCommission = orderBasePrice * 0.03
+            const secondaryInviterCommission = orderBasePrice * 0.02
 
-                // Update their unclaimed_reward based on order.base_price
-                await Promise.all([
+            //give referrals commission
+            const primaryUser = await db.referral_info.findUnique({
+                where: { user_id: order.user_id }, include: {
+                    user_info: {
+                        include: {
+                            inviter_reward: true
+                        }
+                    }
+                }
+            })
+            if (!primaryUser) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "User not found"
+            })
 
-                    // Update the secondary inviter's unclaimed reward
+            //update total_invites in referral_info
+            const userpaidOrders = await db.user_order.findMany({
+                where: {
+                    user_id: order.user_id,
+                    status: ORDERSTATUS['paid']
+                }
+            })
+
+            if (primaryUser.inviter_referral_code) {
+
+                const [_, secondaryUser] = await Promise.all([
+                    // Increase the primary inviter's user referral reward
+                    db.referral_reward.update({
+                        where: {
+                            user_invited_id: primaryUser.user_id
+                        }, data: {
+                            reward: primaryUser.user_info.inviter_reward[0].reward + primaryInviterCommission
+                        }
+                    }),
+                    // Update the primary inviter's unclaimed reward
                     db.referral_info.update({
                         where: {
-                            referral_code: secondaryUser.inviter_referral_code
+                            referral_code: primaryUser.inviter_referral_code
                         },
                         data: {
                             unclaimed_reward: {
-                                increment: secondaryInviterCommission
+                                increment: primaryInviterCommission
                             },
                             total_reward: {
-                                increment: secondaryInviterCommission
+                                increment: primaryInviterCommission
+                            }
+                        },
+                        include: {
+                            user_info: {
+                                include: {
+                                    inviter_reward: true
+                                }
                             }
                         }
-                    }),
-                    // Increase the secondary inviter's user referral reward
-                    db.referral_reward.update({
-                        where: {
-                            user_invited_id: secondaryUser.user_id
-                        }, data: {
-                            reward: {
-                                increment: secondaryInviterCommission
-                            }
-                        }
-                    }),
+                    })
                 ])
+                if (!secondaryUser) throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Secondary User not found"
+                })
 
-                if (userpaidOrders.length === 1 && secondaryUser.inviter_referral_code) {
+                if (userpaidOrders.length === 1 && primaryUser.inviter_referral_code) {
+
                     await db.referral_info.update({
                         where: {
-                            referral_code: secondaryUser.inviter_referral_code
+                            referral_code: primaryUser.inviter_referral_code
                         },
                         data: {
                             total_invites: {
@@ -302,65 +264,186 @@ export const orderRoute = {
                         }
                     })
                 }
+
+                if (secondaryUser.inviter_referral_code) {
+
+                    // Update their unclaimed_reward based on order.base_price
+                    await Promise.all([
+
+                        // Update the secondary inviter's unclaimed reward
+                        db.referral_info.update({
+                            where: {
+                                referral_code: secondaryUser.inviter_referral_code
+                            },
+                            data: {
+                                unclaimed_reward: {
+                                    increment: secondaryInviterCommission
+                                },
+                                total_reward: {
+                                    increment: secondaryInviterCommission
+                                }
+                            }
+                        }),
+                        // Increase the secondary inviter's user referral reward
+                        db.referral_reward.update({
+                            where: {
+                                user_invited_id: secondaryUser.user_id
+                            }, data: {
+                                reward: {
+                                    increment: secondaryInviterCommission
+                                }
+                            }
+                        }),
+                    ])
+
+                    if (userpaidOrders.length === 1 && secondaryUser.inviter_referral_code) {
+                        await db.referral_info.update({
+                            where: {
+                                referral_code: secondaryUser.inviter_referral_code
+                            },
+                            data: {
+                                total_invites: {
+                                    increment: 1
+                                }
+                            }
+                        })
+                    }
+                }
             }
+
+            //notify user
+            await db.user_notification.create({
+                data: {
+                    user: {
+                        connect: {
+                            user_id: order.user_id
+                        }
+                    },
+                    message: "Your order has been successfully processed. Thank you!",
+                    from: "Stylus Admin",
+                    link: `/dashboard/wallet/plans/${order.user_investment_plan}`
+                }
+            })
+
         }
 
-        //notify user
-        await db.user_notification.create({
-            data: {
-                user: {
-                    connect: {
-                        user_id: order.user_id
-                    }
-                },
-                message: "Your order has been successfully processed. Thank you!",
-                from: "Stylus Admin",
-                link: `/dashboard/wallet/plans/${order.user_investment_plan}`
-            }
-        })
+        if (orderType === 'sphp') {
+            const order = await db.user_token_order.findUnique({
+                where: { id: orderID }, select: {
+                    id: true,
+                    user_id: true,
+                    status: true,
+
+                }
+            })
+            if (!order) throw new TRPCError({
+                code: 'NOT_FOUND',
+                message: "Order not found"
+            })
+
+            if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "This order is invalid or paid"
+            })
+
+            const updateOrder = await db.user_token_order.update({
+                where: { id: order.id },
+                data: {
+                    status: ORDERSTATUS['paid'],
+                }
+            })
+            if (!updateOrder) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to update order"
+            })
+        }
+
 
         return true
     }),
-    invalidOrder: publicProcedure.input(z.string()).mutation(async (opts) => {
+    invalidOrder: publicProcedure.input(z.object({
+        orderID: z.string(),
+        orderType: z.enum(Object.values(ORDER_TYPE) as [keyof typeof ORDER_TYPE]),
+
+    })).mutation(async (opts) => {
 
         await rateLimiter.consume(1)
 
-        const orderID = opts.input
+        const { orderID, orderType } = opts.input
         if (!orderID) throw new TRPCError({
             code: 'NOT_FOUND'
         })
 
-        const order = await db.user_order.findUnique({ where: { id: orderID } })
-        if (!order) throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: "Order not found"
-        })
+        if (orderType === 'sbtc') {
 
-        if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "This order is invalid or paid"
-        })
+            const order = await db.user_order.findUnique({ where: { id: orderID } })
+            if (!order) throw new TRPCError({
+                code: 'NOT_FOUND',
+                message: "Order not found"
+            })
 
-        const updateOrder = await db.user_order.update({
-            where: { id: order.id },
-            data: { status: ORDERSTATUS['invalid'] }
-        })
-        if (!updateOrder) throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Failed to update order"
-        })
+            if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "This order is invalid or paid"
+            })
 
-        await db.user_notification.create({
-            data: {
-                user: {
-                    connect: {
-                        user_id: order.user_id
-                    }
-                },
-                message: "Unfortunately, this order is not valid. Please check your information.",
-                from: "Stylus Admin"
-            }
-        })
+            const updateOrder = await db.user_order.update({
+                where: { id: order.id },
+                data: { status: ORDERSTATUS['invalid'] }
+            })
+            if (!updateOrder) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to update order"
+            })
+
+            await db.user_notification.create({
+                data: {
+                    user: {
+                        connect: {
+                            user_id: order.user_id
+                        }
+                    },
+                    message: "Unfortunately, this order is not valid. Please check your information.",
+                    from: "Stylus Admin"
+                }
+            })
+
+        }
+
+        if (orderType === 'sphp') {
+            const order = await db.user_token_order.findUnique({ where: { id: orderID } })
+            if (!order) throw new TRPCError({
+                code: 'NOT_FOUND',
+                message: "Order not found"
+            })
+
+            if (order.status !== ORDERSTATUS['processing']) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "This order is invalid or paid"
+            })
+
+            const updateOrder = await db.user_token_order.update({
+                where: { id: order.id },
+                data: { status: ORDERSTATUS['invalid'] }
+            })
+            if (!updateOrder) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to update order"
+            })
+
+            await db.user_notification.create({
+                data: {
+                    user: {
+                        connect: {
+                            user_id: order.user_id
+                        }
+                    },
+                    message: "Unfortunately, this order is not valid. Please check your information.",
+                    from: "Stylus Admin"
+                }
+            })
+        }
+
 
         return true
 
@@ -450,47 +533,88 @@ export const orderRoute = {
 
         return true
     }),
-    toggleOrderConversation: publicProcedure.input(z.string()).mutation(async (opts) => {
+    toggleOrderConversation: publicProcedure.input(z.object({
+        orderID: z.string(),
+        orderType: z.enum(Object.values(ORDER_TYPE) as [keyof typeof ORDER_TYPE]),
+    })).mutation(async (opts) => {
 
         try {
 
             await rateLimiter.consume(1)
 
+            const { orderID, orderType } = opts.input
             const auth = await getAuth()
             if (!auth) throw new TRPCError({
                 code: "UNAUTHORIZED"
             })
 
-            const order = await db.user_order.findUnique({ where: { id: opts.input } })
-            if (!order) throw new TRPCError({
-                code: "NOT_FOUND"
-            })
+            if (orderType === 'sbtc') {
 
-            if (order.closed && order.request_chat) {
-                await db.user_notification.create({
-                    data: {
-                        user: {
-                            connect: {
-                                user_id: order.user_id,
-                            }
-                        },
-                        message: "Your request to open a conversation has been approved.",
-                        link: `/dashboard/wallet/plans/${order.user_investment_plan_id}`,
-                        from: "Stylus Admin"
+
+                const order = await db.user_order.findUnique({ where: { id: orderID } })
+                if (!order) throw new TRPCError({
+                    code: "NOT_FOUND"
+                })
+
+                if (order.closed && order.request_chat) {
+                    await db.user_notification.create({
+                        data: {
+                            user: {
+                                connect: {
+                                    user_id: order.user_id,
+                                }
+                            },
+                            message: "Your request to open a conversation has been approved.",
+                            link: `/dashboard/wallet/plans/${order.user_investment_plan_id}`,
+                            from: "Stylus Admin"
+                        }
+                    })
+                }
+
+                const updateOrder = await db.user_order.update({
+                    where: { id: order.id }, data: {
+                        closed: !order.closed
+                        , request_chat: order.closed ? false : true
                     }
                 })
+                if (!updateOrder) throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Failed to toggle order conversation"
+                })
+
+            }
+            if (orderType === 'sphp') {
+
+
+                const order = await db.user_token_order.findUnique({ where: { id: orderID } })
+                if (!order) throw new TRPCError({
+                    code: "NOT_FOUND"
+                })
+
+                if (order.closed && order.request_chat) {
+                    await db.user_notification.create({
+                        data: {
+                            user: {
+                                connect: {
+                                    user_id: order.user_id,
+                                }
+                            },
+                            message: "Your request to open a conversation has been approved.",
+                            link: `/dashboard/wallet/sphp-orders`,
+                            from: "Stylus Admin"
+                        }
+                    })
+                }
+
+                const updateOrder = await db.user_token_order.update({
+                    where: { id: order.id }, data: {
+                        closed: !order.closed,
+                        request_chat: false
+                    }
+                })
+
             }
 
-            const updateOrder = await db.user_order.update({
-                where: { id: order.id }, data: {
-                    closed: !order.closed
-                    , request_chat: order.closed ? false : true
-                }
-            })
-            if (!updateOrder) throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: "Failed to toggle order conversation"
-            })
 
             return true
 

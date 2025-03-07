@@ -10,4 +10,9 @@ const PAYMENT_METHOD = {
     'BPI': 'BPI',
 };
 
-export { ORDERSTATUS, PAYMENT_METHOD }
+const ORDER_TYPE = {
+    'sbtc': "sbtc",
+    "sphp": "sphp"
+} as const
+
+export { ORDERSTATUS, PAYMENT_METHOD, ORDER_TYPE }

@@ -13,6 +13,7 @@ import { parseAsInteger, parseAsString, useQueryState } from 'nuqs'
 import TableServerPagination from '../../table-server-pagination'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import Link from 'next/link'
+import DisplayClientMessages from '../../messages/display-client-messages'
 const SPHPOrderHistory = ({ filter }: {
     filter: {
         status: string | undefined;
@@ -22,7 +23,7 @@ const SPHPOrderHistory = ({ filter }: {
 
     const [page, setPage] = useQueryState('page', parseAsString.withDefault('1'))
 
-    const { data } = trpc.token.getAllSphpOrder.useQuery({
+    const { data } = trpc.token.getUserAllSphpOrder.useQuery({
         page: page,
         status: filter.status,
         request_chat: filter.request_chat
@@ -107,7 +108,7 @@ const SPHPOrderHistory = ({ filter }: {
                                     currentTable && currentTable.length > 0 ? currentTable.map((order, i) => (
                                         <TableRow key={order.id} className='text-muted-foreground hover:text-foreground text-xs md:text-sm'>
                                             <TableCell>
-                                                {/* <DisplayClientMessages orderID={order.id} unseen={order.user_unread_messages} /> */}
+                                                <DisplayClientMessages orderType='sphp' orderID={order.id} unseen={order.user_unread_messages} />
                                             </TableCell>
                                             <TableCell>{order.amount}</TableCell>
                                             <TableCell>
@@ -143,12 +144,6 @@ const SPHPOrderHistory = ({ filter }: {
                                                     </TableCell>
                                                     <TableCell>
                                                         <Skeleton className='h-6 w-24' />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Skeleton className='h-6 w-32' />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Skeleton className='h-6 w-44' />
                                                     </TableCell>
                                                     <TableCell>
                                                         <Skeleton className='h-6 w-44' />

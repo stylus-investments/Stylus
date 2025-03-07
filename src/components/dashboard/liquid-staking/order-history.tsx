@@ -99,7 +99,7 @@ const OrderHistory = (props: tProps) => {
                                                 />
                                                 :
                                                 order.status === ORDERSTATUS['upcoming'] ? "upcoming" :
-                                                    <DisplayClientMessages orderID={order.id} unseen={order.user_unread_messages} />
+                                                    <DisplayClientMessages orderType='sbtc' orderID={order.id} unseen={order.user_unread_messages} />
                                             }
                                         </TableCell>
                                         <TableCell>{order.amount}</TableCell>

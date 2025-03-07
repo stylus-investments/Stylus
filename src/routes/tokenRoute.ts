@@ -1,19 +1,73 @@
-import { ORDERSTATUS } from "@/constant/order";
 import db from "@/db/db";
+import { okayRes } from "@/lib/apiResponse";
 import { getMoralis } from "@/lib/moralis";
-import { getIndexPrice, getUserTokenData } from "@/lib/prices";
-import { getUserId, privy } from "@/lib/privy";
+import { getAuth } from "@/lib/nextAuth";
+import { getIndexPrice } from "@/lib/prices";
+import { getUserId } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { BASE_CHAIN_ID, USDC_ADDRESS } from "@/lib/token_address";
 import { publicProcedure } from "@/trpc/trpc";
+import { cashout_status } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import axios from "axios";
 import Moralis from "moralis";
 import { z } from "zod";
 
 export const tokenRoute = {
-    getAllSphpOrder: publicProcedure.input(z.object({
-        page: z.string().min(1),
+    qAllSPHPOrder: publicProcedure.input(z.object({
+        page: z.string().min(1).optional().default('1'),
+        status: z.string().optional(),
+    })).query(async ({ input }) => {
+        try {
+
+            const { page, status } = input,
+                limit = 10
+
+            const auth = await getAuth()
+            if (!auth) throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "Login First."
+            })
+
+            const qCashout = await db.user_token_order.findMany({
+                where: {
+                    status,
+                },
+                orderBy: { updated_at: 'desc' },
+                skip: (Number(page) - 1) * limit, // Skip records for pagination
+                take: limit
+            })
+            const tCashout = await db.user_token_order.count({
+                where: {
+                    status
+                }
+            });
+
+            const hasNextPage = (Number(page) * limit) < tCashout;
+            const hasPreviousPage = Number(page) > 1;
+            const totalPages = Math.ceil(tCashout / limit);
+
+            return {
+                data: qCashout,
+                pagination: {
+                    total: tCashout,
+                    page,
+                    hasNextPage,
+                    hasPreviousPage,
+                    totalPages
+                }
+            };
+
+        } catch (error: any) {
+            console.error(error)
+            throw new TRPCError({
+                code: error.code || "INTERNAL_SERVER_ERROR",
+                message: error.message || "Something went wrong"
+            })
+        }
+    }),
+    getUserAllSphpOrder: publicProcedure.input(z.object({
+        page: z.string().min(1).default("1"),
         status: z.string().optional(),
         request_chat: z.string().optional(),
     })).query(async ({ input }) => {
@@ -99,7 +153,7 @@ export const tokenRoute = {
                 amount,
                 method,
                 receipt,
-                status: ORDERSTATUS.processing
+                status: cashout_status.PENDING
             }
         })
         if (!cUserTokenOrder) throw new TRPCError({
@@ -108,6 +162,32 @@ export const tokenRoute = {
         })
 
         return true
+    }),
+    updateSPHPTokenOrder: publicProcedure.input(z.object({
+        token_order_id: z.string(),
+    })).mutation(async ({ input }) => {
+        const auth = await getAuth()
+        if (!auth) throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Login First."
+        })
+
+        const { token_order_id } = input;
+
+        const uCashout = await db.user_token_order.update({
+            where: {
+                id: token_order_id
+            },
+            data: {
+                status: cashout_status.COMPLETED
+            }
+        })
+        if (!uCashout) throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Failed to update cashout request"
+        })
+
+        return okayRes()
     }),
 
     getIndexPrice: publicProcedure.query(async () => {
