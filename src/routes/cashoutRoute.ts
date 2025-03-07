@@ -9,7 +9,6 @@ import { publicProcedure } from "@/trpc/trpc";
 import { cashoutFormSchema, compoundFormSchema } from "@/types/cashoutType";
 import { cashout_status } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import axios from "axios";
 import { ethers } from "ethers";
 import { z } from "zod";
 

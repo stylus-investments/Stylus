@@ -1,3 +1,4 @@
+import { ORDERSTATUS } from "@/constant/order";
 import db from "@/db/db";
 import { okayRes } from "@/lib/apiResponse";
 import { getMoralis } from "@/lib/moralis";
@@ -7,7 +8,6 @@ import { getUserId } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { BASE_CHAIN_ID, USDC_ADDRESS } from "@/lib/token_address";
 import { publicProcedure } from "@/trpc/trpc";
-import { cashout_status } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import axios from "axios";
 import Moralis from "moralis";
@@ -153,7 +153,7 @@ export const tokenRoute = {
                 amount,
                 method,
                 receipt,
-                status: cashout_status.PENDING
+                status: ORDERSTATUS.processing
             }
         })
         if (!cUserTokenOrder) throw new TRPCError({
@@ -179,7 +179,7 @@ export const tokenRoute = {
                 id: token_order_id
             },
             data: {
-                status: cashout_status.COMPLETED
+                status: ORDERSTATUS.paid
             }
         })
         if (!uCashout) throw new TRPCError({
