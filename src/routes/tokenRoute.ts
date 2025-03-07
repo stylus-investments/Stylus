@@ -91,7 +91,8 @@ export const tokenRoute = {
             db.user_token_order.findMany({
                 where: {
                     request_chat: request_chat ? true : undefined,
-                    status
+                    status,
+                    user_id: user.user_id
                 },
                 orderBy: {
                     updated_at: 'desc'
