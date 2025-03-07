@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { socket } from '@/lib/socket'
-import { useRouter } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 import { ORDERSTATUS } from '@/constant/order'
 import SelectPaymentMethod from '../../investment-plan/select-payment-method'
 import ScanQr from '../../investment-plan/scan-qr'
@@ -39,6 +39,7 @@ const BuySPHP = () => {
         onSuccess: () => {
             toast.success("Success!")
             setOpen(false)
+            redirect('dashboard/wallet/sphp-orders')
         }
     })
 
