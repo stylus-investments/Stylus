@@ -7,6 +7,7 @@ import { HandCoins } from 'lucide-react'
 import React, { useState } from 'react'
 import CashoutConvert from './cashout-convert'
 import CashoutCompound from './cashout-compound'
+import BuySPHP from '../project/sphp/buy-sphp'
 
 const Cashout = () => {
 
@@ -19,28 +20,29 @@ const Cashout = () => {
                     <Button className='w-11 h-11 p-0 rounded-full' variant={'secondary'}>
                         <HandCoins size={20} />
                     </Button>
-                    <Label className='text-sm font-normal'>Cashout</Label>
+                    <Label className='text-sm font-normal'>Funds</Label>
                 </div>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Select Cashout Option</AlertDialogTitle>
+                    <AlertDialogTitle>Select Fund Options</AlertDialogTitle>
                 </AlertDialogHeader>
                 <div className='flex flex-col gap-5'>
-                    <div className='space-y-2 flex items-center justify-between'>
+                    <div className='space-y-2 flex items-center justify-between gap-5'>
                         <div className='space-y-1 flex flex-col'>
-                            <Label>Convert To PHP</Label>
-                            <small className='text-muted-foreground'>Convert your SPHP into real money.</small>
+                            <Label>Cashout SPHP</Label>
+                            <small className='text-muted-foreground'>Cashout your token into real money.</small>
                         </div>
                         <CashoutConvert />
                     </div>
                     <Separator />
-                    <div className='space-y-2 flex items-center justify-between'>
+                    <div className='space-y-2 flex items-center justify-between gap-5'>
                         <div className='space-y-1 flex flex-col'>
-                            <Label>Compound to sAVE</Label>
-                            <small className='text-muted-foreground'>Convert your SPHP into sAVE to compound.</small>
+                            <Label>Cashin SPHP</Label>
+                            <small className='text-muted-foreground'>Purchase SPHP to process transactions and unlock investment opportunities within the app..</small>
                         </div>
-                        <CashoutCompound />
+                        <BuySPHP />
+                        {/* <CashoutCompound /> */}
                     </div>
                 </div>
                 <Separator />

@@ -28,7 +28,6 @@ const CashoutTable = ({ cashoutList, filter }: {
         }
     }
 
-
     const { copyText } = useGlobalStore()
     return (
         <div className='padding py-24 flex flex-col gap-10'>

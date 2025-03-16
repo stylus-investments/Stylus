@@ -6,10 +6,6 @@ import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { socket } from '@/lib/socket'
 import { redirect, useRouter } from 'next/navigation'
-import { ORDERSTATUS } from '@/constant/order'
-import SelectPaymentMethod from '../../investment-plan/select-payment-method'
-import ScanQr from '../../investment-plan/scan-qr'
-import VerifyOrder from '../../investment-plan/verify-order'
 import SPHPSelectPayment from './select-payment-method'
 import BuyTokenScanQr from './scan-qr'
 import VerifyBuySPHP from './verify-buy-sphp'
@@ -82,7 +78,7 @@ const BuySPHP = () => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button className='w-full'>Buy sPHP</Button>
+                <Button className='min-w-28 w-28'>Cashin</Button>
             </AlertDialogTrigger>
             <AlertDialogContent className='w-full max-w-96 max-h-[600px] overflow-y-auto'>
                 {formData.status === 1 &&

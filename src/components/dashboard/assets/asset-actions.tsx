@@ -5,7 +5,7 @@ import Link from 'next/link'
 import React from 'react'
 import SendToken from './send-token'
 import ReceiveToken from './receive-token'
-import Cashout from '../cashout/cashout'
+import Cashout from '../cashout/fundsOptions'
 
 const AssetActions = () => {
 

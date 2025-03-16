@@ -118,7 +118,7 @@ const CashoutConvert = () => {
         <div>
             <AlertDialog open={open} onOpenChange={setOpen}>
                 <AlertDialogTrigger asChild>
-                    <Button className='w-28'>Convert</Button>
+                    <Button className='w-28 min-w-28'>Cashout</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className='max-w-96'>
                     <AlertDialogHeader>
