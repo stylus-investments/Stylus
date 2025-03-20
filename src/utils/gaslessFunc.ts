@@ -46,7 +46,7 @@ const estimateGasCost = async ({ provider, userWalletAddress, amount, decimals, 
 
     console.log("USER ETH BALANCE", userEthBalance);
 
-    return { userEthBalance, transactionGasCost, gasPrice, convertedAmount }
+    return { userEthBalance, transactionGasCost, gasPrice, convertedAmount, gasCostInETH }
 }
 
 
@@ -76,60 +76,7 @@ const checkSPHPBalance = async ({ signer, userWalletAddress }: tCheckSphpBalance
     }
 }
 
-interface tSendUserGas {
-    sPHPTokenContract: ethers.Contract
-    userSphpBalance: number
-    gasPrice: bigint
-    transactionGasCost: bigint
-    userWalletAddress: string
-
-}
-
-const sendUserGas = async ({
-    sPHPTokenContract,
-    userSphpBalance,
-    gasPrice,
-    transactionGasCost,
-    userWalletAddress
-}: tSendUserGas) => {
-    // Estimate gas for sending SPHP to your wallet
-    const estimatedGasForSPHPTransfer = await sPHPTokenContract
-        .getFunction("transfer")
-        .estimateGas(WALLET_TANKER, userSphpBalance);
-    const sPHPTransferGasCost = estimatedGasForSPHPTransfer * gasPrice;
-    const totalEthNeeded = ethers.formatUnits(transactionGasCost + sPHPTransferGasCost, "ether");
-
-    console.log(
-        `Total ETH needed for gas: ${totalEthNeeded}`
-    );
-
-    const provider = new ethers.JsonRpcProvider(
-        process.env.MORALIS_RPC_URL
-    ); // Your RPC URL
-    const senderWallet = new ethers.Wallet(
-        process.env.ASSET_WALLET_PRIVATE_KEY as string,
-        provider
-    ); // Wallet used to send gas fees
-
-
-    toast.success("Sending Gas")
-    const tx = await senderWallet.sendTransaction({
-        to: userWalletAddress,
-        value: totalEthNeeded, // Amount in Wei
-    });
-
-    console.log("Transaction sent:", tx.hash);
-
-    await tx.wait(); // Wait for confirmation
-    console.log("Transaction confirmed:", tx.hash);
-
-
-    toast.success("Gass fee has been sent.")
-}
-
-
 export const gaslessFuncObj = {
     estimateGasCost,
     checkSPHPBalance,
-    sendUserGas
 }

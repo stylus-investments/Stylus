@@ -1,11 +1,8 @@
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { UserPlus } from 'lucide-react'
-import Link from 'next/link'
 import React from 'react'
 import SendToken from './send-token'
 import ReceiveToken from './receive-token'
 import Cashout from '../cashout/fundsOptions'
+import Fee from './fee'
 
 const AssetActions = () => {
 
@@ -14,12 +11,7 @@ const AssetActions = () => {
             <SendToken />
             <ReceiveToken />
             <Cashout />
-            <Link href={'/dashboard/referrals'} className='flex flex-col gap-1.5 items-center'>
-                <Button className='w-11 h-11 p-0 rounded-full' variant={'secondary'}>
-                    <UserPlus size={20} />
-                </Button>
-                <Label className='text-sm font-normal'>Refer</Label>
-            </Link>
+           <Fee />
         </div>
     )
 }

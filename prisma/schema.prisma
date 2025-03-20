@@ -163,6 +163,7 @@ model user_info {
   claimed_gass         Boolean                @default(false)
   age                  String
   id_image             Json?
+  gas_credits          Int                    @default(3)
   front_id             String?
   back_id              String?
   verification_message String?

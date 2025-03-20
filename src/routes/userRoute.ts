@@ -12,6 +12,7 @@ import { UTApi } from "uploadthing/server";
 import { ethers } from "ethers";
 import axios from "axios";
 import { okayRes } from "@/lib/apiResponse";
+import { compoundFormSchema } from "@/types/cashoutType";
 
 export const userRoute = {
     getCurrentUserInfo: publicProcedure.query(async () => {
@@ -24,6 +25,8 @@ export const userRoute = {
         const userInfo = await db.user_info.findUnique({
             where: { user_id: user }
         })
+
+        console.log(userInfo)
 
         if (!userInfo) {
 
@@ -118,7 +121,7 @@ export const userRoute = {
             code: "UNAUTHORIZED"
         })
 
-        if(!input) return okayRes()
+        if (!input) return okayRes()
 
         const userInfo = await db.user_info.findUnique({
             where: { user_id: user }
@@ -452,5 +455,116 @@ export const userRoute = {
 
         return user.claimed_gass
 
+    }),
+    rechargeFee: publicProcedure.input(z.object({
+        data: compoundFormSchema,
+        hash: z.string().min(1, {
+            message: "Transaction hash is required"
+        })
+    })).mutation(async ({ input }) => {
+        const provider = new ethers.JsonRpcProvider(process.env.MORALIS_RPC_URL); // Your RPC URL
+
+        const txReceipt = await provider.getTransactionReceipt(input.hash);
+
+        await rateLimiter.consume(1)
+
+
+        const auth = await getUserId()
+        if (!auth) throw new TRPCError({
+            code: "UNAUTHORIZED"
+        })
+
+
+        const [user] = await Promise.all([
+            db.user_info.findUnique({ where: { user_id: auth } }),
+        ])
+        if (!user) throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: "User not found"
+        })
+
+        await db.user_info.update({
+            where: {
+                user_id: auth
+            },
+            data: {
+                gas_credits: {
+                    increment: Number(input.data.amount)
+                }
+            }
+        })
+
+        return true
+    }),
+    useGasCreditFee: publicProcedure.input(z.object({
+        gasAmount: z.string()
+    })).mutation(async ({ input }) => {
+        await rateLimiter.consume(1)
+
+        const auth = await getUserId()
+        if (!auth) throw new TRPCError({
+            code: "UNAUTHORIZED"
+        })
+
+        const [user] = await Promise.all([
+            db.user_info.findUnique({ where: { user_id: auth } }),
+        ])
+
+        console.log(user)
+        if (!user) throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: "User not found"
+        })
+
+        if (!user.gas_credits) throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "You don't have enough processing fee to continue this transaction. Please recharge."
+        })
+
+        const provider = new ethers.JsonRpcProvider(process.env.MORALIS_RPC_URL); // Your RPC URL
+        const wallet = new ethers.Wallet(process.env.ASSET_WALLET_PRIVATE_KEY as string, provider); // Wallet used to send gas fees
+
+
+        await rateLimiter.consume(1)
+
+        // Create contract instance
+        const recipient = user.wallet;
+        const amount = input.gasAmount
+
+
+        const amountInWei = ethers.parseUnits(amount, "ether"); // Convert ETH to Wei
+
+        console.log("Amount in wei", amountInWei)
+
+        const newGasAmount = amountInWei * BigInt(130) / BigInt(100); // Increase by 30%
+
+        try {
+            // Create and send the transaction
+            const tx = await wallet.sendTransaction({
+                to: recipient,
+                value: newGasAmount, // Amount of ETH to send
+            });
+        // Wait for transaction to be mined
+
+            await tx.wait();
+            console.log("ETH sent successfully:", tx);
+
+        } catch (error) {
+            console.error("Transaction failed:", error);
+        }
+
+
+        await db.user_info.update({
+            where: {
+                user_id: auth
+            },
+            data: {
+                gas_credits: {
+                    decrement: 1
+                }
+            }
+        })
+
+        return true;
     })
 }

@@ -78,7 +78,7 @@ const BuySPHP = () => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button className='min-w-28 w-28'>Cashin</Button>
+                <Button className='min-w-28 w-28'>Cash in</Button>
             </AlertDialogTrigger>
             <AlertDialogContent className='w-full max-w-96 max-h-[600px] overflow-y-auto'>
                 {formData.status === 1 &&

@@ -35,8 +35,6 @@ const AssetsData = () => {
     return '/icons/logo/logo.svg'
   }
 
-
-
   const smallScreen = (
     <div className='flex flex-col w-full md:hidden'>
       {

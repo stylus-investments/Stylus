@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ABI } from "@/constant/abi";
-import { BASE_CHAIN_ID, SPHP, WALLET_TANKER } from "@/lib/token_address";
+import { BASE_CHAIN_ID } from "@/lib/token_address";
 import { useWallets } from "@privy-io/react-auth";
 import { ethers } from "ethers";
 import { ArrowUp, LoaderCircle, QrCode } from "lucide-react";
@@ -32,6 +32,13 @@ const SendToken = () => {
   const walletData = trpc.dashboard.getWalletData.useQuery(undefined, {
     refetchOnMount: false,
     enabled: false,
+  });
+
+  const useGasCredit = trpc.user.useGasCreditFee.useMutation({
+    onError: (err) => {
+      setLoading(false);
+      return toast.error(err.message);
+    },
   });
 
   const { wallets } = useWallets();
@@ -113,6 +120,8 @@ const SendToken = () => {
         return toast.error("You don't have enough token to cashout.");
       }
 
+      console.log("Estimating gas");
+
       const gasCost = await gaslessFuncObj.estimateGasCost({
         provider,
         userWalletAddress,
@@ -122,39 +131,21 @@ const SendToken = () => {
         setLoading,
         tokenContract,
       });
+      console.log("Gas estimated");
 
       if (gasCost) {
         const {
           userEthBalance,
           transactionGasCost,
           gasPrice,
+          gasCostInETH,
           convertedAmount,
         } = gasCost;
 
         if (userEthBalance < transactionGasCost) {
-          // const { userSphpBalance, sPHPTokenContract } =
-          //   await gaslessFuncObj.checkSPHPBalance({
-          //     signer,
-          //     userWalletAddress,
-          //   });
-
-          // if (userSphpBalance >= 1) {
-          //   await gaslessFuncObj.sendUserGas({
-          //     sPHPTokenContract,
-          //     gasPrice,
-          //     userSphpBalance,
-          //     userWalletAddress,
-          //     transactionGasCost,
-          //   });
-
-          //   const transactionResponse = await tokenContract.transfer(
-          //     recipientAddress,
-          //     convertedAmount
-          //   );
-          // }
-
-          setLoading(false);
-          return toast.error("Not enough gas fee to process the transaction.");
+          await useGasCredit.mutateAsync({
+            gasAmount: gasCostInETH,
+          });
         }
 
         const transactionResponse = await tokenContract.transfer(
@@ -165,9 +156,11 @@ const SendToken = () => {
         setLoading(false);
         setFormData({ recipientAddress: "", amount: "" });
         setOpen(false);
+        toast.success("Success! token has been sent.");
+        return;
       }
 
-      toast.success("Success! token has been sent.");
+      toast.error("Please refresh the page.");
     } catch (error) {
       setLoading(false);
       toast.error("Something went wrong.");
