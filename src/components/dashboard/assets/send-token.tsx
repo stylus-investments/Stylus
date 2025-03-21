@@ -33,8 +33,19 @@ const SendToken = () => {
     refetchOnMount: false,
     enabled: false,
   });
+  const getUserInfo = trpc.user.getCurrentUserInfo.useQuery(undefined, {
+    enabled: false,
+  });
+
+  const getWalletData = trpc.dashboard.getWalletData.useQuery(undefined, {
+    enabled: false,
+  });
 
   const useGasCredit = trpc.user.useGasCreditFee.useMutation({
+    onSuccess: () => {
+      getUserInfo.refetch();
+      getWalletData.refetch();
+    },
     onError: (err) => {
       setLoading(false);
       return toast.error(err.message);

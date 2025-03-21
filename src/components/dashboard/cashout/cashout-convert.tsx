@@ -70,15 +70,19 @@ const CashoutConvert = () => {
     enabled: false,
   });
 
+  const getUserInfo = trpc.user.getCurrentUserInfo.useQuery(undefined, {
+    enabled: false,
+  });
+
   const tokenName = getTokenName(tokenAddress);
 
-    const useGasCredit = trpc.user.useGasCreditFee.useMutation({
-      onError: (err) => {
-        setLoading(false);
-        return toast.error(err.message);
-      },
-    });
-  
+  const useGasCredit = trpc.user.useGasCreditFee.useMutation({
+    onSuccess: () => getUserInfo.refetch(),
+    onError: (err) => {
+      setLoading(false);
+      return toast.error(err.message);
+    },
+  });
 
   const { isPending, mutateAsync } = trpc.cashout.cashoutToken.useMutation({
     onError: (e) => toast.error(e.message),
@@ -127,7 +131,6 @@ const CashoutConvert = () => {
       });
 
       if (gasCost) {
-        
         const {
           userEthBalance,
           transactionGasCost,
@@ -151,7 +154,6 @@ const CashoutConvert = () => {
           TOKENRECEIVER_ADDRESS,
           convertedAmount
         );
-        // console.log(transactionResponse);
 
         toast.success("Success! token has been sent.");
 

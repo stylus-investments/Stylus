@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,28 +21,41 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { BASE_CHAIN_ID, SPHP, USDC_ADDRESS } from "@/lib/token_address";
-import { compoundFormSchema, tCompoundFormSchema } from "@/types/cashoutType";
-import { LoaderCircle } from "lucide-react";
+import {
+  cashoutFormSchema,
+  compoundFormSchema,
+  tCompoundFormSchema,
+} from "@/types/cashoutType";
+import { HandCoins, LoaderCircle } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod"; // Import zod resolver for react-hook-form
+import { Checkbox } from "@/components/ui/checkbox";
+import { TOKENRECEIVER_ADDRESS } from "@/constant/receiverAddress";
 import { useWallets } from "@privy-io/react-auth";
 import { ethers } from "ethers";
 import { ABI } from "@/constant/abi";
-import { TOKENRECEIVER_ADDRESS } from "@/constant/receiverAddress";
 import { gaslessFuncObj } from "@/utils/gaslessFunc";
 
-const ConvertUsdcToSPHP = () => {
+const ConvertSphpToSave = () => {
   const [open, setOpen] = useState(false);
 
   const form = useForm<tCompoundFormSchema>({
     resolver: zodResolver(compoundFormSchema),
     defaultValues: {
       amount: "",
-      token_name: "USDC",
+      token_name: "SPHP",
     },
   });
   const [loading, setLoading] = useState(false);
@@ -52,13 +66,12 @@ const ConvertUsdcToSPHP = () => {
 
   const phpRate = trpc.currency.getSingle.useQuery("PHP");
 
-  const [tokenAddress, setTokenAddress] = useState(USDC_ADDRESS);
-
-  const getUserInfo = trpc.user.getCurrentUserInfo.useQuery(undefined, {
-    enabled: false,
-  });
+  const [tokenAddress, setTokenAddress] = useState(SPHP);
 
   const getWalletData = trpc.dashboard.getWalletData.useQuery(undefined, {
+    enabled: false,
+  });
+  const getUserInfo = trpc.user.getCurrentUserInfo.useQuery(undefined, {
     enabled: false,
   });
 
@@ -69,7 +82,8 @@ const ConvertUsdcToSPHP = () => {
       return toast.error(err.message);
     },
   });
-  const { isPending, mutateAsync } = trpc.token.convertUsdcToSphp.useMutation({
+
+  const { isPending, mutateAsync } = trpc.token.convertSphpToSave.useMutation({
     onError: (e) => toast.error(e.message),
     onSuccess: () => {
       getWalletData.refetch();
@@ -107,6 +121,11 @@ const ConvertUsdcToSPHP = () => {
       const readableBalance = ethers.formatUnits(userBalance, decimals);
       // console.log("Readable Balance", readableBalance, amount)
 
+      if (Number(amount) < 100000) {
+        setLoading(false);
+        return toast.error("Minimum conversion is 100K SPHP");
+      }
+
       if (Number(readableBalance) < Number(amount)) {
         setLoading(false);
         return toast.error("You don't have enough token.");
@@ -136,17 +155,11 @@ const ConvertUsdcToSPHP = () => {
             gasAmount: gasCostInETH,
           });
         }
-        // console.log("Converted Amount", convertedAmount)
 
         const transactionResponse = await tokenContract.transfer(
           TOKENRECEIVER_ADDRESS,
           convertedAmount
         );
-        // console.log(transactionResponse)
-
-        // const reciept = await transactionResponse.wait()
-
-        // console.log("Receipt", reciept)
 
         toast.success(
           "Transaction in progress: Your tokens have been received and are being processed for conversion. Please wait for confirmation."
@@ -158,7 +171,6 @@ const ConvertUsdcToSPHP = () => {
         });
 
         setLoading(false);
-
         return;
       }
 
@@ -178,13 +190,15 @@ const ConvertUsdcToSPHP = () => {
     <div>
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogTrigger asChild>
-          <Button className="w-28">Convert</Button>
+          <Button className="w-full">Buy Save</Button>
         </AlertDialogTrigger>
         <AlertDialogContent className="max-w-96">
           <AlertDialogHeader>
-            <AlertDialogTitle>Cash in SPHP using USDC</AlertDialogTitle>
+            <AlertDialogTitle>Convert sPHP to sAVE</AlertDialogTitle>
             <AlertDialogDescription>
-              You are about to convert USDC to SPHP.
+              <div>You are about to convert sPHP to sAVE.</div>
+              <Separator className="my-2" />
+              <Label>Minimum conversion: 100K SPHP</Label>
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -193,32 +207,6 @@ const ConvertUsdcToSPHP = () => {
               onSubmit={form.handleSubmit(onSubmit)}
               className="flex flex-col gap-4 w-full"
             >
-              {/* <div className='w-full flex items-center gap-5'>
-                                <FormField
-                                    control={form.control}
-                                    name='token_name'
-                                    render={({ field }) => (
-                                        <FormItem className='w-full'>
-                                            <FormLabel>Select Token</FormLabel>
-                                            <FormControl>
-                                                <Select
-                                                    {...field}
-                                                    onValueChange={(val) => field.onChange(val)}
-                                                >
-                                                    <SelectTrigger >
-                                                        <SelectValue placeholder="Select Token" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="SPHP">SPHP</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div> */}
-
               <FormField
                 control={form.control}
                 name="amount"
@@ -234,11 +222,11 @@ const ConvertUsdcToSPHP = () => {
               />
               {form.watch("amount") && (
                 <Label className="pt-2">
-                  SPHP Conversion:{" "}
+                  sAVE Conversion:{" "}
                   {form.watch("amount") &&
                     phpRate.data &&
                     (
-                      Number(form.watch("amount")) *
+                      Number(form.watch("amount")) /
                       Number(phpRate.data.conversion_rate)
                     ).toFixed(6)}
                 </Label>
@@ -269,4 +257,4 @@ const ConvertUsdcToSPHP = () => {
   );
 };
 
-export default ConvertUsdcToSPHP;
+export default ConvertSphpToSave;

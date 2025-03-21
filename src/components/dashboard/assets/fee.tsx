@@ -34,17 +34,17 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 const Fee = () => {
-  const { data, refetch } = trpc.user.getCurrentUserInfo.useQuery();
+  const { data, refetch } = trpc.user.getCurrentUserInfo.useQuery()
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
   const form = useForm<tCompoundFormSchema>({
     resolver: zodResolver(compoundFormSchema),
     defaultValues: {
       amount: "",
       token_name: "SPHP",
     },
-  });
-  const [loading, setLoading] = useState(false);
+  })
+  const [loading, setLoading] = useState(false)
 
   const wallet = useWallets().wallets.find(
     (item) => item.walletClientType === "privy"

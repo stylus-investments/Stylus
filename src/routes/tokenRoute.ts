@@ -7,7 +7,7 @@ import { getAuth } from "@/lib/nextAuth";
 import { getIndexPrice } from "@/lib/prices";
 import { getUserId } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
-import { BASE_CHAIN_ID, SPHP, USDC_ADDRESS } from "@/lib/token_address";
+import { BASE_CHAIN_ID, SAVE, SPHP, USDC_ADDRESS } from "@/lib/token_address";
 import { publicProcedure } from "@/trpc/trpc";
 import { compoundFormSchema } from "@/types/cashoutType";
 import { TRPCError } from "@trpc/server";
@@ -324,4 +324,65 @@ export const tokenRoute = {
 
         return true
     }),
+    convertSphpToSave: publicProcedure.input(z.object({
+        data: compoundFormSchema,
+        hash: z.string().min(1, {
+            message: "Transaction hash is required"
+        })
+    })).mutation(async ({ input }) => {
+        const provider = new ethers.JsonRpcProvider(process.env.MORALIS_RPC_URL); // Your RPC URL
+        const wallet = new ethers.Wallet(process.env.ASSET_WALLET_PRIVATE_KEY as string, provider); // Wallet used to send gas fees
+
+        await rateLimiter.consume(1)
+
+        const auth = await getUserId()
+        if (!auth) throw new TRPCError({
+            code: "UNAUTHORIZED"
+        })
+
+        const [user, exchangeRate] = await Promise.all([
+            db.user_info.findUnique({ where: { user_id: auth } }),
+            db.currency_conversion.findUnique({
+                where: {
+                    currency: "PHP"
+                }
+            })
+        ])
+        if (!user) throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: "User not found"
+        })
+        if (!exchangeRate) throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Currency not found"
+        })
+
+        console.log("User found", user)
+
+        // Create contract instance
+        const tokenAddress = SAVE
+        const tokenContract = new ethers.Contract(tokenAddress, ABI, wallet);
+
+        const decimals = await tokenContract.decimals();
+
+        console.log("Getting token decimal", decimals)
+
+        const tokenAmount = (Number(input.data.amount) / Number(exchangeRate.conversion_rate)).toFixed(6)
+
+        const tokenAmountToSend = ethers.parseUnits(tokenAmount, decimals)
+
+        console.log("Token amount conversion", tokenAmount)
+        console.log("Token amount to Send", tokenAmountToSend)
+
+        const tx = await tokenContract.transfer(user.wallet, Number(tokenAmountToSend));
+
+        console.log("Transaction request", tx)
+
+        // Step 4: Wait for the transaction to be mined
+        await tx.wait();
+
+        console.log("Transaction complete")
+
+        return true
+    })
 }

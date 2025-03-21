@@ -13,15 +13,14 @@ import React from "react";
 import CreateInvestment from "../investment-plan/create-investment";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
 import BuySPHP from "./sphp/buy-sphp";
 import { PhilippinePeso } from "lucide-react";
-import Cashout from "../cashout/fundsOptions";
 import CashoutConvert from "../cashout/cashout-convert";
+import ConvertSphpToSave from "./sphp/convert-sphp-to-save";
 
 const ProjectCards = () => {
   return (
-    <div className="flex flex-col md:flex-row lg:gap-20  gap-10 py-28 padding w-full">
+    <div className="grid md:grid-cols-2 lg:gap-20  gap-10 py-28 padding w-full">
       <div className="space-y-2 w-full">
         <LabelSeparator text="sBTC" />
         <Card>
@@ -52,10 +51,8 @@ const ProjectCards = () => {
             </CardTitle>
             <CardDescription>Gives you 3% reward per month</CardDescription>
           </CardHeader>
-          <CardContent className="flex items-center">
-            <Button className="w-full" onClick={() => toast("Coming Soon.")}>
-              Buy Save
-            </Button>
+          <CardContent>
+              <ConvertSphpToSave />
           </CardContent>
         </Card>
       </div>
@@ -71,7 +68,7 @@ const ProjectCards = () => {
               <Separator className="my-2" />
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex items-center w-full gap-5">
+          <CardContent className="flex items-center flex-wrap justify-center w-full gap-5">
             <Link href={"/dashboard/wallet/sphp-orders"} className="w-full">
               <Button className="w-full">SPHP Orders</Button>
             </Link>
