@@ -1,9 +1,11 @@
+import { NewCashOutRequestEmail } from "@/components/emails/cashout-email";
 import { ABI } from "@/constant/abi";
 import db from "@/db/db";
 import { okayRes } from "@/lib/apiResponse";
 import { getAuth } from "@/lib/nextAuth";
 import { getUserId } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
+import { resend } from "@/lib/resend";
 import { SAVE } from "@/lib/token_address";
 import { publicProcedure } from "@/trpc/trpc";
 import { cashoutFormSchema, compoundFormSchema } from "@/types/cashoutType";
@@ -50,6 +52,14 @@ export const cashoutRoute = {
                 code: "BAD_REQUEST",
                 message: "Failed to create cashout request"
             })
+
+            await resend.emails.send({
+                from: 'New Cashout Request <order@stylus.investments>',
+                to: ['support@stylus.investments'],
+                subject: 'New Cashout Request',
+                react: NewCashOutRequestEmail(),
+            });
+
 
 
             return okayRes()

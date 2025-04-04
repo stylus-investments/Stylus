@@ -42,11 +42,15 @@ const estimateGasCost = async ({ provider, userWalletAddress, amount, decimals, 
     const gasCostInETH = ethers.formatUnits(transactionGasCost, "ether");
     console.log("Gas cost in eth", gasCostInETH);
 
+    const increasedGasCost = transactionGasCost * BigInt(130) / BigInt(100); // Increase by 30%
+
+    console.log("Increased TOTAL GAS COST (30%)", increasedGasCost);
+
     const userEthBalance = userNativeBalance.toBigInt();
 
     console.log("USER ETH BALANCE", userEthBalance);
 
-    return { userEthBalance, transactionGasCost, gasPrice, convertedAmount, gasCostInETH }
+    return { userEthBalance, transactionGasCost: increasedGasCost, gasPrice, convertedAmount, gasCostInETH }
 }
 
 

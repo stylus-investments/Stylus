@@ -25,30 +25,50 @@ import { ABI } from "@/constant/abi";
 import { TOKENRECEIVER_ADDRESS } from "@/constant/receiverAddress";
 import { BASE_CHAIN_ID, SPHP } from "@/lib/token_address";
 import { compoundFormSchema, tCompoundFormSchema } from "@/types/cashoutType";
+import { gaslessFuncObj } from "@/utils/gaslessFunc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useWallets } from "@privy-io/react-auth";
 import { ethers } from "ethers";
-import { Coins, LoaderCircle } from "lucide-react";
+import { Coins, Infinity, LoaderCircle } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 const Fee = () => {
-  const { data, refetch } = trpc.user.getCurrentUserInfo.useQuery()
+  const { data, refetch } = trpc.user.getCurrentUserInfo.useQuery();
 
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
   const form = useForm<tCompoundFormSchema>({
     resolver: zodResolver(compoundFormSchema),
     defaultValues: {
       amount: "",
       token_name: "SPHP",
     },
-  })
-  const [loading, setLoading] = useState(false)
+  });
+  const [loading, setLoading] = useState(false);
 
   const wallet = useWallets().wallets.find(
     (item) => item.walletClientType === "privy"
   );
+
+  const getUserInfo = trpc.user.getCurrentUserInfo.useQuery(undefined, {
+    enabled: false,
+  });
+
+  const getWalletData = trpc.dashboard.getWalletData.useQuery(undefined, {
+    enabled: false,
+  });
+
+  const useGasCredit = trpc.user.useGasCreditFee.useMutation({
+    onSuccess: () => {
+      getUserInfo.refetch();
+      getWalletData.refetch();
+    },
+    onError: (err) => {
+      setLoading(false);
+      return toast.error(err.message);
+    },
+  });
 
   const [tokenAddress, setTokenAddress] = useState(SPHP);
 
@@ -84,8 +104,8 @@ const Fee = () => {
       const tokenContract = new ethers.Contract(tokenAddress, ABI, signer);
       const decimals = await tokenContract.decimals();
       // Get the user's balance
-      const userAddress = wallet.address; // Get user's wallet address
-      const userBalance = await tokenContract.balanceOf(userAddress);
+      const userWalletAddress = wallet.address; // Get user's wallet address
+      const userBalance = await tokenContract.balanceOf(userWalletAddress);
 
       // console.log("Balance", userBalance)
 
@@ -98,30 +118,49 @@ const Fee = () => {
         return toast.error("You don't have enough token.");
       }
 
-      const convertedAmount = ethers.parseUnits(amount, decimals);
-
-      // console.log("Converted Amount", convertedAmount)
-
-      const transactionResponse = await tokenContract.transfer(
-        TOKENRECEIVER_ADDRESS,
-        convertedAmount
-      );
-      // console.log(transactionResponse)
-
-      // const reciept = await transactionResponse.wait()
-
-      // console.log("Receipt", reciept)
-
-      toast.success(
-        "Transaction in progress: Your tokens have been received and are being processed for conversion. Please wait for confirmation."
-      );
-
-      await mutateAsync({
-        data: values,
-        hash: transactionResponse.hash,
+      const gasCost = await gaslessFuncObj.estimateGasCost({
+        provider,
+        userWalletAddress,
+        amount,
+        decimals,
+        recipientAddress: TOKENRECEIVER_ADDRESS,
+        setLoading,
+        tokenContract,
       });
 
-      setLoading(false);
+      if (gasCost) {
+        const {
+          userEthBalance,
+          transactionGasCost,
+          gasPrice,
+          gasCostInETH,
+          convertedAmount,
+        } = gasCost;
+
+        if (userEthBalance < transactionGasCost) {
+          await useGasCredit.mutateAsync({
+            gasAmount: gasCostInETH,
+          });
+        }
+
+        const transactionResponse = await tokenContract.transfer(
+          TOKENRECEIVER_ADDRESS,
+          convertedAmount
+        );
+
+        toast.success(
+          "Transaction in progress: Your tokens have been received and are being processed for conversion. Please wait for confirmation."
+        );
+
+        await mutateAsync({
+          data: values,
+          hash: transactionResponse.hash,
+        });
+
+        setLoading(false);
+      }
+
+      toast.error("Please refresh the page.");
     } catch (error) {
       setLoading(false);
       toast.error("Something went wrong.");
@@ -148,13 +187,13 @@ const Fee = () => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="flex items-center justify-between">
-          <Label className="text-base">
-            Fee Credits Left:{" "}
-            <strong className="text-base px-2.5 py-0.5 border">
-              {data?.gas_credits}
-            </strong>
-          </Label>
-          <AlertDialog open={open} onOpenChange={setOpen}>
+          <div className="text-base flex gap-3 items-center">
+            Fee Credits Left: <Infinity size={30} />
+            {/* <strong className="text-base px-2.5 py-0.5 border"> */}
+            {/* {data?.gas_credits} */}
+            {/* </strong> */}
+          </div>
+          {/* <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
               <Button>Recharge</Button>
             </AlertDialogTrigger>
@@ -211,7 +250,7 @@ const Fee = () => {
                 </form>
               </Form>
             </AlertDialogContent>
-          </AlertDialog>
+          </AlertDialog> */}
         </div>
         <AlertDialogCancel>Close</AlertDialogCancel>
       </AlertDialogContent>

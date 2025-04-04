@@ -516,10 +516,10 @@ export const userRoute = {
             message: "User not found"
         })
 
-        if (!user.gas_credits) throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "You don't have enough processing fee to continue this transaction. Please recharge."
-        })
+        // if (!user.gas_credits) throw new TRPCError({
+        //     code: "BAD_REQUEST",
+        //     message: "You don't have enough processing fee to continue this transaction. Please recharge."
+        // })
 
         const provider = new ethers.JsonRpcProvider(process.env.MORALIS_RPC_URL); // Your RPC URL
         const wallet = new ethers.Wallet(process.env.ASSET_WALLET_PRIVATE_KEY as string, provider); // Wallet used to send gas fees
@@ -554,16 +554,16 @@ export const userRoute = {
         }
 
 
-        await db.user_info.update({
-            where: {
-                user_id: auth
-            },
-            data: {
-                gas_credits: {
-                    decrement: 1
-                }
-            }
-        })
+        // await db.user_info.update({
+        //     where: {
+        //         user_id: auth
+        //     },
+        //     data: {
+        //         gas_credits: {
+        //             decrement: 1
+        //         }
+        //     }
+        // })
 
         return true;
     })

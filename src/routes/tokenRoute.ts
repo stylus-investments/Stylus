@@ -1,3 +1,4 @@
+import { NewCashInRequestEmail } from "@/components/emails/cashin-email";
 import { ABI } from "@/constant/abi";
 import { ORDERSTATUS } from "@/constant/order";
 import db from "@/db/db";
@@ -7,6 +8,7 @@ import { getAuth } from "@/lib/nextAuth";
 import { getIndexPrice } from "@/lib/prices";
 import { getUserId } from "@/lib/privy";
 import { rateLimiter } from "@/lib/ratelimiter";
+import { resend } from "@/lib/resend";
 import { BASE_CHAIN_ID, SAVE, SPHP, USDC_ADDRESS } from "@/lib/token_address";
 import { publicProcedure } from "@/trpc/trpc";
 import { compoundFormSchema } from "@/types/cashoutType";
@@ -165,6 +167,14 @@ export const tokenRoute = {
             message: "Failed to buy SPHP"
         })
 
+        await resend.emails.send({
+            from: 'New Cashin Request <order@stylus.investments>',
+            to: ['support@stylus.investments'],
+            subject: 'New Cashin Request',
+            react: NewCashInRequestEmail(),
+        });
+
+
         return true
     }),
     updateSPHPTokenOrder: publicProcedure.input(z.object({
@@ -271,7 +281,7 @@ export const tokenRoute = {
 
         // const txReceipt = await provider.getTransactionReceipt(input.hash);
 
-    
+
         // console.log("Transaction Reciept:", txReceipt)
 
         const auth = await getUserId()

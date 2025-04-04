@@ -26,7 +26,7 @@ const CashoutPage = async ({
 
   return (
     <>
-      <AdminHeader currentPage="cashout" />
+      <AdminHeader currentPage="cashin" />
       <SPHPOrderTable orders={cashoutList} filter={filter} />
     </>
   );
