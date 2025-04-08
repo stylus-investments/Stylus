@@ -290,7 +290,6 @@ const CashoutConvert = () => {
                 </Label>
               </div>
               <Separator />
-              <small className="text-muted-foreground">Admin Fee: 5%</small>
               <div className="flex w-full items-center gap-5 ">
                 <Button
                   type="button"

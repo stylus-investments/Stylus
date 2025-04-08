@@ -36,7 +36,7 @@ export const cashoutRoute = {
             const cCashoutRequest = await db.user_cashout.create({
                 data: {
                     account_name,
-                    amount: (Number(amount) * 0.95).toString(),
+                    amount: amount,
                     account_number,
                     transaction_hash: input.hash,
                     token_name,
