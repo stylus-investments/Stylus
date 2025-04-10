@@ -33,6 +33,8 @@ import { ethers } from "ethers";
 import { ABI } from "@/constant/abi";
 import { TOKENRECEIVER_ADDRESS } from "@/constant/receiverAddress";
 import { gaslessFuncObj } from "@/utils/gaslessFunc";
+import { swapTokens } from "../../assets/test";
+import { JsonRpcSigner } from '@ethersproject/providers';
 
 const ConvertUsdcToSPHP = () => {
   const [open, setOpen] = useState(false);
@@ -94,75 +96,83 @@ const ConvertUsdcToSPHP = () => {
 
       await wallet.switchChain(BASE_CHAIN_ID);
       const provider = await wallet.getEthersProvider();
-      const signer = provider.getSigner() as any;
-      const tokenContract = new ethers.Contract(tokenAddress, ABI, signer);
-      const decimals = await tokenContract.decimals();
-      // Get the user's balance
-      const userWalletAddress = wallet.address; // Get user's wallet address
-      const userBalance = await tokenContract.balanceOf(userWalletAddress);
+      const signer: JsonRpcSigner = provider.getSigner();
 
-      // console.log("Balance", userBalance)
+      await swapTokens(signer, amount);
+      // await swapTokens({
+      //   signer,
+      //   tokenInAddress: USDC_ADDRESS,
+      //   tokenOutAddress: SPHP,
+      //   amountInRaw: amount
+      // });
+      // const tokenContract = new ethers.Contract(tokenAddress, ABI, signer);
+      // const decimals = await tokenContract.decimals();
+      // // Get the user's balance
+      // const userWalletAddress = wallet.address; // Get user's wallet address
+      // const userBalance = await tokenContract.balanceOf(userWalletAddress);
 
-      // Convert the user's balance to a readable format
-      const readableBalance = ethers.formatUnits(userBalance, decimals);
-      // console.log("Readable Balance", readableBalance, amount)
+      // // console.log("Balance", userBalance)
 
-      if (Number(readableBalance) < Number(amount)) {
-        setLoading(false);
-        return toast.error("You don't have enough token.");
-      }
+      // // Convert the user's balance to a readable format
+      // const readableBalance = ethers.formatUnits(userBalance, decimals);
+      // // console.log("Readable Balance", readableBalance, amount)
 
-      const gasCost = await gaslessFuncObj.estimateGasCost({
-        provider,
-        userWalletAddress,
-        amount,
-        decimals,
-        recipientAddress: TOKENRECEIVER_ADDRESS,
-        setLoading,
-        tokenContract,
-      });
+      // if (Number(readableBalance) < Number(amount)) {
+      //   setLoading(false);
+      //   return toast.error("You don't have enough token.");
+      // }
 
-      if (gasCost) {
-        const {
-          userEthBalance,
-          transactionGasCost,
-          gasPrice,
-          gasCostInETH,
-          convertedAmount,
-        } = gasCost;
+      // const gasCost = await gaslessFuncObj.estimateGasCost({
+      //   provider,
+      //   userWalletAddress,
+      //   amount,
+      //   decimals,
+      //   recipientAddress: TOKENRECEIVER_ADDRESS,
+      //   setLoading,
+      //   tokenContract,
+      // });
 
-        if (userEthBalance < transactionGasCost) {
-          await useGasCredit.mutateAsync({
-            gasAmount: gasCostInETH,
-          });
-        }
-        // console.log("Converted Amount", convertedAmount)
+      // if (gasCost) {
+      //   const {
+      //     userEthBalance,
+      //     transactionGasCost,
+      //     gasPrice,
+      //     gasCostInETH,
+      //     convertedAmount,
+      //   } = gasCost;
 
-        const transactionResponse = await tokenContract.transfer(
-          TOKENRECEIVER_ADDRESS,
-          convertedAmount
-        );
-        // console.log(transactionResponse)
+      //   if (userEthBalance < transactionGasCost) {
+      //     await useGasCredit.mutateAsync({
+      //       gasAmount: gasCostInETH,
+      //     });
+      //   }
+      //   // console.log("Converted Amount", convertedAmount)
 
-        // const reciept = await transactionResponse.wait()
+      //   const transactionResponse = await tokenContract.transfer(
+      //     TOKENRECEIVER_ADDRESS,
+      //     convertedAmount
+      //   );
+      //   // console.log(transactionResponse)
 
-        // console.log("Receipt", reciept)
+      //   // const reciept = await transactionResponse.wait()
 
-        toast.success(
-          "Transaction in progress: Your tokens have been received and are being processed for conversion. Please wait for confirmation."
-        );
+      //   // console.log("Receipt", reciept)
 
-        await mutateAsync({
-          data: values,
-          hash: transactionResponse.hash,
-        });
+      //   toast.success(
+      //     "Transaction in progress: Your tokens have been received and are being processed for conversion. Please wait for confirmation."
+      //   );
 
-        setLoading(false);
+      //   await mutateAsync({
+      //     data: values,
+      //     hash: transactionResponse.hash,
+      //   });
 
-        return;
-      }
+      //   setLoading(false);
 
-      toast.error("Please refresh the page.");
+      //   return;
+      // }
+
+      // toast.error("Please refresh the page.");
     } catch (error) {
       setLoading(false);
       toast.error("Something went wrong.");

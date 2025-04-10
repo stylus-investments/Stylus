@@ -17,30 +17,30 @@ const BalancesHeader = () => {
         enabled: false
     })
 
-    const userGasFee = trpc.user.checkGas.useQuery()
-    const claimGass = trpc.user.claimGass.useMutation({
-        onSuccess: () => {
-            userGasFee.refetch()
-            toast.success("Gas fee claimed successfully! You can now transfer your assets to your new wallet.");
-        },
-        onError: (err) => {
-            toast.error(err.message)
-        }
-    })
+    // const userGasFee = trpc.user.checkGas.useQuery()
+    // const claimGass = trpc.user.claimGass.useMutation({
+    //     onSuccess: () => {
+    //         userGasFee.refetch()
+    //         toast.success("Gas fee claimed successfully! You can now transfer your assets to your new wallet.");
+    //     },
+    //     onError: (err) => {
+    //         toast.error(err.message)
+    //     }
+    // })
 
     const { currency, showBalance, setShowBalance } = useBalanceStore()
 
     return (
         <div className='flex flex-col gap-5 lg:pt-10 padding'>
             <div className='flex flex-col items-center w-full gap-2'>
-                {!userGasFee.data && !userGasFee.isPending && <div className='bg-muted p-5 rounded-md flex items-center flex-col text-center gap-1'>
+                {/* {!userGasFee.data && !userGasFee.isPending && <div className='bg-muted p-5 rounded-md flex items-center flex-col text-center gap-1'>
                     <p>Claim your gas fee to cover the cost of transferring assets to your new wallet address.</p>
                     <button disabled={claimGass.isPending} onClick={() => claimGass.mutate()} className='mt-3 px-4 py-2 bg-primary text-white rounded-md'>
                         {claimGass.isPending ?
                             <LoaderCircle size={20} className='animate-spin' />
                             : "Claim Gas Fee"}
                     </button>
-                </div>}
+                </div>} */}
                 <div className='flex items-center text-muted-foreground gap-3'>
                     <Label className='font-normal'>
                         Total Balance
