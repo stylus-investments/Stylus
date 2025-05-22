@@ -28,7 +28,7 @@ export const currencyRoute = {
 
         return await db.currency_conversion.findMany()
     }),
-    update: publicProcedure.query(async () => {
+    update: publicProcedure.mutation(async () => {
 
         try {
 

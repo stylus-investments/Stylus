@@ -296,12 +296,12 @@ const getUserTokenData = async (props: UserTokenData) => {
 }
 
 const getCurrentBalance = async ({
-    // totalUSDC = '0.00',
+    totalSHKD = '0.00',
     totalSAVE = '0.00',
     // totalSBTC = '0.00',
     totalSPHP = '0.00'
 }: {
-    // totalUSDC: string | undefined
+    totalSHKD: string | undefined
     totalSAVE: string | undefined
     // totalSBTC: string | undefined
     totalSPHP: string | undefined
@@ -311,7 +311,7 @@ const getCurrentBalance = async ({
 
         const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&precision=full`;
 
-        const [bitcoin, usdc, conversionRate] = await Promise.all([
+        const [bitcoin, usdc, phpConversionRate, hkdConversionRate] = await Promise.all([
             axios.get(url, {
                 headers: {
                     'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
@@ -325,20 +325,26 @@ const getCurrentBalance = async ({
                 where: {
                     currency: "PHP"
                 }
-            })
+            }),
+            db.currency_conversion.findFirst({
+                where: {
+                    currency: "HKD"
+                }
+            }),
         ])
-        if (!conversionRate) throw new TRPCError({
+        if (!phpConversionRate || !hkdConversionRate) throw new TRPCError({
             code: "NOT_FOUND"
         })
 
-        const indexPrice = getIndexPrice({ btc_price: bitcoin.data.bitcoin.usd, usdc_price: usdc.raw.usdPrice, php_converstion: conversionRate.conversion_rate })
+        const indexPrice = getIndexPrice({ btc_price: bitcoin.data.bitcoin.usd, usdc_price: usdc.raw.usdPrice, php_converstion: phpConversionRate.conversion_rate })
 
         // const convertedSbtcPrice = indexPrice.usd * Number(totalSBTC)
         // const usdcConvertedPrice = Number(usdc.raw.usdPrice) * Number(totalUSDC)
+        const convertedShkdPrice = Number(Number(totalSHKD) / Number(hkdConversionRate.conversion_rate))
         const convertedSavePrice = Number(usdc.raw.usdPrice) * Number(totalSAVE)
-        const convertedSphpPrice = Number(totalSPHP) / Number(conversionRate.conversion_rate);
+        const convertedSphpPrice = Number(totalSPHP) / Number(phpConversionRate.conversion_rate);
 
-        return (convertedSavePrice + convertedSphpPrice).toString()
+        return (convertedShkdPrice.toString() + convertedSavePrice + convertedSphpPrice).toString()
 
     } catch (error) {
         return null

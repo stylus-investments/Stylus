@@ -127,7 +127,7 @@ export const dashboardRoute = {
             // console.log(assets)
 
             const currentBalance = await getCurrentBalance({
-                // totalUSDC: assets.find(asset => asset?.symbol === 'USDC')?.amount,
+                totalSHKD: assets.find(asset => asset?.symbol === 'SHKD')?.amount,
                 // totalSBTC: assets.find(asset => asset?.symbol === 'sBTC')?.amount,
                 totalSAVE: assets.find(asset => asset?.symbol === 'sAVE')?.amount,
                 totalSPHP: assets.find(asset => asset?.symbol === 'sPHP')?.amount,
