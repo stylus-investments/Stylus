@@ -13,6 +13,10 @@ const availableCurrencies = [
         currency: "EUR",
         icon: faEuroSign
     },
+    {
+        currency: "HKD",
+        icon: faDollarSign
+    }
 ]
 
 export { availableCurrencies }

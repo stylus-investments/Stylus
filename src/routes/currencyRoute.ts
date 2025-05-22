@@ -28,7 +28,7 @@ export const currencyRoute = {
 
         return await db.currency_conversion.findMany()
     }),
-    update: publicProcedure.mutation(async () => {
+    update: publicProcedure.query(async () => {
 
         try {
 
@@ -46,6 +46,8 @@ export const currencyRoute = {
                 conversion_rate: String(rate) // Directly using the rate as it is already a number
             }))
 
+            console.log(conversionRates)
+
             const availableCurrencyCodes = availableCurrencies.map(c => c.currency);
 
             // Filter currencies that need upserting
@@ -60,7 +62,7 @@ export const currencyRoute = {
                 })
             ));
 
-            return true
+            return currenciesToUpsert
 
         } catch (error: any) {
             console.log(error);

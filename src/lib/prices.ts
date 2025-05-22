@@ -66,7 +66,7 @@ const getTokenValue = async (tokenSymbol: string) => {
             return indexPrices.usd.toFixed(6)
         }
 
-        const [usdc, conversionRate] = await Promise.all([
+        const [usdc, phpConversionRate, hkdConversionRate] = await Promise.all([
             Moralis.EvmApi.token.getTokenPrice({
                 chain: BASE_CHAIN_ID,
                 address: USDC_ADDRESS
@@ -75,9 +75,14 @@ const getTokenValue = async (tokenSymbol: string) => {
                 where: {
                     currency: "PHP"
                 }
+            }),
+            db.currency_conversion.findFirst({
+                where: {
+                    currency: "HKD"
+                }
             })
         ])
-        if (!conversionRate) throw new TRPCError({
+        if (!phpConversionRate || !hkdConversionRate) throw new TRPCError({
             code: "NOT_FOUND"
         })
 
@@ -87,9 +92,11 @@ const getTokenValue = async (tokenSymbol: string) => {
             case 'usdc':
                 return usdc_market.toFixed(6)
             case 'sphp':
-                return (usdc_market / Number(conversionRate.conversion_rate)).toFixed(6)
+                return (usdc_market / Number(phpConversionRate.conversion_rate)).toFixed(6)
             case 'save':
                 return usdc_market.toFixed(6)
+            case 'shkd':
+                return (usdc_market / Number(hkdConversionRate.conversion_rate)).toFixed(6)
         }
 
         return '0.00'
@@ -155,6 +162,8 @@ const getUserTokenData = async (props: UserTokenData) => {
             })
         ])
 
+        console.log(tokenData, userToken, tokenName)
+
         const tokenPrice = tokenData?.raw.usdPriceFormatted || "0.00"
         const userTokenData = userToken.raw[0]
         const balance = userTokenData ? Number(userTokenData.balance) : 0.00;
@@ -165,6 +174,7 @@ const getUserTokenData = async (props: UserTokenData) => {
         const tokenValue = await getTokenValue(tokenSymbol.toLocaleLowerCase())
 
         const tokenValueArray = calculateBalanceArray({ currencyExchangeRate, balance: tokenValue })
+        // console.log(tokenValueArray, tokenName)
         const totalValueArray = calculateBalanceArray({ currencyExchangeRate, balance: (Number(tokenValue) * Number(amount)).toFixed(6) })
 
         let tokenChange: string
@@ -285,10 +295,15 @@ const getUserTokenData = async (props: UserTokenData) => {
     }
 }
 
-const getCurrentBalance = async ({ totalUSDC = '0.00', totalSAVE = '0.00', totalSBTC = '0.00', totalSPHP = '0.00' }: {
-    totalUSDC: string | undefined
+const getCurrentBalance = async ({
+    // totalUSDC = '0.00',
+    totalSAVE = '0.00',
+    // totalSBTC = '0.00',
+    totalSPHP = '0.00'
+}: {
+    // totalUSDC: string | undefined
     totalSAVE: string | undefined
-    totalSBTC: string | undefined
+    // totalSBTC: string | undefined
     totalSPHP: string | undefined
 }) => {
 
@@ -318,12 +333,12 @@ const getCurrentBalance = async ({ totalUSDC = '0.00', totalSAVE = '0.00', total
 
         const indexPrice = getIndexPrice({ btc_price: bitcoin.data.bitcoin.usd, usdc_price: usdc.raw.usdPrice, php_converstion: conversionRate.conversion_rate })
 
-        const convertedSbtcPrice = indexPrice.usd * Number(totalSBTC)
-        const usdcConvertedPrice = Number(usdc.raw.usdPrice) * Number(totalUSDC)
+        // const convertedSbtcPrice = indexPrice.usd * Number(totalSBTC)
+        // const usdcConvertedPrice = Number(usdc.raw.usdPrice) * Number(totalUSDC)
         const convertedSavePrice = Number(usdc.raw.usdPrice) * Number(totalSAVE)
         const convertedSphpPrice = Number(totalSPHP) / Number(conversionRate.conversion_rate);
 
-        return (usdcConvertedPrice + convertedSavePrice + convertedSbtcPrice + convertedSphpPrice).toString()
+        return (convertedSavePrice + convertedSphpPrice).toString()
 
     } catch (error) {
         return null

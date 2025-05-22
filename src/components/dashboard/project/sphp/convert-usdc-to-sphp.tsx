@@ -99,12 +99,14 @@ const ConvertUsdcToSPHP = () => {
       const signer: JsonRpcSigner = provider.getSigner();
 
       await swapTokens(signer, amount);
+
       // await swapTokens({
       //   signer,
       //   tokenInAddress: USDC_ADDRESS,
       //   tokenOutAddress: SPHP,
       //   amountInRaw: amount
       // });
+      
       // const tokenContract = new ethers.Contract(tokenAddress, ABI, signer);
       // const decimals = await tokenContract.decimals();
       // // Get the user's balance

@@ -7,7 +7,7 @@ import { getCurrentBalance, getRewardsAccumulated, getTokenPrice, getUserTokenDa
 import { calculateBalanceArray } from "@/lib/balances";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { getUserId, privy } from "@/lib/privy";
-import { BASE_CHAIN_ID, EARN_ADDRESS, SBTC, SAVE, USDC_ADDRESS, SPHP } from "@/lib/token_address";
+import { BASE_CHAIN_ID, EARN_ADDRESS, SBTC, SAVE, USDC_ADDRESS, SPHP, SHKD } from "@/lib/token_address";
 import { ORDERSTATUS } from "@/constant/order";
 import { z } from "zod";
 
@@ -85,11 +85,11 @@ export const dashboardRoute = {
 
             const getAssets = await Promise.all([
                 getUserTokenData({
-                    tokenAddress: SBTC,
+                    tokenAddress: SHKD,
                     chain: BASE_CHAIN_ID,
-                    tokenName: "SBTC",
-                    tokenSymbol: "sBTC",
-                    tokenLogo: "/icons/token/sbtc.svg",
+                    tokenName: "SHKD",
+                    tokenSymbol: "sHKD",
+                    tokenLogo: "/icons/logo/logo.svg",
                     walletAddress: userWalletAddress,
                     currencyExchangeRate
                 }),
@@ -111,23 +111,25 @@ export const dashboardRoute = {
                     walletAddress: userWalletAddress,
                     currencyExchangeRate
                 }),
-                getUserTokenData({
-                    tokenAddress: USDC_ADDRESS,
-                    chain: BASE_CHAIN_ID,
-                    tokenName: "USD Coin",
-                    tokenSymbol: "USDC",
-                    tokenLogo: "/icons/token/usdc.png",
-                    walletAddress: userWalletAddress,
-                    currencyExchangeRate
-                }),
+                // getUserTokenData({
+                //     tokenAddress: USDC_ADDRESS,
+                //     chain: BASE_CHAIN_ID,
+                //     tokenName: "USD Coin",
+                //     tokenSymbol: "USDC",
+                //     tokenLogo: "/icons/token/usdc.png",
+                //     walletAddress: userWalletAddress,
+                //     currencyExchangeRate
+                // }),
             ])
 
             const assets = getAssets.filter(asset => asset !== null)
 
+            // console.log(assets)
+
             const currentBalance = await getCurrentBalance({
-                totalUSDC: assets.find(asset => asset?.symbol === 'USDC')?.amount,
+                // totalUSDC: assets.find(asset => asset?.symbol === 'USDC')?.amount,
+                // totalSBTC: assets.find(asset => asset?.symbol === 'sBTC')?.amount,
                 totalSAVE: assets.find(asset => asset?.symbol === 'sAVE')?.amount,
-                totalSBTC: assets.find(asset => asset?.symbol === 'sBTC')?.amount,
                 totalSPHP: assets.find(asset => asset?.symbol === 'sPHP')?.amount,
             })
 
