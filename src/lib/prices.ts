@@ -344,7 +344,7 @@ const getCurrentBalance = async ({
         const convertedSavePrice = Number(usdc.raw.usdPrice) * Number(totalSAVE)
         const convertedSphpPrice = Number(totalSPHP) / Number(phpConversionRate.conversion_rate);
 
-        return (convertedShkdPrice.toString() + convertedSavePrice + convertedSphpPrice).toString()
+        return (convertedShkdPrice + convertedSavePrice + convertedSphpPrice).toString()
 
     } catch (error) {
         return null
