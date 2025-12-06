@@ -307,7 +307,7 @@ export const snapshotRoute = {
 
                         if (user) {
                             const sAVEBalance = Number(holder.balance_formatted).toString()
-                            const reward = (Number(holder.balance_formatted) * 0.005).toFixed(8); // 0.5% reward
+                            const reward = (Number(holder.balance_formatted) * 0.01).toFixed(8); // 0.1% reward
                             acc.push({
                                 stake: sAVEBalance,
                                 balance: sBTCBalance,

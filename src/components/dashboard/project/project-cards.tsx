@@ -49,7 +49,7 @@ const ProjectCards = () => {
               <div>sAVE Investments</div>
               <PiggyBank />
             </CardTitle>
-            <CardDescription>Gives you 3% reward per month</CardDescription>
+            <CardDescription>Gives you 12% reward per year</CardDescription>
           </CardHeader>
           <CardContent>
               <ConvertSphpToSave />
