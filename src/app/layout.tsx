@@ -11,7 +11,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import LoadingBarComp from "@/components/loadingbar";
 
 export const metadata: Metadata = {
-  title: "Stylus",
+  title: "Tych",
   description: footerTexts.description,
   icons: '/icons/logo/logo.svg'
 };

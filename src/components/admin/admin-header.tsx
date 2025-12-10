@@ -42,7 +42,7 @@ const AdminHeader = ({ currentPage }: {
             </SheetTrigger>
             <SheetContent className='flex flex-col gap-5'>
                 <SheetHeader>
-                    <SheetTitle className='text-left border-b pb-2'>STYLUS</SheetTitle>
+                    <SheetTitle className='text-left border-b pb-2'>TYCH</SheetTitle>
                 </SheetHeader>
                 <div className='flex flex-col gap-2 text-muted-foreground'>
                     {pages.map(link => (
@@ -57,7 +57,7 @@ const AdminHeader = ({ currentPage }: {
     )
     return (
         <div className='fixed top-0 left-0 w-full padding h-16 border-b flex items-center justify-between backdrop-blur z-20'>
-            <h1 className='font-[1000] text-2xl'>STYLUS</h1>
+            <h1 className='font-[1000] text-2xl'>TYCH</h1>
             {largeScreen}
             <div className='flex items-center gap-4 lg:hidden'>
                 <ToggleTheme />

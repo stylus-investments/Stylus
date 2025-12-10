@@ -44,7 +44,7 @@ const ConnectPage = () => {
 
     return (
         <div className='padding xl:container overflow-x-hidden xl:overflow-visible grid place-items-center h-screen'>
-            <Button onClick={login}>Connect To Stylus</Button>
+            <Button onClick={login}>Connect To Tych</Button>
         </div>
     )
 }
