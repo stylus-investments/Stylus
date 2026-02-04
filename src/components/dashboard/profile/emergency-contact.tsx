@@ -1,18 +1,13 @@
 "use client";
-import { trpc } from "@/app/_trpc/client";
-import { caller } from "@/app/_trpc/server";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
+import { caller } from "@/app/_trpc/server";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { trpc } from "@/app/_trpc/client";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { cn, UploadButton } from "@/lib/utils";
-import useGlobalStore from "@/state/globalStore";
-import { ProfileStatus } from "@prisma/client";
 import {
   CircleOff,
   Clock,
@@ -22,20 +17,32 @@ import {
   UploadCloud,
   CircleX,
 } from "lucide-react";
-import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { ProfileStatus } from "@prisma/client";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
 
-const ProfileForm = ({
-  profileInfo,
+const EmergencyContact = ({
+  contactInfo,
 }: {
-  profileInfo: Awaited<
+  contactInfo: Awaited<
     ReturnType<(typeof caller)["user"]["getCurrentUserInfo"]>
-  >;
+  >["emergency_contact"][0];
 }) => {
   const router = useRouter();
+
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -47,21 +54,20 @@ const ProfileForm = ({
     birth_date: "",
   });
 
-  const { copyText } = useGlobalStore();
+  const { mutateAsync, isPending } =
+    trpc.user.updateUserContactInfo.useMutation({
+      onSuccess: () => {
+        router.refresh();
+        toast.success(
+          "Success! profile updated. Please wait for admin to verify this.",
+        );
+      },
+      onError: (err) => {
+        toast.error(err.message);
+      },
+    });
 
-  const { mutateAsync, isPending } = trpc.user.updateUserInfo.useMutation({
-    onSuccess: () => {
-      router.refresh();
-      toast.success(
-        "Success! profile updated. Please wait for admin to verify your account.",
-      );
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    },
-  });
-
-  const updateUserID = trpc.user.updateProfileID.useMutation({
+  const updateUserID = trpc.user.updateContactProfileID.useMutation({
     onError: (err) => {
       toast.error(err.message);
     },
@@ -107,16 +113,21 @@ const ProfileForm = ({
 
   useEffect(() => {
     setFormData({
-      ...profileInfo,
-      front_id: profileInfo.front_id || "",
-      back_id: profileInfo.back_id || "",
+      first_name: contactInfo.first_name,
+      last_name: contactInfo.last_name,
+      email: contactInfo.email,
+      mobile: contactInfo.mobile,
+      age: contactInfo.age,
+      front_id: contactInfo.front_id || "",
+      back_id: contactInfo.back_id || "",
+      birth_date: new Date(contactInfo.birth_date).toISOString(),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [contactInfo]);
 
   const returnStatus = () => {
-    if (profileInfo?.status) {
-      switch (profileInfo.status) {
+    if (contactInfo?.status) {
+      switch (contactInfo.status) {
         case "INVALID":
           return (
             <Button
@@ -141,9 +152,9 @@ const ProfileForm = ({
           );
         case "VERIFIED":
           return (
-            <Button variant={'outline'} type="button" className="flex items-center text-base gap-2">
+            <Button type="button" className="flex items-center text-base gap-2">
               <CircleCheckBig size={18} />
-              Profile Verified
+              Verified
             </Button>
           );
         default:
@@ -152,44 +163,42 @@ const ProfileForm = ({
     }
   };
 
+  if (!contactInfo) return null;
+
   return (
     <form
       className="padding py-28 flex flex-col gap-10"
       onSubmit={updateOrCreateUserInfo}
     >
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <Link href={"/dashboard/profile"} className="hover:text-foreground">
+              Profile
+            </Link>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Emergency Contact</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
       <div className="flex flex-col gap-1 border-b pb-3">
-        <Label className="text-2xl font-black">Profile Info</Label>
+        <Label className="text-2xl font-black">Emergency Contact</Label>
         <div className="w-full flex flex-wrap items-center justify-between gap-y-3">
           <div className="text-muted-foreground">
-            Manage your profile information.
+            Manage your emergency contact information.
           </div>
-          <div className="flex gap-5 items-center">
-            <Link href={"/dashboard/profile/emergency"}>
-              <Button variant={'destructive'}>Emergency Contact</Button>
-            </Link>
-            {returnStatus()}
-          </div>
+          {returnStatus()}
         </div>
-        {profileInfo.verification_message && (
+        {contactInfo.verification_message && (
           <div className="w-full flex items-center gap-3 bg-destructive text-white px-3 mt-2 py-2 rounded-lg">
             <CircleX size={30} className="w-10" />
-            <div>{profileInfo.verification_message}</div>
+            <div>{contactInfo.verification_message}</div>
           </div>
         )}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 lg:gap-x-16 gap-8 w-full">
-        <div className="flex flex-col w-full  gap-2">
-          <Label>Wallet Address</Label>
-          <Input
-            readOnly
-            className="w-full cursor-pointer"
-            value={profileInfo.wallet}
-            onClick={() => copyText(profileInfo.wallet)}
-          />
-          <small className="text-muted-foreground">
-            Your wallet address is displayed above.
-          </small>
-        </div>
         <div className="flex flex-col w-full  gap-2">
           <Label>Full Name</Label>
           <div className="w-full flex items-center gap-3">
@@ -209,15 +218,15 @@ const ProfileForm = ({
             />
           </div>
           <small className="text-muted-foreground">
-            Enter your full name as it appears on your official documents.
+            Enter your full name as it appears on your  official documents.
           </small>
         </div>
         <div className="flex flex-col w-full  gap-2">
           <Label htmlFor="email">Email</Label>
           <Input
             readOnly={
-              profileInfo.email &&
-              profileInfo.status === ProfileStatus["INCOMPLETE"]
+              contactInfo.email &&
+              contactInfo.status === ProfileStatus["INCOMPLETE"]
                 ? true
                 : false
             }
@@ -243,7 +252,7 @@ const ProfileForm = ({
             onChange={handleChange}
           />
           <small className="text-muted-foreground">
-            Please provide your age for verification purposes.
+            Please provide an age for verification purposes.
           </small>
         </div>
         <div className="flex flex-col w-full  gap-2">
@@ -256,57 +265,16 @@ const ProfileForm = ({
             onChange={handleChange}
           />
           <small className="text-muted-foreground">
-            This is your linked phone number for account verification.
+            This is your linked phone number for emergency contact verification.
           </small>
         </div>
-        <div className="flex flex-col w-full  gap-2">
-          <Label htmlFor="birth_date">Birth Date</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !formData.birth_date && "text-muted-foreground",
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {formData.birth_date ? (
-                  new Date(formData.birth_date).toDateString()
-                ) : (
-                  <span>Select your birth date</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                fromYear={1960}
-                captionLayout="dropdown-buttons"
-                toYear={2025}
-                mode="single"
-                selected={new Date(formData.birth_date)}
-                onSelect={(date) => {
-                  if (date) {
-                    setFormData((prev) => ({
-                      ...prev,
-                      birth_date: date.toISOString(),
-                    }));
-                  }
-                }}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-          <small className="text-muted-foreground">
-            Your birthdate helps us verify your identity.
-          </small>
-        </div>
-        {profileInfo.status !== ProfileStatus.VERIFIED && (
+
+        {contactInfo.status !== ProfileStatus.VERIFIED && (
           <div className="flex flex-col gap-3 w-full ">
             <div className="w-full flex items-center justify-between">
               <Label>Upload Valid ID (Front)</Label>
-              {(profileInfo.status === ProfileStatus["INCOMPLETE"] ||
-                profileInfo.status === ProfileStatus["INVALID"]) &&
+              {(contactInfo.status === ProfileStatus["INCOMPLETE"] ||
+                contactInfo.status === ProfileStatus["INVALID"]) &&
                 formData.front_id && (
                   <Button
                     type="button"
@@ -371,12 +339,12 @@ const ProfileForm = ({
             </small>
           </div>
         )}
-        {profileInfo.status !== ProfileStatus["VERIFIED"] && (
+        {contactInfo.status !== ProfileStatus["VERIFIED"] && (
           <div className="flex flex-col gap-3 w-full ">
             <div className="flex w-full items-center justify-between">
               <Label>Upload Valid ID (Back)</Label>
-              {(profileInfo.status === ProfileStatus["INCOMPLETE"] ||
-                profileInfo.status === ProfileStatus["INVALID"]) &&
+              {(contactInfo.status === ProfileStatus["INCOMPLETE"] ||
+                contactInfo.status === ProfileStatus["INVALID"]) &&
                 formData.back_id && (
                   <Button
                     type="button"
@@ -442,10 +410,53 @@ const ProfileForm = ({
           </div>
         )}
       </div>
-      <div className="border-t pt-5 w-full flex justify-center">
-        {(profileInfo.status === ProfileStatus.INCOMPLETE ||
-          profileInfo.status === ProfileStatus.INVALID) && (
-          <Button disabled={isPending} className="w-full max-w-80">
+
+      <div className="border-t pt-5 w-full flex items-center gap-5 flex-col md:gap-8 md:flex-row">
+        <div className="flex flex-col w-full  gap-2">
+          <Label htmlFor="birth_date">Birth Date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !formData.birth_date && "text-muted-foreground",
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {formData.birth_date ? (
+                  new Date(formData.birth_date).toDateString()
+                ) : (
+                  <span>Select your birth date</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                fromYear={1960}
+                captionLayout="dropdown-buttons"
+                toYear={2025}
+                mode="single"
+                selected={new Date(formData.birth_date)}
+                onSelect={(date) => {
+                  if (date) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      birth_date: date.toISOString(),
+                    }));
+                  }
+                }}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          <small className="text-muted-foreground">
+            Emergency contact birthdate helps us verify your identity.
+          </small>
+        </div>
+        {(contactInfo.status === ProfileStatus.INCOMPLETE ||
+          contactInfo.status === ProfileStatus.INVALID) && (
+          <Button disabled={isPending} className="w-full md:max-w-96">
             {isPending ? (
               <LoaderCircle size={16} className="animate-spin" />
             ) : (
@@ -458,4 +469,4 @@ const ProfileForm = ({
   );
 };
 
-export default ProfileForm;
+export default EmergencyContact;

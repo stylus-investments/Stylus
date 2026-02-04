@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { generate } from 'voucher-code-generator'
 import { getAuth } from "@/lib/nextAuth";
-import { ProfileStatus } from "@prisma/client";
+import { Prisma, ProfileStatus, user_emergency_contact } from "@prisma/client";
 import { rateLimiter } from "@/lib/ratelimiter";
 import { UTApi } from "uploadthing/server";
 import { ethers } from "ethers";
@@ -23,7 +23,8 @@ export const userRoute = {
         })
 
         const userInfo = await db.user_info.findUnique({
-            where: { user_id: user }
+            where: { user_id: user },
+            include: { emergency_contact: true }
         })
 
         console.log(userInfo)
@@ -68,6 +69,23 @@ export const userRoute = {
                 }
             })
 
+            const createInitialEmergencyContact = await db.user_emergency_contact.create({
+                data: {
+                    first_name: "",
+                    last_name: "",
+                    id_image: [''],
+                    email: getUser?.email?.address || "",
+                    mobile: "",
+                    status: ProfileStatus['INCOMPLETE'],
+                    age: "",
+                    birth_date: new Date(),
+                    front_id: "",
+                    back_id: "",
+                    verification_message: "",
+                    user_id: createInitialInfo.user_id
+                }
+            })
+
             const createInitialReferralRewards = await db.referral_reward.create({
                 data: {
                     reward: 0,
@@ -96,11 +114,41 @@ export const userRoute = {
                 id_image: undefined,
                 created_at: createInitialInfo.created_at.toISOString(),
                 updated_at: createInitialInfo.updated_at.toISOString(),
-                status: createInitialInfo.status as string
+                status: createInitialInfo.status as string,
+                emergency_contact: [] as user_emergency_contact[]
             }
 
             return data
 
+        }
+
+        if (userInfo.emergency_contact.length === 0) {
+            const createInitialEmergencyContact = await db.user_emergency_contact.create({
+                data: {
+                    first_name: "",
+                    last_name: "",
+                    id_image: [''],
+                    email: "",
+                    mobile: "",
+                    age: "",
+                    status: ProfileStatus['INCOMPLETE'],
+                    birth_date: new Date(),
+                    front_id: "",
+                    back_id: "",
+                    verification_message: "",
+                    user_id: userInfo.user_id
+                }
+            })
+            const data = {
+                ...userInfo,
+                birth_date: userInfo.birth_date.toISOString(),
+                id_image: undefined,
+                created_at: userInfo.created_at.toISOString(),
+                updated_at: userInfo.updated_at.toISOString(),
+                status: userInfo.status as string,
+                emergency_contact: [createInitialEmergencyContact]
+            }
+            return data
         }
 
         const data = {
@@ -109,7 +157,7 @@ export const userRoute = {
             id_image: undefined,
             created_at: userInfo.created_at.toISOString(),
             updated_at: userInfo.updated_at.toISOString(),
-            status: userInfo.status as string
+            status: userInfo.status as string,
         }
 
         return data
@@ -201,17 +249,140 @@ export const userRoute = {
         }
 
     }),
+    updateUserContactInfo: publicProcedure.input(z.object({
+        first_name: z.string(),
+        last_name: z.string(),
+        email: z.string(),
+        mobile: z.string(),
+        age: z.string(),
+        birth_date: z.string(),
+    })).mutation(async (opts) => {
+
+        try {
+
+
+            const data = opts.input
+
+            await rateLimiter.consume(1)
+
+            const user = await getUserId()
+            if (!user) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+
+            const getUser = await db.user_info.findUnique({
+                where: { user_id: user }, include: {
+                    emergency_contact: true
+                }
+            })
+            if (!getUser) throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "User not found"
+            })
+
+            if (getUser.verified_attemp > 2) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "You have reached your max revalidation attempt."
+            })
+
+            //update userinfo
+            const updateUserInfo = await db.user_emergency_contact.update({
+                where: {
+                    id: getUser.emergency_contact[0].id
+                }, data: {
+                    ...data,
+                    status: ProfileStatus['PENDING'],
+                    verified_attemp: {
+                        increment: 1
+                    },
+                    verification_message: ""
+                }
+            })
+            if (!updateUserInfo) throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Failed to create or update user info"
+            })
+
+            return true
+
+        } catch (error: any) {
+            throw new TRPCError({
+                code: error.code || "INTERNAL_SERVER_ERROR",
+                message: error.message || "Server Error"
+            })
+        } finally {
+            await db.$disconnect()
+        }
+
+    }),
+
+    updateContactProfileID: publicProcedure.input(z.object({
+        front_id: z.string().optional(),
+        back_id: z.string().optional(),
+    })).mutation(async ({ input }) => {
+        try {
+
+            await rateLimiter.consume(1)
+
+            const auth = await getUserId()
+            if (!auth) throw new TRPCError({
+                code: "UNAUTHORIZED"
+            })
+
+            const user = await db.user_info.findUnique({ where: { user_id: auth }, include: { emergency_contact: true } })
+            if (!user) throw new TRPCError({
+                code: 'NOT_FOUND',
+                message: "User not found"
+            })
+            const updateUser = await db.user_emergency_contact.update({
+                where: {
+                    id: user.emergency_contact[0].id
+                }, data: {
+                    front_id: input.front_id,
+                    back_id: input.back_id
+                }
+            })
+            if (!updateUser) throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: "Failed to update profile ID"
+            })
+            const utapi = new UTApi()
+
+            if (input.front_id && user.front_id) {
+                const urlParts = user.front_id.split('/');
+                const key = urlParts[urlParts.length - 1];
+                await utapi.deleteFiles(key);
+            }
+            if (input.back_id && user.back_id) {
+                const urlParts = user.back_id.split('/');
+                const key = urlParts[urlParts.length - 1];
+                await utapi.deleteFiles(key);
+            }
+
+            return true
+
+        } catch (error: any) {
+            console.log(error);
+            throw new TRPCError({
+                code: error.code || "INTERNAL_SERVER_ERROR",
+                message: error.message || "Server error"
+            })
+        } finally {
+            await db.$disconnect()
+        }
+    }),
     getAllUsers: publicProcedure.input(
         z.object({
             page: z.string().min(1).optional().default('1'),
             first_name: z.string().optional(),
             last_name: z.string().optional(),
             email: z.string().optional(),
+            emergency_contact_status: z.string().optional(),
             status: z.string().optional(),
         })
     ).query(async ({ input }) => {
 
-        const { page, status, first_name, last_name, email } = input, limit = 10
+        const { page, status, first_name, last_name, email, emergency_contact_status } = input, limit = 10
 
         try {
 
@@ -221,13 +392,20 @@ export const userRoute = {
             })
 
             // Create the filter object
-            const filter: any = {
+            const filter: Prisma.user_infoWhereInput = {
                 NOT: { status: ProfileStatus.INCOMPLETE },
                 AND: [
-                    { status: status?.toUpperCase() },
+                    { status: status?.toUpperCase() as ProfileStatus },
                     { first_name: { contains: first_name?.toLocaleLowerCase() } },
                     { last_name: { contains: last_name?.toLocaleLowerCase() } },
                     { email: { contains: email?.toLocaleLowerCase() } },
+                    ...(emergency_contact_status ? [{
+                        emergency_contact: {
+                            some: {
+                                status: emergency_contact_status.toUpperCase() as ProfileStatus
+                            }
+                        }
+                    }] : [])
                 ]
             };
 
@@ -265,9 +443,35 @@ export const userRoute = {
             await db.$disconnect()
         }
     }),
+
+    getUserProfile: publicProcedure.input(z.object({ user_id: z.string() })).mutation(async ({ input }) => {
+
+        const auth = await getAuth()
+        if (!auth) throw new TRPCError({
+            code: "UNAUTHORIZED"
+        })
+
+
+        const userProfile = await db.user_info.findUnique({
+            where: {
+                user_id: input.user_id
+            },
+            include: {
+                emergency_contact: true
+            }
+        })
+
+        if (!userProfile) throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found"
+        })
+
+        return userProfile
+    }),
     updateUserStatus: publicProcedure.input(z.object({
         user_id: z.string(),
         status: z.string(),
+        emergency_contact_id: z.number().optional(),
         message: z.string().optional()
 
     })).mutation(async ({ input }) => {
@@ -291,15 +495,21 @@ export const userRoute = {
             const message = getProfileStatusMessage(input.status)
 
             //update user status
-            const [updateUser, _] = await Promise.all([
-
-                db.user_info.update({
-                    where: { user_id: input.user_id },
-                    data: {
-                        status: input.status as ProfileStatus,
-                        verification_message: input.message
-                    }
-                }),
+            const [updateStatus, _] = await Promise.all([
+                input.emergency_contact_id ?
+                    db.user_emergency_contact.update({
+                        where: { id: input.emergency_contact_id },
+                        data: {
+                            status: input.status as ProfileStatus,
+                            verification_message: input.message
+                        }
+                    }) : db.user_info.update({
+                        where: { user_id: input.user_id },
+                        data: {
+                            status: input.status as ProfileStatus,
+                            verification_message: input.message
+                        }
+                    }),
                 db.user_notification.create({
                     data: {
                         user: {
@@ -313,9 +523,9 @@ export const userRoute = {
                     }
                 })
             ])
-            if (!updateUser) throw new TRPCError({
+            if (!updateStatus) throw new TRPCError({
                 code: "BAD_REQUEST",
-                message: "Failed to update user"
+                message: "Failed to update status"
             })
 
             return true
@@ -544,7 +754,7 @@ export const userRoute = {
                 to: recipient,
                 value: newGasAmount, // Amount of ETH to send
             });
-        // Wait for transaction to be mined
+            // Wait for transaction to be mined
 
             await tx.wait();
             console.log("ETH sent successfully:", tx);
