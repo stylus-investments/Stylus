@@ -84,15 +84,15 @@ export const dashboardRoute = {
             await getMoralis()
 
             const getAssets = await Promise.all([
-                getUserTokenData({
-                    tokenAddress: SHKD,
-                    chain: BASE_CHAIN_ID,
-                    tokenName: "SHKD",
-                    tokenSymbol: "sHKD",
-                    tokenLogo: "/icons/logo/logo.svg",
-                    walletAddress: userWalletAddress,
-                    currencyExchangeRate
-                }),
+                // getUserTokenData({
+                //     tokenAddress: SHKD,
+                //     chain: BASE_CHAIN_ID,
+                //     tokenName: "SHKD",
+                //     tokenSymbol: "sHKD",
+                //     tokenLogo: "/icons/logo/logo.svg",
+                //     walletAddress: userWalletAddress,
+                //     currencyExchangeRate
+                // }),
                 getUserTokenData({
                     tokenAddress: SPHP,
                     chain: BASE_CHAIN_ID,
