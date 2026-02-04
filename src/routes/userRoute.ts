@@ -486,10 +486,19 @@ export const userRoute = {
             })
 
             const getProfileStatusMessage = (profileStatus: string) => {
-                if (profileStatus === ProfileStatus['VERIFIED']) {
-                    return 'Awesome! Your profile is all set and verified! 🎉';
+
+                if (input.emergency_contact_id) {
+
+                    if (profileStatus === ProfileStatus['VERIFIED']) {
+                        return 'Awesome! Your emergency contact is all set and verified! 🎉';
+                    }
+                    return 'Your emergency contact is invalid. Please check your information.';
+                } else {
+                    if (profileStatus === ProfileStatus['VERIFIED']) {
+                        return 'Awesome! Your profile is all set and verified! 🎉';
+                    }
+                    return 'Your profile status is invalid. Please check your information.';
                 }
-                return 'Your profile status is invalid. Please check your information.';
             }
 
             const message = getProfileStatusMessage(input.status)
